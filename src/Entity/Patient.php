@@ -1,0 +1,279 @@
+<?php
+
+namespace App\Entity;
+
+use ApiPlatform\Metadata\ApiResource;
+use App\AppTraits\CreatedAtTrait;
+use App\AppTraits\IsDeletedTrait;
+use App\AppTraits\PrivateKeyTrait;
+use App\AppTraits\UIDTrait;
+use App\Repository\PatientRepository;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+
+#[ORM\Entity(repositoryClass: PatientRepository::class)]
+#[ApiResource(
+  types: ['https://schema.org/Patient'],
+  normalizationContext: ['groups' => ['patient:read']],
+  order: ['id' => 'DESC'],
+)]
+class Patient
+{
+  use CreatedAtTrait, IsDeletedTrait, PrivateKeyTrait, UIDTrait;
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    #[Assert\NotBlank(message: 'Le nom du patient doit être renseigné.')]
+    private ?string $name = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read'])]
+    private ?string $lastName = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $firstName = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $sex = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    #[Assert\NotBlank(message: 'La date de naissance doit être renseigné.')]
+    private ?\DateTimeInterface $birthDate = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $birthPlace = null;
+
+    #[ORM\Column(length: 12, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $maritalStatus = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $tel = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    #[Assert\Email(message: 'Adresse email invalide.')]
+    private ?string $email = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read'])]
+    private ?string $father = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $mother = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $address = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(inversedBy: 'patients')]
+    #[Groups(['patient:read'])]
+    private ?Covenant $covenant = null;
+
+    #[ORM\ManyToOne]
+    #[Groups(['patient:read'])]
+    private ?ImageObject $profile = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(?string $lastName): self
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): self
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getSex(): ?string
+    {
+        return $this->sex;
+    }
+
+    public function setSex(?string $sex): self
+    {
+        $this->sex = $sex;
+
+        return $this;
+    }
+
+    public function getBirthDate(): ?\DateTimeInterface
+    {
+        return $this->birthDate;
+    }
+
+    public function setBirthDate(\DateTimeInterface $birthDate): self
+    {
+        $this->birthDate = $birthDate;
+
+        return $this;
+    }
+
+    public function getBirthPlace(): ?string
+    {
+        return $this->birthPlace;
+    }
+
+    public function setBirthPlace(?string $birthPlace): self
+    {
+        $this->birthPlace = $birthPlace;
+
+        return $this;
+    }
+
+    public function getMaritalStatus(): ?string
+    {
+        return $this->maritalStatus;
+    }
+
+    public function setMaritalStatus(?string $maritalStatus): self
+    {
+        $this->maritalStatus = $maritalStatus;
+
+        return $this;
+    }
+
+    public function getTel(): ?string
+    {
+        return $this->tel;
+    }
+
+    public function setTel(?string $tel): self
+    {
+        $this->tel = $tel;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getFather(): ?string
+    {
+        return $this->father;
+    }
+
+    public function setFather(?string $father): self
+    {
+        $this->father = $father;
+
+        return $this;
+    }
+
+    public function getMother(): ?string
+    {
+        return $this->mother;
+    }
+
+    public function setMother(?string $mother): self
+    {
+        $this->mother = $mother;
+
+        return $this;
+    }
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): self
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCovenant(): ?Covenant
+    {
+        return $this->covenant;
+    }
+
+    public function setCovenant(?Covenant $covenant): self
+    {
+        $this->covenant = $covenant;
+
+        return $this;
+    }
+
+    public function getProfile(): ?ImageObject
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?ImageObject $profile): self
+    {
+        $this->profile = $profile;
+
+        return $this;
+    }
+}
