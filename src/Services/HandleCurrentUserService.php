@@ -26,6 +26,11 @@ class HandleCurrentUserService
     return $this->getUser()->getHospital();
   }
 
+  public function getHospitalCenter(): ?Hospital
+  {
+    return $this->getUser()->getHospitalCenter();
+  }
+
   public function getAuth(): ?AuthorizationCheckerInterface
   {
     return $this->checker;

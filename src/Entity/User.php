@@ -3,7 +3,12 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
+use App\AppTraits\IsDeletedTrait;
 use App\AppTraits\UIDTrait;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -18,14 +23,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource(
   types: ['https://schema.org/User'],
+  operations: [
+    new Get(),
+    new Post(),
+    new GetCollection(),
+    new Patch(),
+  ],
   normalizationContext: ['groups' => ['user:read']],
-  order: ['id' => 'DESC'],
+  order: ['id' => 'DESC']
 )]
-#[UniqueEntity('email', message: 'Cette adresse email existe déjà.')]
 #[UniqueEntity('username', message: 'Ce username est déjà pris.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-  use CreatedAtTrait, UIDTrait;
+  use CreatedAtTrait, UIDTrait, IsDeletedTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -58,9 +68,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: self::class)]
     private Collection $users;
 
-    #[ORM\Column(length: 255, unique: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['user:read', 'hospital:read'])]
-    #[Assert\NotBlank(message: 'L\'adresse email doit être renseigné.')]
     #[Assert\Email(message: 'Adresse email invalide.')]
     private ?string $email = null;
 
@@ -72,9 +81,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?Hospital $hospitalCenter = null;
 
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné')]
+    #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
+    #[Assert\Regex('#^([+]\d{2}[-. ])?\d{9,14}$#', message: 'Numéro de téléphone invalide.')]
+    private ?string $tel = null;
+
+    #[ORM\Column]
+    #[Groups(['user:read'])]
+    private ?bool $isActive = true;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: BoxInput::class)]
+    private Collection $boxInputs;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: BoxOutput::class)]
+    private Collection $boxOutputs;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: BoxExpense::class)]
+    private Collection $boxExpenses;
+
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[Groups(['user:read'])]
+    private ?PersonalImageObject $profile = null;
+
+    public ?bool $isChangingPassword = false;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->boxInputs = new ArrayCollection();
+        $this->boxOutputs = new ArrayCollection();
+        $this->boxExpenses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -194,7 +231,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 
@@ -231,6 +268,132 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setHospitalCenter(?Hospital $hospitalCenter): self
     {
         $this->hospitalCenter = $hospitalCenter;
+
+        return $this;
+    }
+
+    public function getTel(): ?string
+    {
+        return $this->tel;
+    }
+
+    public function setTel(string $tel): self
+    {
+        $this->tel = $tel;
+
+        return $this;
+    }
+
+    public function isIsActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): self
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BoxInput>
+     */
+    public function getBoxInputs(): Collection
+    {
+        return $this->boxInputs;
+    }
+
+    public function addBoxInput(BoxInput $boxInput): self
+    {
+        if (!$this->boxInputs->contains($boxInput)) {
+            $this->boxInputs->add($boxInput);
+            $boxInput->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoxInput(BoxInput $boxInput): self
+    {
+        if ($this->boxInputs->removeElement($boxInput)) {
+            // set the owning side to null (unless already changed)
+            if ($boxInput->getUser() === $this) {
+                $boxInput->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BoxOutput>
+     */
+    public function getBoxOutputs(): Collection
+    {
+        return $this->boxOutputs;
+    }
+
+    public function addBoxOutput(BoxOutput $boxOutput): self
+    {
+        if (!$this->boxOutputs->contains($boxOutput)) {
+            $this->boxOutputs->add($boxOutput);
+            $boxOutput->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoxOutput(BoxOutput $boxOutput): self
+    {
+        if ($this->boxOutputs->removeElement($boxOutput)) {
+            // set the owning side to null (unless already changed)
+            if ($boxOutput->getUser() === $this) {
+                $boxOutput->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BoxExpense>
+     */
+    public function getBoxExpenses(): Collection
+    {
+        return $this->boxExpenses;
+    }
+
+    public function addBoxExpense(BoxExpense $boxExpense): self
+    {
+        if (!$this->boxExpenses->contains($boxExpense)) {
+            $this->boxExpenses->add($boxExpense);
+            $boxExpense->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoxExpense(BoxExpense $boxExpense): self
+    {
+        if ($this->boxExpenses->removeElement($boxExpense)) {
+            // set the owning side to null (unless already changed)
+            if ($boxExpense->getUser() === $this) {
+                $boxExpense->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getProfile(): ?PersonalImageObject
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?PersonalImageObject $profile): self
+    {
+        $this->profile = $profile;
 
         return $this;
     }

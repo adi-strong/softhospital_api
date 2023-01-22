@@ -3,6 +3,10 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\AppTraits\PrivateKeyTrait;
@@ -16,34 +20,40 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: PatientRepository::class)]
 #[ApiResource(
   types: ['https://schema.org/Patient'],
+  operations: [
+    new GetCollection(),
+    new Post(),
+    new Get(),
+    new Patch(),
+  ],
   normalizationContext: ['groups' => ['patient:read']],
   order: ['id' => 'DESC'],
 )]
 class Patient
 {
-  use CreatedAtTrait, IsDeletedTrait, PrivateKeyTrait, UIDTrait;
+  use CreatedAtTrait, IsDeletedTrait, PrivateKeyTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['patient:read', 'covenant:read'])]
+    #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['patient:read', 'covenant:read'])]
+    #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
     #[Assert\NotBlank(message: 'Le nom du patient doit être renseigné.')]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['patient:read'])]
+    #[Groups(['patient:read', 'covenant:read'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read'])]
+    #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read'])]
+    #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
     private ?string $sex = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -56,11 +66,11 @@ class Patient
     private ?string $birthPlace = null;
 
     #[ORM\Column(length: 12, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read'])]
+    #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
     private ?string $maritalStatus = null;
 
     #[ORM\Column(length: 20, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read'])]
+    #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
     private ?string $tel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -91,6 +101,9 @@ class Patient
     #[ORM\ManyToOne]
     #[Groups(['patient:read'])]
     private ?ImageObject $profile = null;
+
+    #[ORM\ManyToOne(inversedBy: 'patients')]
+    private ?Hospital $hospital = null;
 
     public function getId(): ?int
     {
@@ -273,6 +286,18 @@ class Patient
     public function setProfile(?ImageObject $profile): self
     {
         $this->profile = $profile;
+
+        return $this;
+    }
+
+    public function getHospital(): ?Hospital
+    {
+        return $this->hospital;
+    }
+
+    public function setHospital(?Hospital $hospital): self
+    {
+        $this->hospital = $hospital;
 
         return $this;
     }

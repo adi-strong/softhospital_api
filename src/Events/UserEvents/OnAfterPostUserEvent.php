@@ -3,7 +3,10 @@
 namespace App\Events\UserEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
+use App\Entity\Box;
+use App\Entity\Parameters;
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -13,9 +16,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class OnAfterPostUserEvent implements EventSubscriberInterface
 {
-  public function __construct(private readonly EntityManagerInterface $em)
-  {
-  }
+  public function __construct(private readonly EntityManagerInterface $em) { }
 
   public function handler(ViewEvent $event)
   {
@@ -24,6 +25,21 @@ class OnAfterPostUserEvent implements EventSubscriberInterface
     if ($user instanceof User && $method === Request::METHOD_POST) {
       if (null === $user->getUser()) {
         $user->setUId(uniqid().$user->getId());
+        $hospital = $user->getHospital();
+
+        $box = (new Box())
+          ->setHospital($hospital)
+          ->setSum(0);
+
+        $parameters = (new Parameters())
+          ->setCurrency('$')
+          ->setName("(US) United States of America ' $ '")
+          ->setCode('US')
+          ->setHospital($hospital)
+          ->setCreatedAt(new DateTime());
+
+        $this->em->persist($box);
+        $this->em->persist($parameters);
         $this->em->flush();
       }
     }

@@ -9,11 +9,13 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
-use App\AppTraits\UIDTrait;
 use App\Controller\CreatePersonalImageObjectAction;
 use App\Repository\PersonalImageObjectRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -55,16 +57,16 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 )]
 class PersonalImageObject
 {
-  use CreatedAtTrait, UIDTrait;
+  use CreatedAtTrait;
 
   #[ORM\Id]
   #[ORM\GeneratedValue]
   #[ORM\Column]
-  #[Groups(['personal_img_obj:read'])]
+  #[Groups(['personal_img_obj:read', 'user:read'])]
   private ?int $id = null;
 
   #[ApiProperty(types: ['https://schema.org/contentUrl'])]
-  #[Groups(['personal_img_obj:read'])]
+  #[Groups(['personal_img_obj:read', 'user:read'])]
   public ?string $contentUrl = null;
 
   #[Vich\UploadableField(mapping: 'personal_img_obj', fileNameProperty: 'filePath')]
@@ -74,6 +76,17 @@ class PersonalImageObject
   #[ORM\Column(nullable: true)]
   #[Groups(['personal_img_obj:read'])]
   public ?string $filePath = null;
+
+  #[ORM\ManyToOne]
+  private ?User $user = null;
+
+  #[ORM\OneToMany(mappedBy: 'profile', targetEntity: User::class)]
+  private Collection $users;
+
+  public function __construct()
+  {
+      $this->users = new ArrayCollection();
+  }
 
   public function getId(): ?int
   {
@@ -91,5 +104,47 @@ class PersonalImageObject
         ->addViolation()
       ;
     }
+  }
+
+  public function getUser(): ?User
+  {
+      return $this->user;
+  }
+
+  public function setUser(?UserInterface $user): self
+  {
+      $this->user = $user;
+
+      return $this;
+  }
+
+  /**
+   * @return Collection<int, User>
+   */
+  public function getUsers(): Collection
+  {
+      return $this->users;
+  }
+
+  public function addUser(User $user): self
+  {
+      if (!$this->users->contains($user)) {
+          $this->users->add($user);
+          $user->setProfile($this);
+      }
+
+      return $this;
+  }
+
+  public function removeUser(User $user): self
+  {
+      if ($this->users->removeElement($user)) {
+          // set the owning side to null (unless already changed)
+          if ($user->getProfile() === $this) {
+              $user->setProfile(null);
+          }
+      }
+
+      return $this;
   }
 }

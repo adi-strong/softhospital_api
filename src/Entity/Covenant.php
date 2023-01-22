@@ -3,7 +3,12 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
+use App\AppTraits\IsDeletedTrait;
 use App\AppTraits\UIDTrait;
 use App\Repository\CovenantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -15,12 +20,18 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: CovenantRepository::class)]
 #[ApiResource(
   types: ['https://schema.org/Covenant'],
+  operations: [
+    new GetCollection(),
+    new Post(),
+    new Get(),
+    new Patch(),
+  ],
   normalizationContext: ['groups' => ['covenant:read']],
   order: ['id' => 'DESC'],
 )]
 class Covenant
 {
-  use CreatedAtTrait, UIDTrait;
+  use CreatedAtTrait, IsDeletedTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -38,22 +49,29 @@ class Covenant
     private ?string $unitName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['covenant:read', 'patient:read'])]
+    #[Groups(['covenant:read'])]
     #[Assert\NotBlank(message: 'Le point focal doit être renseigné.')]
     private ?string $focal = null;
 
     #[ORM\Column(length: 20)]
+    #[Groups(['covenant:read'])]
     private ?string $tel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Email(message: 'Adresse email invalide.')]
+    #[Groups(['covenant:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['covenant:read'])]
     private ?string $address = null;
 
     #[ORM\OneToMany(mappedBy: 'covenant', targetEntity: Patient::class)]
+    #[Groups(['covenant:read'])]
     private Collection $patients;
+
+    #[ORM\ManyToOne(inversedBy: 'covenants')]
+    private ?Hospital $hospital = null;
 
     public function __construct()
     {
@@ -163,6 +181,18 @@ class Covenant
                 $patient->setCovenant(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getHospital(): ?Hospital
+    {
+        return $this->hospital;
+    }
+
+    public function setHospital(?Hospital $hospital): self
+    {
+        $this->hospital = $hospital;
 
         return $this;
     }

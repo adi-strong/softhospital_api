@@ -12,6 +12,8 @@ use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\UIDTrait;
 use App\Controller\CreateImageObjectAction;
 use App\Repository\ImageObjectRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -55,16 +57,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class ImageObject
 {
-  use CreatedAtTrait, UIDTrait;
+  use CreatedAtTrait;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['img_obj:read', 'patient:read'])]
+    #[Groups(['img_obj:read', 'patient:read', 'hospital:read', 'user:read', 'param:read'])]
     private ?int $id = null;
 
     #[ApiProperty(types: ['https://schema.org/contentUrl'])]
-    #[Groups(['img_obj:read', 'patient:read'])]
+    #[Groups(['img_obj:read', 'patient:read', 'hospital:read', 'user:read', 'param:read'])]
     public ?string $contentUrl = null;
 
     #[Vich\UploadableField(mapping: 'img_obj', fileNameProperty: 'filePath')]
@@ -74,6 +76,17 @@ class ImageObject
     #[ORM\Column(nullable: true)]
     #[Groups(['img_obj:read', 'patient:read'])]
     public ?string $filePath = null;
+
+    #[ORM\OneToMany(mappedBy: 'logo', targetEntity: Hospital::class)]
+    private Collection $hospitals;
+
+    #[ORM\ManyToOne(inversedBy: 'imageObjects')]
+    private ?Hospital $hospital = null;
+
+    public function __construct()
+    {
+        $this->hospitals = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -91,5 +104,47 @@ class ImageObject
         ->addViolation()
       ;
     }
+  }
+
+  /**
+   * @return Collection<int, Hospital>
+   */
+  public function getHospitals(): Collection
+  {
+      return $this->hospitals;
+  }
+
+  public function addHospital(Hospital $hospital): self
+  {
+      if (!$this->hospitals->contains($hospital)) {
+          $this->hospitals->add($hospital);
+          $hospital->setLogo($this);
+      }
+
+      return $this;
+  }
+
+  public function removeHospital(Hospital $hospital): self
+  {
+      if ($this->hospitals->removeElement($hospital)) {
+          // set the owning side to null (unless already changed)
+          if ($hospital->getLogo() === $this) {
+              $hospital->setLogo(null);
+          }
+      }
+
+      return $this;
+  }
+
+  public function getHospital(): ?Hospital
+  {
+      return $this->hospital;
+  }
+
+  public function setHospital(?Hospital $hospital): self
+  {
+      $this->hospital = $hospital;
+
+      return $this;
   }
 }

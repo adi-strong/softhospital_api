@@ -16,6 +16,9 @@ trait CreatedAtTrait
     'hospital:read',
     'img_obj:read',
     'personal_img_obj:read',
+    'param:read',
+    'box_historic:read',
+    'box:read',
   ])]
   protected ?\DateTimeInterface $createdAt = null;
 

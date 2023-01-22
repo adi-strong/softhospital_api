@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events\PersonalImageObject;
+namespace App\Events\FileObjectsEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
 use App\Entity\PersonalImageObject;
@@ -23,7 +23,7 @@ class OnPostNewPersonalImageObjectEvent implements EventSubscriberInterface
     $request = $event->getRequest()->getMethod();
     if ($img instanceof PersonalImageObject && $request === Request::METHOD_POST) {
       if ($this->currentUser->getUser() !== null) {
-        $img->setUId($this->currentUser->getUId());
+        $img->setUser($this->currentUser->getUser());
       }
       $img->setCreatedAt(new \DateTime('now'));
     }

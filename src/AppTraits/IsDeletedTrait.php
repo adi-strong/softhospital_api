@@ -10,8 +10,10 @@ trait IsDeletedTrait
   #[ORM\Column]
   #[Groups([
     'patient:read',
+    'covenant:read',
+    'hospital:read',
   ])]
-  private ?bool $isDeleted = null;
+  private ?bool $isDeleted = false;
 
   public function isIsDeleted(): ?bool
   {

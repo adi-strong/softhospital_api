@@ -19,6 +19,7 @@ class AppFixtures extends Fixture
     // $manager->persist($product);
     $root = (new User())
       ->setEmail('adi.life91@gmail.com')
+      ->setTel('0843210565')
       ->setCreatedAt(new \DateTime('now'))
       ->setUsername('root')
       ->setPassword('root!')

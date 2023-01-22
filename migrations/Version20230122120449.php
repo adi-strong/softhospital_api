@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230110173915 extends AbstractMigration
+final class Version20230122120449 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,16 +20,16 @@ final class Version20230110173915 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE user ADD user_id INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE user ADD CONSTRAINT FK_8D93D649A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
-        $this->addSql('CREATE INDEX IDX_8D93D649A76ED395 ON user (user_id)');
+        $this->addSql('ALTER TABLE user ADD profile_id INT DEFAULT NULL');
+        $this->addSql('ALTER TABLE user ADD CONSTRAINT FK_8D93D649CCFA12B8 FOREIGN KEY (profile_id) REFERENCES personal_image_object (id)');
+        $this->addSql('CREATE INDEX IDX_8D93D649CCFA12B8 ON user (profile_id)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE user DROP FOREIGN KEY FK_8D93D649A76ED395');
-        $this->addSql('DROP INDEX IDX_8D93D649A76ED395 ON user');
-        $this->addSql('ALTER TABLE user DROP user_id');
+        $this->addSql('ALTER TABLE user DROP FOREIGN KEY FK_8D93D649CCFA12B8');
+        $this->addSql('DROP INDEX IDX_8D93D649CCFA12B8 ON user');
+        $this->addSql('ALTER TABLE user DROP profile_id');
     }
 }
