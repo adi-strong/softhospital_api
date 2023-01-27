@@ -62,11 +62,11 @@ class PersonalImageObject
   #[ORM\Id]
   #[ORM\GeneratedValue]
   #[ORM\Column]
-  #[Groups(['personal_img_obj:read', 'user:read'])]
+  #[Groups(['personal_img_obj:read', 'user:read', 'agent:read'])]
   private ?int $id = null;
 
   #[ApiProperty(types: ['https://schema.org/contentUrl'])]
-  #[Groups(['personal_img_obj:read', 'user:read'])]
+  #[Groups(['personal_img_obj:read', 'user:read', 'agent:read'])]
   public ?string $contentUrl = null;
 
   #[Vich\UploadableField(mapping: 'personal_img_obj', fileNameProperty: 'filePath')]

@@ -3,9 +3,13 @@
 namespace App\Events\UserEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
+use App\Entity\Agent;
 use App\Entity\Hospital;
 use App\Entity\User;
+use App\Repository\AgentRepository;
 use App\Services\HandleCurrentUserService;
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,31 +20,40 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class OnPostNewUserEvent implements EventSubscriberInterface
 {
  public function __construct(
-   private readonly HandleCurrentUserService $currentUser,
-   private readonly UserPasswordHasherInterface $encoder) { }
+   private readonly HandleCurrentUserService    $user,
+   private readonly UserPasswordHasherInterface $encoder,
+   private readonly AgentRepository $agentRepository,
+   private readonly EntityManagerInterface $em) { }
 
   public function handler(ViewEvent $event)
   {
     $user = $event->getControllerResult();
     $method = $event->getRequest()->getMethod();
     if ($user instanceof User && $method === Request::METHOD_POST) {
-      if (null === $this->currentUser->getUser()) {
+      if (null === $this->user->getUser()) {
         $user->setHospital(
           (new Hospital())
             ->setDenomination('Inconnue')
-            ->setUser($this->currentUser->getUser())
+            ->setUser($this->user->getUser())
         );
         $user->setRoles(['ROLE_OWNER_ADMIN']);
       }
       else {
-        $user->setUser($this->currentUser->getUser());
-        $user->setUId($this->currentUser->getUId());
-        $user->setHospitalCenter($this->currentUser->getHospital());
+        if (null !== $user->agentId) {
+          $agent = $this->agentRepository->find($user->agentId);
+          if (null !== $agent) $user->setAgent($agent);
+
+          $this->em->flush();
+        }
+
+        $user->setUser($this->user->getUser());
+        $user->setUId($this->user->getUId());
+        $user->setHospitalCenter($this->user->getHospital() ?? $this->user->getHospitalCenter());
       }
 
       $password = $this->encoder->hashPassword($user, $user->getPassword());
       $user->setPassword($password);
-      $user->setCreatedAt(new \DateTime('now'));
+      $user->setCreatedAt(new DateTime('now'));
     }
   }
 

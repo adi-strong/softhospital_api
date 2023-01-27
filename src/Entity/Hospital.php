@@ -97,6 +97,18 @@ class Hospital
     #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: ExpenseCategory::class)]
     private Collection $expenseCategories;
 
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Department::class)]
+    private Collection $departments;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Service::class)]
+    private Collection $services;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Office::class)]
+    private Collection $offices;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Agent::class)]
+    private Collection $agents;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -108,6 +120,10 @@ class Hospital
         $this->boxOutputs = new ArrayCollection();
         $this->boxExpenses = new ArrayCollection();
         $this->expenseCategories = new ArrayCollection();
+        $this->departments = new ArrayCollection();
+        $this->services = new ArrayCollection();
+        $this->offices = new ArrayCollection();
+        $this->agents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -451,6 +467,126 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($expenseCategory->getHospital() === $this) {
                 $expenseCategory->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Department>
+     */
+    public function getDepartments(): Collection
+    {
+        return $this->departments;
+    }
+
+    public function addDepartment(Department $department): self
+    {
+        if (!$this->departments->contains($department)) {
+            $this->departments->add($department);
+            $department->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDepartment(Department $department): self
+    {
+        if ($this->departments->removeElement($department)) {
+            // set the owning side to null (unless already changed)
+            if ($department->getHospital() === $this) {
+                $department->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Service>
+     */
+    public function getServices(): Collection
+    {
+        return $this->services;
+    }
+
+    public function addService(Service $service): self
+    {
+        if (!$this->services->contains($service)) {
+            $this->services->add($service);
+            $service->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeService(Service $service): self
+    {
+        if ($this->services->removeElement($service)) {
+            // set the owning side to null (unless already changed)
+            if ($service->getHospital() === $this) {
+                $service->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Office>
+     */
+    public function getOffices(): Collection
+    {
+        return $this->offices;
+    }
+
+    public function addOffice(Office $office): self
+    {
+        if (!$this->offices->contains($office)) {
+            $this->offices->add($office);
+            $office->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOffice(Office $office): self
+    {
+        if ($this->offices->removeElement($office)) {
+            // set the owning side to null (unless already changed)
+            if ($office->getHospital() === $this) {
+                $office->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Agent>
+     */
+    public function getAgents(): Collection
+    {
+        return $this->agents;
+    }
+
+    public function addAgent(Agent $agent): self
+    {
+        if (!$this->agents->contains($agent)) {
+            $this->agents->add($agent);
+            $agent->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgent(Agent $agent): self
+    {
+        if ($this->agents->removeElement($agent)) {
+            // set the owning side to null (unless already changed)
+            if ($agent->getHospital() === $this) {
+                $agent->setHospital(null);
             }
         }
 

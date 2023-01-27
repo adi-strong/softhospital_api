@@ -1,33 +1,31 @@
 <?php
 
-namespace App\Events\UserEvents;
+namespace App\Events\OfficeEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
-use App\Entity\User;
+use App\Entity\Office;
+use App\Services\HandleCurrentUserService;
+use DateTime;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class OnUpdateUserEvent implements EventSubscriberInterface
+class OnAddNewOfficeEvent implements EventSubscriberInterface
 {
-  public function __construct(private readonly ?UserPasswordHasherInterface $encoder)
+  public function __construct(private readonly HandleCurrentUserService $user)
   {
   }
 
   public function handler(ViewEvent $event)
   {
-    $user = $event->getControllerResult();
+    $office = $event->getControllerResult();
     $method = $event->getRequest()->getMethod();
-    if ($user instanceof User && $method === Request::METHOD_PATCH) {
-      if ($user->isChangingPassword) {
-        $newPassword = $this->encoder->hashPassword($user, $user->getPassword());
-        $user->setPassword($newPassword);
-      }
 
-      if ($user->isIsDeleted() === true) $user->setIsActive(false);
+    if ($office instanceof Office && $method === Request::METHOD_POST) {
+      $office->setCreatedAt(new DateTime());
+      $office->setHospital($this->user->getHospital() ?? $this->user->getHospitalCenter());
     }
   }
 

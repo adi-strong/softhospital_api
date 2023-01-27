@@ -1,0 +1,6 @@
+api_platform:
+    defaults:
+        pagination_enabled: true
+    collection:
+        pagination:
+            page_parameter_name: page

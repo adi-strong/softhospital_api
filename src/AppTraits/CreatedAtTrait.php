@@ -19,6 +19,10 @@ trait CreatedAtTrait
     'param:read',
     'box_historic:read',
     'box:read',
+    'service:read',
+    'department:read',
+    'office:read',
+    'agent:read',
   ])]
   protected ?\DateTimeInterface $createdAt = null;
 

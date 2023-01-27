@@ -37,14 +37,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
   use CreatedAtTrait, UIDTrait, IsDeletedTrait;
 
+    public ?int $agentId = null;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'patient:read', 'hospital:read'])]
+    #[Groups(['user:read', 'patient:read', 'hospital:read', 'agent:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'patient:read', 'hospital:read'])]
+    #[Groups(['user:read', 'patient:read', 'hospital:read', 'agent:read'])]
     #[Assert\NotBlank(message: 'Le username doit être renseigné.')]
     private ?string $username = null;
 
@@ -69,7 +71,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $users;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'hospital:read'])]
+    #[Groups(['user:read'])]
     #[Assert\Email(message: 'Adresse email invalide.')]
     private ?string $email = null;
 
@@ -85,6 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné')]
     #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
     #[Assert\Regex('#^([+]\d{2}[-. ])?\d{9,14}$#', message: 'Numéro de téléphone invalide.')]
+    #[Groups(['user:read'])]
     private ?string $tel = null;
 
     #[ORM\Column]
@@ -101,10 +104,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $boxExpenses;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'agent:read'])]
     private ?PersonalImageObject $profile = null;
 
     public ?bool $isChangingPassword = false;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Agent::class)]
+    private Collection $agents;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'agent:read'])]
+    private ?string $name = null;
+
+    #[ORM\OneToOne(mappedBy: 'userAccount', cascade: ['persist', 'remove'])]
+    #[Groups(['user:read'])]
+    private ?Agent $agent = null;
 
     public function __construct()
     {
@@ -112,6 +126,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->boxInputs = new ArrayCollection();
         $this->boxOutputs = new ArrayCollection();
         $this->boxExpenses = new ArrayCollection();
+        $this->agents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -394,6 +409,70 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setProfile(?PersonalImageObject $profile): self
     {
         $this->profile = $profile;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Agent>
+     */
+    public function getAgents(): Collection
+    {
+        return $this->agents;
+    }
+
+    public function addAgent(Agent $agent): self
+    {
+        if (!$this->agents->contains($agent)) {
+            $this->agents->add($agent);
+            $agent->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgent(Agent $agent): self
+    {
+        if ($this->agents->removeElement($agent)) {
+            // set the owning side to null (unless already changed)
+            if ($agent->getUser() === $this) {
+                $agent->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getAgent(): ?Agent
+    {
+        return $this->agent;
+    }
+
+    public function setAgent(?Agent $agent): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($agent === null && $this->agent !== null) {
+            $this->agent->setUserAccount(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($agent !== null && $agent->getUserAccount() !== $this) {
+            $agent->setUserAccount($this);
+        }
+
+        $this->agent = $agent;
 
         return $this;
     }

@@ -17,8 +17,9 @@ class JWTCreatedListener
     $payload['roles'] = $user->getRoles();
     $payload['email'] = $user->getEmail() ?? null;
     $payload['tel'] = $user->getTel();
+    $payload['name'] = $user->getName() ?? null;
 
-    if ($user->isIsActive() || !$user->isIsDeleted()) $event->setData($payload);
+    if ($user->isIsActive()) $event->setData($payload);
     else throw new NotFoundHttpException('Cet utilisateur a été désactivé. Veuillez contacter l\'administrateur.');
   }
 }

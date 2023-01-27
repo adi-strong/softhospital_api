@@ -6,16 +6,20 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
+use App\Entity\Agent;
 use App\Entity\Box;
 use App\Entity\BoxExpense;
 use App\Entity\BoxInput;
 use App\Entity\BoxOutput;
 use App\Entity\Covenant;
+use App\Entity\Department;
 use App\Entity\ExpenseCategory;
 use App\Entity\ImageObject;
+use App\Entity\Office;
 use App\Entity\Parameters;
 use App\Entity\Patient;
 use App\Entity\PersonalImageObject;
+use App\Entity\Service;
 use App\Entity\User;
 use App\Services\HandleCurrentUserService;
 use Doctrine\ORM\QueryBuilder;
@@ -41,9 +45,11 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
       $user instanceof User) {
       $alias = $this->rootAlias($qb);
       if (null !== $user->getUId()) {
-        $qb->join("$alias.hospital", 'h');
-        $qb->andWhere("$alias.hospital", ':hospital');
-        $qb->setParameter('uId', $user->getHospital() ?? $user->getHospitalCenter());
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter())
+          ->setParameter('isDeleted', false);
       }
       else {
         $qb->andWhere("$alias.user = :user");
@@ -63,8 +69,10 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
       if (null !== $user->getUId()) {
         $qb
           ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.isDeleted = :isDeleted")
           ->andWhere("$alias.hospital = :hospital")
-          ->setParameter('hospital', $user->getHospitalCenter() ?? $user->getHospital());
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter())
+          ->setParameter('isDeleted', false);
       }
     }
     // End Covenant
@@ -109,8 +117,11 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
       $user instanceof User) {
       $alias = $this->rootAlias($qb);
       if (null !== $user->getUId()) {
-        $qb->andWhere("$alias.uId = :uId");
-        $qb->setParameter('uId', $user->getUId());
+        $qb
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->andWhere("$alias.uId = :uId")
+          ->setParameter('uId', $user->getUId())
+          ->setParameter('isDeleted', false);
       }
       else {
         $qb->andWhere("$alias.user = :user");
@@ -196,6 +207,40 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
 
     /** ----------------------------------------------------------------------------------- **/
 
+    // Department
+    if (($resourceClass === Department::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter())
+          ->setParameter('isDeleted', false);
+      }
+    }
+    // End Department
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Service
+    if (($resourceClass === Service::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter())
+          ->setParameter('isDeleted', false);
+      }
+    }
+    // End Service
+
+    /** ----------------------------------------------------------------------------------- **/
+
     // ExpenseCategory
     if (($resourceClass === ExpenseCategory::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
       $user instanceof User) {
@@ -208,6 +253,40 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
       }
     }
     // End ExpenseCategory
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Office
+    if (($resourceClass === Office::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Office
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Agent
+    if (($resourceClass === Agent::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Agent
 
     /** ----------------------------------------------------------------------------------- **/
   }
