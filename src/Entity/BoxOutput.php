@@ -3,13 +3,22 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\Repository\BoxOutputRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BoxOutputRepository::class)]
-#[ApiResource]
+#[ApiResource(
+  types: ['https://schema.org/BoxOutput'],
+  operations: [ new GetCollection(), new Post() ],
+  normalizationContext: ['groups' => ['output:read']],
+  order: ['id' => 'DESC'],
+)]
 class BoxOutput
 {
   use CreatedAtTrait;
@@ -17,28 +26,38 @@ class BoxOutput
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['output:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'boxOutputs')]
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'boxOutputs')]
+    #[Groups(['output:read'])]
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['output:read'])]
     private ?string $reason = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['output:read'])]
     private ?string $recipient = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $amount = null;
+    #[Groups(['output:read'])]
+    private ?string $amount = '0';
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['output:read'])]
     private ?string $docRef = null;
 
     #[ORM\ManyToOne(inversedBy: 'boxOutputs')]
+    #[Groups(['output:read'])]
     private ?ExpenseCategory $category = null;
+
+    #[ORM\ManyToOne(inversedBy: 'boxOutputs')]
+    private ?Box $box = null;
 
     public function getId(): ?int
     {
@@ -62,7 +81,7 @@ class BoxOutput
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
 
@@ -125,6 +144,18 @@ class BoxOutput
     public function setCategory(?ExpenseCategory $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getBox(): ?Box
+    {
+        return $this->box;
+    }
+
+    public function setBox(?Box $box): self
+    {
+        $this->box = $box;
 
         return $this;
     }

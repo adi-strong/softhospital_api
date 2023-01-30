@@ -29,7 +29,8 @@ class OnAfterPostUserEvent implements EventSubscriberInterface
 
         $box = (new Box())
           ->setHospital($hospital)
-          ->setSum(0);
+          ->setSum(0)
+          ->setOutputSum(0);
 
         $parameters = (new Parameters())
           ->setCurrency('$')

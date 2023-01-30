@@ -109,6 +109,10 @@ class Hospital
     #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Agent::class)]
     private Collection $agents;
 
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Box::class)]
+    #[ORM\JoinColumn(referencedColumnName: 'id', unique: false)]
+    private Collection $boxes;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -124,6 +128,7 @@ class Hospital
         $this->services = new ArrayCollection();
         $this->offices = new ArrayCollection();
         $this->agents = new ArrayCollection();
+        $this->boxes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -587,6 +592,36 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($agent->getHospital() === $this) {
                 $agent->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Box>
+     */
+    public function getBoxes(): Collection
+    {
+        return $this->boxes;
+    }
+
+    public function addBox(Box $box): self
+    {
+        if (!$this->boxes->contains($box)) {
+            $this->boxes->add($box);
+            $box->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBox(Box $box): self
+    {
+        if ($this->boxes->removeElement($box)) {
+            // set the owning side to null (unless already changed)
+            if ($box->getHospital() === $this) {
+                $box->setHospital(null);
             }
         }
 

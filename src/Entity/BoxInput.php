@@ -3,13 +3,22 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\Repository\BoxInputRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BoxInputRepository::class)]
-#[ApiResource]
+#[ApiResource(
+  types: ['https://schema.org/BoxInput'],
+  operations: [ new GetCollection(), new Post() ],
+  normalizationContext: ['groups' => ['input:read']],
+  order: ['id' => 'DESC'],
+)]
 class BoxInput
 {
   use CreatedAtTrait;
@@ -17,25 +26,34 @@ class BoxInput
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['input:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'boxInputs')]
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'boxInputs')]
+    #[Groups(['input:read'])]
     private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['input:read'])]
     private ?string $reason = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['input:read'])]
     private ?string $porter = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $amount = null;
+    #[Groups(['input:read'])]
+    private ?string $amount = '0';
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['input:read'])]
     private ?string $docRef = null;
+
+    #[ORM\ManyToOne(inversedBy: 'boxInputs')]
+    private ?Box $box = null;
 
     public function getId(): ?int
     {
@@ -59,7 +77,7 @@ class BoxInput
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
 
@@ -110,6 +128,18 @@ class BoxInput
     public function setDocRef(?string $docRef): self
     {
         $this->docRef = $docRef;
+
+        return $this;
+    }
+
+    public function getBox(): ?Box
+    {
+        return $this->box;
+    }
+
+    public function setBox(?Box $box): self
+    {
+        $this->box = $box;
 
         return $this;
     }

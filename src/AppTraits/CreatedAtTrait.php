@@ -23,6 +23,10 @@ trait CreatedAtTrait
     'department:read',
     'office:read',
     'agent:read',
+    'expense:read',
+    'expense_category:read',
+    'output:read',
+    'input:read',
   ])]
   protected ?\DateTimeInterface $createdAt = null;
 

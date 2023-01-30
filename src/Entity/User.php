@@ -42,11 +42,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'patient:read', 'hospital:read', 'agent:read'])]
+    #[Groups([
+      'user:read',
+      'patient:read',
+      'hospital:read',
+      'agent:read',
+      'expense:read',
+      'output:read',
+      'input:read',
+    ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'patient:read', 'hospital:read', 'agent:read'])]
+    #[Groups([
+      'user:read',
+      'patient:read',
+      'hospital:read',
+      'agent:read',
+      'expense:read',
+      'output:read',
+      'input:read',
+    ])]
     #[Assert\NotBlank(message: 'Le username doit être renseigné.')]
     private ?string $username = null;
 
@@ -113,7 +129,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $agents;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'agent:read'])]
+    #[Groups(['user:read', 'agent:read', 'expense:read', 'output:read', 'input:read'])]
     private ?string $name = null;
 
     #[ORM\OneToOne(mappedBy: 'userAccount', cascade: ['persist', 'remove'])]

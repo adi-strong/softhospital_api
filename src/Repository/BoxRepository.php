@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Box;
+use App\Entity\Hospital;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

@@ -29,7 +29,7 @@ class BoxHistoric
 
     #[ORM\Column(length: 8)]
     #[NotBlank(message: 'Le tag doit être renseigné.')]
-    #[Choice(['input', 'output', 'expense'], message: 'L\'information fournie est incorrecte.')]
+    #[Choice(['input', 'output'], message: 'L\'information fournie est incorrecte.')]
     #[Groups(['box:read'])]
     private ?string $tag = null;
 

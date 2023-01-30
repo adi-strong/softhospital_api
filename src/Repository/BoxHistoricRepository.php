@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Box;
 use App\Entity\BoxHistoric;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -62,5 +63,25 @@ class BoxHistoricRepository extends ServiceEntityRepository
 //            ->getQuery()
 //            ->getOneOrNullResult()
 //        ;
-//    }
+
+  /**
+   * @param Box $box
+   * @param string $tag
+   * @return BoxHistoric[]
+   */
+  public function findBoxSum(Box $box, string $tag): array
+  {
+    $qb = $this->createQueryBuilder('h')
+      ->join('h.box', 'b')
+      ->andWhere('h.box = :box')
+      ->andWhere('h.tag = :tag');
+
+    $parameters = $qb
+      ->setParameter('box', $box)
+      ->setParameter('tag', $tag);
+
+    $query = $parameters->getQuery();
+
+    return $query->getResult();
+  }
 }
