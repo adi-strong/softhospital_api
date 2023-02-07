@@ -83,9 +83,13 @@ class ImageObject
     #[ORM\ManyToOne(inversedBy: 'imageObjects')]
     private ?Hospital $hospital = null;
 
+    #[ORM\OneToMany(mappedBy: 'logo', targetEntity: Covenant::class)]
+    private Collection $covenants;
+
     public function __construct()
     {
         $this->hospitals = new ArrayCollection();
+        $this->covenants = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -99,7 +103,7 @@ class ImageObject
     $types = ['image/jpg', 'image/jpeg', 'image/png'];
     if (!in_array($this->file->getMimeType(), $types)) {
       $context
-        ->buildViolation("Extension non valide: 'jpg' | 'jpeg' | 'png'")
+        ->buildViolation("Extension non valide: 'jpg'")
         ->atPath('file')
         ->addViolation()
       ;
@@ -144,6 +148,36 @@ class ImageObject
   public function setHospital(?Hospital $hospital): self
   {
       $this->hospital = $hospital;
+
+      return $this;
+  }
+
+  /**
+   * @return Collection<int, Covenant>
+   */
+  public function getCovenants(): Collection
+  {
+      return $this->covenants;
+  }
+
+  public function addCovenant(Covenant $covenant): self
+  {
+      if (!$this->covenants->contains($covenant)) {
+          $this->covenants->add($covenant);
+          $covenant->setLogo($this);
+      }
+
+      return $this;
+  }
+
+  public function removeCovenant(Covenant $covenant): self
+  {
+      if ($this->covenants->removeElement($covenant)) {
+          // set the owning side to null (unless already changed)
+          if ($covenant->getLogo() === $this) {
+              $covenant->setLogo(null);
+          }
+      }
 
       return $this;
   }

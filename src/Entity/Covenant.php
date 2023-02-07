@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -9,29 +10,43 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
-use App\AppTraits\UIDTrait;
 use App\Repository\CovenantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
+#[Vich\Uploadable]
 #[ORM\Entity(repositoryClass: CovenantRepository::class)]
 #[ApiResource(
   types: ['https://schema.org/Covenant'],
   operations: [
     new GetCollection(),
-    new Post(),
+    new Post(inputFormats: ['multipart' => ['multipart/form-data']]),
     new Get(),
     new Patch(),
   ],
   normalizationContext: ['groups' => ['covenant:read']],
+  denormalizationContext: ['groups' => ['covenant:write']],
   order: ['id' => 'DESC'],
 )]
 class Covenant
 {
   use CreatedAtTrait, IsDeletedTrait;
+
+    #[ApiProperty(types: ['https://schema.org/contentUrl'])]
+    #[Groups(['covenant:read', 'patient:read'])]
+    public ?string $contentUrl = null;
+
+    #[Vich\UploadableField(mapping: 'pdf_obj', fileNameProperty: 'filePath')]
+    #[Groups(['covenant:write'])]
+    public ?File $file = null;
+
+    #[ORM\Column(nullable: true)]
+    public ?string $filePath = null;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -40,30 +55,30 @@ class Covenant
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['covenant:read', 'patient:read'])]
+    #[Groups(['covenant:read', 'covenant:write', 'patient:read'])]
     #[Assert\NotBlank(message: 'La dénomination doit être renseigné.')]
     private ?string $denomination = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['covenant:read', 'patient:read'])]
+    #[Groups(['covenant:read', 'covenant:write', 'patient:read'])]
     private ?string $unitName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['covenant:read'])]
     #[Assert\NotBlank(message: 'Le point focal doit être renseigné.')]
+    #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $focal = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['covenant:read'])]
+    #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $tel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Email(message: 'Adresse email invalide.')]
-    #[Groups(['covenant:read'])]
+    #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['covenant:read'])]
+    #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $address = null;
 
     #[ORM\OneToMany(mappedBy: 'covenant', targetEntity: Patient::class)]
@@ -72,6 +87,10 @@ class Covenant
 
     #[ORM\ManyToOne(inversedBy: 'covenants')]
     private ?Hospital $hospital = null;
+
+    #[ORM\ManyToOne(inversedBy: 'covenants')]
+    #[Groups(['covenant:read', 'covenant:write'])]
+    private ?ImageObject $logo = null;
 
     public function __construct()
     {
@@ -193,6 +212,18 @@ class Covenant
     public function setHospital(?Hospital $hospital): self
     {
         $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function getLogo(): ?ImageObject
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?ImageObject $logo): self
+    {
+        $this->logo = $logo;
 
         return $this;
     }

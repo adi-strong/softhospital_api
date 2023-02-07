@@ -27,6 +27,17 @@ trait CreatedAtTrait
     'expense_category:read',
     'output:read',
     'input:read',
+    'fileType:read',
+    'act:read',
+    'exam:read',
+    'examCategory:read',
+    'actCategory:read',
+    'treatment:read',
+    'treatmentCategory:read',
+    'bedroomCategory:read',
+    'bedroom:read',
+    'bed:read',
+    'pdf_obj:read',
   ])]
   protected ?\DateTimeInterface $createdAt = null;
 

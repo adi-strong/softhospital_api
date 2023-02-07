@@ -6,13 +6,21 @@ use ApiPlatform\Doctrine\Orm\Extension\QueryCollectionExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
+use App\Entity\Act;
+use App\Entity\ActCategory;
 use App\Entity\Agent;
+use App\Entity\Bed;
+use App\Entity\Bedroom;
+use App\Entity\BedroomCategory;
 use App\Entity\Box;
 use App\Entity\BoxExpense;
 use App\Entity\BoxInput;
 use App\Entity\BoxOutput;
+use App\Entity\ConsultationsType;
 use App\Entity\Covenant;
 use App\Entity\Department;
+use App\Entity\Exam;
+use App\Entity\ExamCategory;
 use App\Entity\ExpenseCategory;
 use App\Entity\ImageObject;
 use App\Entity\Office;
@@ -20,6 +28,8 @@ use App\Entity\Parameters;
 use App\Entity\Patient;
 use App\Entity\PersonalImageObject;
 use App\Entity\Service;
+use App\Entity\Treatment;
+use App\Entity\TreatmentCategory;
 use App\Entity\User;
 use App\Services\HandleCurrentUserService;
 use Doctrine\ORM\QueryBuilder;
@@ -287,6 +297,171 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
       }
     }
     // End Agent
+    // End Office
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // ConsultationsType
+    if (($resourceClass === ConsultationsType::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End ConsultationsType
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Act
+    if (($resourceClass === Act::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Act
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Exam
+    if (($resourceClass === Exam::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Exam
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // ExamCategory
+    if (($resourceClass === ExamCategory::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End ExamCategory
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // ActCategory
+    if (($resourceClass === ActCategory::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End ActCategory
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // TreatmentCategory
+    if (($resourceClass === TreatmentCategory::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End TreatmentCategory
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Treatment
+    if (($resourceClass === Treatment::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Treatment
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // BedroomCategory
+    if (($resourceClass === BedroomCategory::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End BedroomCategory
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Bedroom
+    if (($resourceClass === Bedroom::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Bedroom
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Bed
+    if (($resourceClass === Bed::class) && !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb
+          ->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Bed
 
     /** ----------------------------------------------------------------------------------- **/
   }

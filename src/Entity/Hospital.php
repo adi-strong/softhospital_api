@@ -113,6 +113,36 @@ class Hospital
     #[ORM\JoinColumn(referencedColumnName: 'id', unique: false)]
     private Collection $boxes;
 
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: ConsultationsType::class)]
+    private Collection $consultationsTypes;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Act::class)]
+    private Collection $acts;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Exam::class)]
+    private Collection $exams;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Treatment::class)]
+    private Collection $treatments;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: ActCategory::class)]
+    private Collection $actCategories;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: ExamCategory::class)]
+    private Collection $examCategories;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: TreatmentCategory::class)]
+    private Collection $treatmentCategories;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: BedroomCategory::class)]
+    private Collection $bedroomCategories;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Bedroom::class)]
+    private Collection $bedrooms;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Bed::class)]
+    private Collection $beds;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -129,6 +159,16 @@ class Hospital
         $this->offices = new ArrayCollection();
         $this->agents = new ArrayCollection();
         $this->boxes = new ArrayCollection();
+        $this->consultationsTypes = new ArrayCollection();
+        $this->acts = new ArrayCollection();
+        $this->exams = new ArrayCollection();
+        $this->treatments = new ArrayCollection();
+        $this->actCategories = new ArrayCollection();
+        $this->examCategories = new ArrayCollection();
+        $this->treatmentCategories = new ArrayCollection();
+        $this->bedroomCategories = new ArrayCollection();
+        $this->bedrooms = new ArrayCollection();
+        $this->beds = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -622,6 +662,306 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($box->getHospital() === $this) {
                 $box->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ConsultationsType>
+     */
+    public function getConsultationsTypes(): Collection
+    {
+        return $this->consultationsTypes;
+    }
+
+    public function addConsultationsType(ConsultationsType $consultationsType): self
+    {
+        if (!$this->consultationsTypes->contains($consultationsType)) {
+            $this->consultationsTypes->add($consultationsType);
+            $consultationsType->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultationsType(ConsultationsType $consultationsType): self
+    {
+        if ($this->consultationsTypes->removeElement($consultationsType)) {
+            // set the owning side to null (unless already changed)
+            if ($consultationsType->getHospital() === $this) {
+                $consultationsType->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Act>
+     */
+    public function getActs(): Collection
+    {
+        return $this->acts;
+    }
+
+    public function addAct(Act $act): self
+    {
+        if (!$this->acts->contains($act)) {
+            $this->acts->add($act);
+            $act->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAct(Act $act): self
+    {
+        if ($this->acts->removeElement($act)) {
+            // set the owning side to null (unless already changed)
+            if ($act->getHospital() === $this) {
+                $act->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Exam>
+     */
+    public function getExams(): Collection
+    {
+        return $this->exams;
+    }
+
+    public function addExam(Exam $exam): self
+    {
+        if (!$this->exams->contains($exam)) {
+            $this->exams->add($exam);
+            $exam->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExam(Exam $exam): self
+    {
+        if ($this->exams->removeElement($exam)) {
+            // set the owning side to null (unless already changed)
+            if ($exam->getHospital() === $this) {
+                $exam->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Treatment>
+     */
+    public function getTreatments(): Collection
+    {
+        return $this->treatments;
+    }
+
+    public function addTreatment(Treatment $treatment): self
+    {
+        if (!$this->treatments->contains($treatment)) {
+            $this->treatments->add($treatment);
+            $treatment->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTreatment(Treatment $treatment): self
+    {
+        if ($this->treatments->removeElement($treatment)) {
+            // set the owning side to null (unless already changed)
+            if ($treatment->getHospital() === $this) {
+                $treatment->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ActCategory>
+     */
+    public function getActCategories(): Collection
+    {
+        return $this->actCategories;
+    }
+
+    public function addActCategory(ActCategory $actCategory): self
+    {
+        if (!$this->actCategories->contains($actCategory)) {
+            $this->actCategories->add($actCategory);
+            $actCategory->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActCategory(ActCategory $actCategory): self
+    {
+        if ($this->actCategories->removeElement($actCategory)) {
+            // set the owning side to null (unless already changed)
+            if ($actCategory->getHospital() === $this) {
+                $actCategory->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ExamCategory>
+     */
+    public function getExamCategories(): Collection
+    {
+        return $this->examCategories;
+    }
+
+    public function addExamCategory(ExamCategory $examCategory): self
+    {
+        if (!$this->examCategories->contains($examCategory)) {
+            $this->examCategories->add($examCategory);
+            $examCategory->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExamCategory(ExamCategory $examCategory): self
+    {
+        if ($this->examCategories->removeElement($examCategory)) {
+            // set the owning side to null (unless already changed)
+            if ($examCategory->getHospital() === $this) {
+                $examCategory->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TreatmentCategory>
+     */
+    public function getTreatmentCategories(): Collection
+    {
+        return $this->treatmentCategories;
+    }
+
+    public function addTreatmentCategory(TreatmentCategory $treatmentCategory): self
+    {
+        if (!$this->treatmentCategories->contains($treatmentCategory)) {
+            $this->treatmentCategories->add($treatmentCategory);
+            $treatmentCategory->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTreatmentCategory(TreatmentCategory $treatmentCategory): self
+    {
+        if ($this->treatmentCategories->removeElement($treatmentCategory)) {
+            // set the owning side to null (unless already changed)
+            if ($treatmentCategory->getHospital() === $this) {
+                $treatmentCategory->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BedroomCategory>
+     */
+    public function getBedroomCategories(): Collection
+    {
+        return $this->bedroomCategories;
+    }
+
+    public function addBedroomCategory(BedroomCategory $bedroomCategory): self
+    {
+        if (!$this->bedroomCategories->contains($bedroomCategory)) {
+            $this->bedroomCategories->add($bedroomCategory);
+            $bedroomCategory->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBedroomCategory(BedroomCategory $bedroomCategory): self
+    {
+        if ($this->bedroomCategories->removeElement($bedroomCategory)) {
+            // set the owning side to null (unless already changed)
+            if ($bedroomCategory->getHospital() === $this) {
+                $bedroomCategory->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bedroom>
+     */
+    public function getBedrooms(): Collection
+    {
+        return $this->bedrooms;
+    }
+
+    public function addBedroom(Bedroom $bedroom): self
+    {
+        if (!$this->bedrooms->contains($bedroom)) {
+            $this->bedrooms->add($bedroom);
+            $bedroom->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBedroom(Bedroom $bedroom): self
+    {
+        if ($this->bedrooms->removeElement($bedroom)) {
+            // set the owning side to null (unless already changed)
+            if ($bedroom->getHospital() === $this) {
+                $bedroom->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bed>
+     */
+    public function getBeds(): Collection
+    {
+        return $this->beds;
+    }
+
+    public function addBed(Bed $bed): self
+    {
+        if (!$this->beds->contains($bed)) {
+            $this->beds->add($bed);
+            $bed->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBed(Bed $bed): self
+    {
+        if ($this->beds->removeElement($bed)) {
+            // set the owning side to null (unless already changed)
+            if ($bed->getHospital() === $this) {
+                $bed->setHospital(null);
             }
         }
 
