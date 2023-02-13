@@ -5,15 +5,17 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\AppTraits\PrivateKeyTrait;
-use App\AppTraits\UIDTrait;
 use App\Repository\PatientRepository;
+use Cocur\Slugify\Slugify;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -29,6 +31,13 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['patient:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiResource(
+  uriTemplate: '/covenant/{id}/patients',
+  types: ['https://schema.org/Patient'],
+  operations: [ new GetCollection() ],
+  uriVariables: [ 'id' => new Link(fromProperty: 'patients', fromClass: Covenant::class) ],
+  normalizationContext: ['groups' => ['patient:read']]
+)]
 class Patient
 {
   use CreatedAtTrait, IsDeletedTrait, PrivateKeyTrait;
@@ -36,7 +45,7 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
+    #[Groups(['patient:read', 'covenant:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -57,8 +66,8 @@ class Patient
     private ?string $sex = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['patient:read', 'covenant:read'])]
     #[Assert\NotBlank(message: 'La date de naissance doit être renseigné.')]
+    #[Groups(['patient:read', 'covenant:read'])]
     private ?\DateTimeInterface $birthDate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -70,6 +79,14 @@ class Patient
     private ?string $maritalStatus = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné.')]
+    #[Assert\NotNull(message: 'Le numéro de téléphone doit être renseigné.')]
+    #[Assert\Length(
+      min: 9,
+      max: 20,
+      minMessage: 'Ce champs doit contenir au moins {{ limit }} caractères.',
+      maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
+    #[Assert\Regex('#^([+]|0)?[0-9]([-. ]?[0-9]{2}){4,}$#', message: 'N° de téléphone invalide.')]
     #[Groups(['patient:read', 'covenant:read', 'covenant:read'])]
     private ?string $tel = null;
 
@@ -99,11 +116,20 @@ class Patient
     private ?Covenant $covenant = null;
 
     #[ORM\ManyToOne]
-    #[Groups(['patient:read'])]
+    #[Groups(['patient:read', 'covenant:read'])]
     private ?ImageObject $profile = null;
 
     #[ORM\ManyToOne(inversedBy: 'patients')]
+    #[Assert\NotBlank(message: "Informations non valides.")]
     private ?Hospital $hospital = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?int $age = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read', 'covenant:read'])]
+    private ?string $nationality = null;
 
     public function getId(): ?int
     {
@@ -259,7 +285,7 @@ class Patient
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
 
@@ -301,4 +327,34 @@ class Patient
 
         return $this;
     }
+
+  #[Groups(['patient:read', 'covenant:read'])]
+  public function getSlug(): ?string
+  {
+    return (new Slugify())->slugify($this->name.' '.($this->firstName ?? ''));
+  }
+
+  public function getAge(): ?int
+  {
+      return $this->age;
+  }
+
+  public function setAge(?int $age): self
+  {
+      $this->age = $age;
+
+      return $this;
+  }
+
+  public function getNationality(): ?string
+  {
+      return $this->nationality;
+  }
+
+  public function setNationality(?string $nationality): self
+  {
+      $this->nationality = $nationality;
+
+      return $this;
+  }
 }

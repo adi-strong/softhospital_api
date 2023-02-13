@@ -50,6 +50,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'expense:read',
       'output:read',
       'input:read',
+      'medicine:read',
     ])]
     private ?int $id = null;
 
@@ -62,6 +63,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'expense:read',
       'output:read',
       'input:read',
+      'medicine:read',
     ])]
     #[Assert\NotBlank(message: 'Le username doit être renseigné.')]
     private ?string $username = null;
@@ -133,8 +135,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $name = null;
 
     #[ORM\OneToOne(mappedBy: 'userAccount', cascade: ['persist', 'remove'])]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'medicine:read'])]
     private ?Agent $agent = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Medicine::class)]
+    private Collection $medicines;
 
     public function __construct()
     {
@@ -143,6 +148,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->boxOutputs = new ArrayCollection();
         $this->boxExpenses = new ArrayCollection();
         $this->agents = new ArrayCollection();
+        $this->medicines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -489,6 +495,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->agent = $agent;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Medicine>
+     */
+    public function getMedicines(): Collection
+    {
+        return $this->medicines;
+    }
+
+    public function addMedicine(Medicine $medicine): self
+    {
+        if (!$this->medicines->contains($medicine)) {
+            $this->medicines->add($medicine);
+            $medicine->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedicine(Medicine $medicine): self
+    {
+        if ($this->medicines->removeElement($medicine)) {
+            // set the owning side to null (unless already changed)
+            if ($medicine->getUser() === $this) {
+                $medicine->setUser(null);
+            }
+        }
 
         return $this;
     }

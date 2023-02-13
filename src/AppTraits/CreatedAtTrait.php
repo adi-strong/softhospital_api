@@ -38,6 +38,10 @@ trait CreatedAtTrait
     'bedroom:read',
     'bed:read',
     'pdf_obj:read',
+    'medCategory:read',
+    'medSubCategory:read',
+    'consumptionUnit:read',
+    'medicine:read',
   ])]
   protected ?\DateTimeInterface $createdAt = null;
 

@@ -62,11 +62,18 @@ class ImageObject
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['img_obj:read', 'patient:read', 'hospital:read', 'user:read', 'param:read'])]
+    #[Groups([
+      'img_obj:read',
+      'patient:read',
+      'hospital:read',
+      'user:read',
+      'param:read',
+      'covenant:read'
+    ])]
     private ?int $id = null;
 
     #[ApiProperty(types: ['https://schema.org/contentUrl'])]
-    #[Groups(['img_obj:read', 'patient:read', 'hospital:read', 'user:read', 'param:read'])]
+    #[Groups(['img_obj:read', 'patient:read', 'hospital:read', 'user:read', 'param:read', 'covenant:read'])]
     public ?string $contentUrl = null;
 
     #[Vich\UploadableField(mapping: 'img_obj', fileNameProperty: 'filePath')]
@@ -103,7 +110,7 @@ class ImageObject
     $types = ['image/jpg', 'image/jpeg', 'image/png'];
     if (!in_array($this->file->getMimeType(), $types)) {
       $context
-        ->buildViolation("Extension non valide: 'jpg'")
+        ->buildViolation("Extension non valide: 'jpg' | 'jpeg' | 'png'")
         ->atPath('file')
         ->addViolation()
       ;

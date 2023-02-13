@@ -35,7 +35,7 @@ class Agent
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['agent:read', 'user:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
@@ -49,15 +49,15 @@ class Agent
       minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.',
       maxMessage: 'Ce champs doit faire {{ limit }} caractères au maximum.',
     )]
-    #[Groups(['agent:read', 'user:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['agent:read', 'user:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['agent:read', 'user:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 4, nullable: true)]

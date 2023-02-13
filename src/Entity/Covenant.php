@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
@@ -11,6 +13,7 @@ use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Repository\CovenantRepository;
+use Cocur\Slugify\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -33,6 +36,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
   denormalizationContext: ['groups' => ['covenant:write']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['denomination' => 'ipartial'])]
 class Covenant
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -46,6 +50,7 @@ class Covenant
     public ?File $file = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['covenant:read', 'patient:read'])]
     public ?string $filePath = null;
 
     #[ORM\Id]
@@ -59,29 +64,37 @@ class Covenant
     #[Assert\NotBlank(message: 'La dénomination doit être renseigné.')]
     private ?string $denomination = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Length(max: 20, maxMessage: 'Ce champs ne peut dépasser 20 caractères.')]
     #[Groups(['covenant:read', 'covenant:write', 'patient:read'])]
     private ?string $unitName = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le point focal doit être renseigné.')]
+    #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
     #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $focal = null;
 
     #[ORM\Column(length: 20)]
+    #[Assert\NotBlank(message: 'Le n° de téléphone doit être renseigné.')]
+    #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
     #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $tel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "L'adresse email doit être renseignée.")]
+    #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
     #[Assert\Email(message: 'Adresse email invalide.')]
     #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['covenant:read', 'covenant:write'])]
+    #[Assert\Length(max: 255, maxMessage: 'Ce champs ne peut dépasser 255 caractères.')]
+    #[Groups(['covenant:read', 'covenant:write', 'patient:read'])]
     private ?string $address = null;
 
     #[ORM\OneToMany(mappedBy: 'covenant', targetEntity: Patient::class)]
+    #[ORM\JoinColumn(referencedColumnName: 'id', unique: false)]
     #[Groups(['covenant:read'])]
     private Collection $patients;
 
@@ -89,7 +102,8 @@ class Covenant
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'covenants')]
-    #[Groups(['covenant:read', 'covenant:write'])]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['covenant:read', 'covenant:write', 'patient:read'])]
     private ?ImageObject $logo = null;
 
     public function __construct()
@@ -227,4 +241,10 @@ class Covenant
 
         return $this;
     }
+
+  #[Groups(['covenant:read', 'patient:read'])]
+  public function getSlug(): string
+  {
+    return (new Slugify())->slugify($this->denomination);
+  }
 }

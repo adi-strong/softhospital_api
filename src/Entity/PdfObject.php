@@ -14,6 +14,7 @@ use App\Repository\PdfObjectRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -23,7 +24,6 @@ use Symfony\Component\Validator\Constraints as Assert;
   types: ['https://schema.org/PdfObject'],
   operations: [
     new Get(),
-    new GetCollection(),
     new Delete(),
     new Post(
       controller: CreatePdfObjectAction::class,
@@ -77,5 +77,18 @@ class PdfObject
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    #[Assert\Callback]
+      public function validate(ExecutionContextInterface $context, $payload): void
+    {
+      $types = ['application/pdf'];
+      if (!in_array($this->file->getMimeType(), $types)) {
+        $context
+          ->buildViolation("Extension non valide: 'pdf'")
+          ->atPath('file')
+          ->addViolation()
+        ;
+      }
     }
 }
