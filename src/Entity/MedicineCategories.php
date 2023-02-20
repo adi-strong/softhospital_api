@@ -37,7 +37,7 @@ class MedicineCategories
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['medCategory:read', 'medicine:read'])]
+    #[Groups(['medCategory:read', 'medicine:read', 'medSubCategory:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -48,7 +48,7 @@ class MedicineCategories
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['medCategory:read', 'medicine:read'])]
+    #[Groups(['medCategory:read', 'medicine:read', 'medSubCategory:read'])]
     private ?string $wording = null;
 
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: MedicineSubCategories::class)]

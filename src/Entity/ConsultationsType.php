@@ -11,6 +11,8 @@ use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Repository\ConsultationsTypeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -57,6 +59,14 @@ class ConsultationsType
     #[Groups(['fileType:read'])]
     private ?string $price = '0';
 
+    #[ORM\OneToMany(mappedBy: 'file', targetEntity: Consultation::class)]
+    private Collection $consultations;
+
+    public function __construct()
+    {
+        $this->consultations = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -94,6 +104,36 @@ class ConsultationsType
     public function setPrice(string $price): self
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): self
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setFile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): self
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getFile() === $this) {
+                $consultation->setFile(null);
+            }
+        }
 
         return $this;
     }

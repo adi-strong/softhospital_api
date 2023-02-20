@@ -27,12 +27,14 @@ class OnDeleteMedCategoryEvent implements EventSubscriberInterface
       if ($medicines->count() > 0) {
         foreach ($medicines as $medicine)
           $category->removeMedicine($medicine);
-
+      }
+      
+      if ($subCategories->count() > 0) {
         foreach ($subCategories as $subCategory)
           $category->removeMedicineSubCategory($subCategory);
-
-        $this->em->flush();
       }
+
+      $this->em->flush();
     }
   }
 

@@ -155,6 +155,28 @@ class Hospital
     #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: MedicineCategories::class)]
     private Collection $medicineCategories;
 
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Provider::class)]
+    private Collection $providers;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: DrugstoreSupply::class)]
+    private Collection $drugstoreSupplies;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: MedicineInvoice::class)]
+    private Collection $medicineInvoices;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['hospital:read', 'user:read', 'param:read'])]
+    private ?string $address = null;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Invoice::class)]
+    private Collection $invoices;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Consultation::class)]
+    private Collection $consultations;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Appointment::class)]
+    private Collection $appointments;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -185,6 +207,12 @@ class Hospital
         $this->consumptionUnits = new ArrayCollection();
         $this->medicineSubCategories = new ArrayCollection();
         $this->medicineCategories = new ArrayCollection();
+        $this->providers = new ArrayCollection();
+        $this->drugstoreSupplies = new ArrayCollection();
+        $this->medicineInvoices = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
+        $this->consultations = new ArrayCollection();
+        $this->appointments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1098,6 +1126,198 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($medicineCategory->getHospital() === $this) {
                 $medicineCategory->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Provider>
+     */
+    public function getProviders(): Collection
+    {
+        return $this->providers;
+    }
+
+    public function addProvider(Provider $provider): self
+    {
+        if (!$this->providers->contains($provider)) {
+            $this->providers->add($provider);
+            $provider->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProvider(Provider $provider): self
+    {
+        if ($this->providers->removeElement($provider)) {
+            // set the owning side to null (unless already changed)
+            if ($provider->getHospital() === $this) {
+                $provider->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DrugstoreSupply>
+     */
+    public function getDrugstoreSupplies(): Collection
+    {
+        return $this->drugstoreSupplies;
+    }
+
+    public function addDrugstoreSupply(DrugstoreSupply $drugstoreSupply): self
+    {
+        if (!$this->drugstoreSupplies->contains($drugstoreSupply)) {
+            $this->drugstoreSupplies->add($drugstoreSupply);
+            $drugstoreSupply->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDrugstoreSupply(DrugstoreSupply $drugstoreSupply): self
+    {
+        if ($this->drugstoreSupplies->removeElement($drugstoreSupply)) {
+            // set the owning side to null (unless already changed)
+            if ($drugstoreSupply->getHospital() === $this) {
+                $drugstoreSupply->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MedicineInvoice>
+     */
+    public function getMedicineInvoices(): Collection
+    {
+        return $this->medicineInvoices;
+    }
+
+    public function addMedicineInvoice(MedicineInvoice $medicineInvoice): self
+    {
+        if (!$this->medicineInvoices->contains($medicineInvoice)) {
+            $this->medicineInvoices->add($medicineInvoice);
+            $medicineInvoice->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedicineInvoice(MedicineInvoice $medicineInvoice): self
+    {
+        if ($this->medicineInvoices->removeElement($medicineInvoice)) {
+            // set the owning side to null (unless already changed)
+            if ($medicineInvoice->getHospital() === $this) {
+                $medicineInvoice->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?string $address): self
+    {
+        $this->address = $address;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function getInvoices(): Collection
+    {
+        return $this->invoices;
+    }
+
+    public function addInvoice(Invoice $invoice): self
+    {
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices->add($invoice);
+            $invoice->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoice(Invoice $invoice): self
+    {
+        if ($this->invoices->removeElement($invoice)) {
+            // set the owning side to null (unless already changed)
+            if ($invoice->getHospital() === $this) {
+                $invoice->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): self
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): self
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getHospital() === $this) {
+                $consultation->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Appointment>
+     */
+    public function getAppointments(): Collection
+    {
+        return $this->appointments;
+    }
+
+    public function addAppointment(Appointment $appointment): self
+    {
+        if (!$this->appointments->contains($appointment)) {
+            $this->appointments->add($appointment);
+            $appointment->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAppointment(Appointment $appointment): self
+    {
+        if ($this->appointments->removeElement($appointment)) {
+            // set the owning side to null (unless already changed)
+            if ($appointment->getHospital() === $this) {
+                $appointment->setHospital(null);
             }
         }
 

@@ -22,6 +22,7 @@ class OnDeleteMedSubCategoryEvent implements EventSubscriberInterface
     $method = $event->getRequest()->getMethod();
     $category = $event->getControllerResult();
     if ($category instanceof MedicineSubCategories && $method === Request::METHOD_DELETE) {
+      $category->setCategory(null);
       $medicines = $category->getMedicines();
       if ($medicines->count() > 0) {
         foreach ($medicines as $medicine)

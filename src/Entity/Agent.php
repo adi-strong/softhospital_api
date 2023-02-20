@@ -11,6 +11,8 @@ use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Repository\AgentRepository;
 use Cocur\Slugify\Slugify;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -93,6 +95,18 @@ class Agent
     #[ORM\OneToOne(inversedBy: 'agent', cascade: ['persist', 'remove'])]
     #[Groups(['agent:read'])]
     private ?User $userAccount = null;
+
+    #[ORM\OneToMany(mappedBy: 'doctor', targetEntity: Consultation::class)]
+    private Collection $consultations;
+
+    #[ORM\OneToMany(mappedBy: 'doctor', targetEntity: Appointment::class)]
+    private Collection $appointments;
+
+    public function __construct()
+    {
+        $this->consultations = new ArrayCollection();
+        $this->appointments = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -233,6 +247,66 @@ class Agent
   public function setUserAccount(?User $userAccount): self
   {
       $this->userAccount = $userAccount;
+
+      return $this;
+  }
+
+  /**
+   * @return Collection<int, Consultation>
+   */
+  public function getConsultations(): Collection
+  {
+      return $this->consultations;
+  }
+
+  public function addConsultation(Consultation $consultation): self
+  {
+      if (!$this->consultations->contains($consultation)) {
+          $this->consultations->add($consultation);
+          $consultation->setDoctor($this);
+      }
+
+      return $this;
+  }
+
+  public function removeConsultation(Consultation $consultation): self
+  {
+      if ($this->consultations->removeElement($consultation)) {
+          // set the owning side to null (unless already changed)
+          if ($consultation->getDoctor() === $this) {
+              $consultation->setDoctor(null);
+          }
+      }
+
+      return $this;
+  }
+
+  /**
+   * @return Collection<int, Appointment>
+   */
+  public function getAppointments(): Collection
+  {
+      return $this->appointments;
+  }
+
+  public function addAppointment(Appointment $appointment): self
+  {
+      if (!$this->appointments->contains($appointment)) {
+          $this->appointments->add($appointment);
+          $appointment->setDoctor($this);
+      }
+
+      return $this;
+  }
+
+  public function removeAppointment(Appointment $appointment): self
+  {
+      if ($this->appointments->removeElement($appointment)) {
+          // set the owning side to null (unless already changed)
+          if ($appointment->getDoctor() === $this) {
+              $appointment->setDoctor(null);
+          }
+      }
 
       return $this;
   }

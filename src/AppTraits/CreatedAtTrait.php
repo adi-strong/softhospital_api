@@ -10,6 +10,7 @@ trait CreatedAtTrait
 {
   #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
   #[Groups([
+    'provider:read',
     'user:read',
     'patient:read',
     'covenant:read',
@@ -42,6 +43,8 @@ trait CreatedAtTrait
     'medSubCategory:read',
     'consumptionUnit:read',
     'medicine:read',
+    'consult:read',
+    'appointment:read',
   ])]
   protected ?\DateTimeInterface $createdAt = null;
 

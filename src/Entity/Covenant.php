@@ -56,11 +56,11 @@ class Covenant
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['covenant:read', 'patient:read'])]
+    #[Groups(['covenant:read', 'patient:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['covenant:read', 'covenant:write', 'patient:read'])]
+    #[Groups(['covenant:read', 'covenant:write', 'patient:read', 'consult:read'])]
     #[Assert\NotBlank(message: 'La dénomination doit être renseigné.')]
     private ?string $denomination = null;
 

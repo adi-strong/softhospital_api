@@ -25,7 +25,6 @@ class OnAddNewMedSubCategoryEvent implements EventSubscriberInterface
     if ($category instanceof MedicineSubCategories && $method === Request::METHOD_POST) {
       $category->setCreatedAt(new DateTime());
       $category->setHospital($this->user->getHospital() ?? $this->user->getHospitalCenter());
-      $category->setCategory(null);
     }
   }
 

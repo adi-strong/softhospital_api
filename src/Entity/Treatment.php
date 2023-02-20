@@ -10,6 +10,8 @@ use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Repository\TreatmentRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -58,6 +60,14 @@ class Treatment
     #[ORM\ManyToOne(inversedBy: 'treatments')]
     #[Groups(['treatment:read'])]
     private ?TreatmentCategory $category = null;
+
+    #[ORM\ManyToMany(targetEntity: Consultation::class, mappedBy: 'treatments')]
+    private Collection $consultations;
+
+    public function __construct()
+    {
+        $this->consultations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -108,6 +118,33 @@ class Treatment
     public function setCategory(?TreatmentCategory $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): self
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->addTreatment($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): self
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            $consultation->removeTreatment($this);
+        }
 
         return $this;
     }

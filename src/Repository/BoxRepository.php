@@ -3,8 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Box;
-use App\Entity\Hospital;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -64,4 +64,19 @@ class BoxRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  public function findBox(int $id): ?Box
+  {
+    $qb = $this->createQueryBuilder('b')
+      ->andWhere('b.id = :id')
+      ->setParameter('id', $id);
+
+    $query = null;
+
+    try {
+      $query = $qb->getQuery()->getOneOrNullResult();
+    } catch (NonUniqueResultException $e) { }
+
+    return $query;
+  }
 }

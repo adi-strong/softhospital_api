@@ -45,12 +45,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups([
       'user:read',
       'patient:read',
+      'provider:read',
       'hospital:read',
       'agent:read',
       'expense:read',
       'output:read',
       'input:read',
       'medicine:read',
+      'supply:read',
+      'medicineInvoice:read',
     ])]
     private ?int $id = null;
 
@@ -58,12 +61,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups([
       'user:read',
       'patient:read',
+      'provider:read',
       'hospital:read',
       'agent:read',
       'expense:read',
       'output:read',
       'input:read',
       'medicine:read',
+      'supply:read',
+      'medicineInvoice:read',
     ])]
     #[Assert\NotBlank(message: 'Le username doit être renseigné.')]
     private ?string $username = null;
@@ -131,7 +137,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $agents;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'agent:read', 'expense:read', 'output:read', 'input:read'])]
+    #[Groups([
+      'user:read',
+      'patient:read',
+      'provider:read',
+      'hospital:read',
+      'agent:read',
+      'expense:read',
+      'output:read',
+      'input:read',
+      'medicine:read',
+      'supply:read',
+      'medicineInvoice:read',
+    ])]
     private ?string $name = null;
 
     #[ORM\OneToOne(mappedBy: 'userAccount', cascade: ['persist', 'remove'])]
@@ -141,6 +159,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Medicine::class)]
     private Collection $medicines;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Provider::class)]
+    private Collection $providers;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: DrugstoreSupply::class)]
+    private Collection $drugstoreSupplies;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: MedicineInvoice::class)]
+    private Collection $medicineInvoices;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Consultation::class)]
+    private Collection $consultations;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: InvoiceStoric::class)]
+    private Collection $invoiceStorics;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Appointment::class)]
+    private Collection $appointments;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -149,6 +185,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->boxExpenses = new ArrayCollection();
         $this->agents = new ArrayCollection();
         $this->medicines = new ArrayCollection();
+        $this->providers = new ArrayCollection();
+        $this->drugstoreSupplies = new ArrayCollection();
+        $this->medicineInvoices = new ArrayCollection();
+        $this->consultations = new ArrayCollection();
+        $this->invoiceStorics = new ArrayCollection();
+        $this->appointments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -523,6 +565,186 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($medicine->getUser() === $this) {
                 $medicine->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Provider>
+     */
+    public function getProviders(): Collection
+    {
+        return $this->providers;
+    }
+
+    public function addProvider(Provider $provider): self
+    {
+        if (!$this->providers->contains($provider)) {
+            $this->providers->add($provider);
+            $provider->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProvider(Provider $provider): self
+    {
+        if ($this->providers->removeElement($provider)) {
+            // set the owning side to null (unless already changed)
+            if ($provider->getUser() === $this) {
+                $provider->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DrugstoreSupply>
+     */
+    public function getDrugstoreSupplies(): Collection
+    {
+        return $this->drugstoreSupplies;
+    }
+
+    public function addDrugstoreSupply(DrugstoreSupply $drugstoreSupply): self
+    {
+        if (!$this->drugstoreSupplies->contains($drugstoreSupply)) {
+            $this->drugstoreSupplies->add($drugstoreSupply);
+            $drugstoreSupply->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDrugstoreSupply(DrugstoreSupply $drugstoreSupply): self
+    {
+        if ($this->drugstoreSupplies->removeElement($drugstoreSupply)) {
+            // set the owning side to null (unless already changed)
+            if ($drugstoreSupply->getUser() === $this) {
+                $drugstoreSupply->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MedicineInvoice>
+     */
+    public function getMedicineInvoices(): Collection
+    {
+        return $this->medicineInvoices;
+    }
+
+    public function addMedicineInvoice(MedicineInvoice $medicineInvoice): self
+    {
+        if (!$this->medicineInvoices->contains($medicineInvoice)) {
+            $this->medicineInvoices->add($medicineInvoice);
+            $medicineInvoice->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedicineInvoice(MedicineInvoice $medicineInvoice): self
+    {
+        if ($this->medicineInvoices->removeElement($medicineInvoice)) {
+            // set the owning side to null (unless already changed)
+            if ($medicineInvoice->getUser() === $this) {
+                $medicineInvoice->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Consultation>
+     */
+    public function getConsultations(): Collection
+    {
+        return $this->consultations;
+    }
+
+    public function addConsultation(Consultation $consultation): self
+    {
+        if (!$this->consultations->contains($consultation)) {
+            $this->consultations->add($consultation);
+            $consultation->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeConsultation(Consultation $consultation): self
+    {
+        if ($this->consultations->removeElement($consultation)) {
+            // set the owning side to null (unless already changed)
+            if ($consultation->getUser() === $this) {
+                $consultation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, InvoiceStoric>
+     */
+    public function getInvoiceStorics(): Collection
+    {
+        return $this->invoiceStorics;
+    }
+
+    public function addInvoiceStoric(InvoiceStoric $invoiceStoric): self
+    {
+        if (!$this->invoiceStorics->contains($invoiceStoric)) {
+            $this->invoiceStorics->add($invoiceStoric);
+            $invoiceStoric->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoiceStoric(InvoiceStoric $invoiceStoric): self
+    {
+        if ($this->invoiceStorics->removeElement($invoiceStoric)) {
+            // set the owning side to null (unless already changed)
+            if ($invoiceStoric->getUser() === $this) {
+                $invoiceStoric->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Appointment>
+     */
+    public function getAppointments(): Collection
+    {
+        return $this->appointments;
+    }
+
+    public function addAppointment(Appointment $appointment): self
+    {
+        if (!$this->appointments->contains($appointment)) {
+            $this->appointments->add($appointment);
+            $appointment->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAppointment(Appointment $appointment): self
+    {
+        if ($this->appointments->removeElement($appointment)) {
+            // set the owning side to null (unless already changed)
+            if ($appointment->getUser() === $this) {
+                $appointment->setUser(null);
             }
         }
 

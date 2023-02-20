@@ -10,6 +10,8 @@ use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Repository\MedicineRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -35,7 +37,7 @@ class Medicine
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['medicine:read'])]
+    #[Groups(['medicine:read', 'supply:read', 'medicineInvoice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -50,7 +52,7 @@ class Medicine
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['medicine:read'])]
+    #[Groups(['medicine:read', 'supply:read', 'medicineInvoice:read'])]
     private ?string $wording = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
@@ -70,7 +72,7 @@ class Medicine
     private ?\DateTimeInterface $expiryDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'medicines')]
-    #[Groups(['medicine:read'])]
+    #[Groups(['medicine:read', 'supply:read', 'medicineInvoice:read'])]
     private ?ConsumptionUnit $consumptionUnit = null;
 
     #[ORM\ManyToOne(inversedBy: 'medicines')]
@@ -87,6 +89,34 @@ class Medicine
     #[ORM\ManyToOne(inversedBy: 'medicines')]
     #[Groups(['medicine:read'])]
     private ?User $user = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['medicine:read'])]
+    private ?int $daysRemainder = 0;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['medicine:read'])]
+    private ?\DateTimeInterface $released = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['medicine:read'])]
+    private ?int $totalQuantity = 0;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['medicine:read'])]
+    private ?int $nbSales = 0;
+
+    #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: DrugstoreSupplyMedicine::class, cascade: ['persist'])]
+    private Collection $drugstoreSupplyMedicines;
+
+    #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: MedicinesSold::class)]
+    private Collection $medicinesSolds;
+
+    public function __construct()
+    {
+        $this->drugstoreSupplyMedicines = new ArrayCollection();
+        $this->medicinesSolds = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -221,6 +251,114 @@ class Medicine
     public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getDaysRemainder(): ?int
+    {
+        return $this->daysRemainder;
+    }
+
+    public function setDaysRemainder(?int $daysRemainder): self
+    {
+        $this->daysRemainder = $daysRemainder;
+
+        return $this;
+    }
+
+    public function getReleased(): ?\DateTimeInterface
+    {
+        return $this->released;
+    }
+
+    public function setReleased(?\DateTimeInterface $released): self
+    {
+        $this->released = $released;
+
+        return $this;
+    }
+
+    public function getTotalQuantity(): ?int
+    {
+        return $this->totalQuantity;
+    }
+
+    public function setTotalQuantity(?int $totalQuantity): self
+    {
+        $this->totalQuantity = $totalQuantity;
+
+        return $this;
+    }
+
+    public function getNbSales(): ?int
+    {
+        return $this->nbSales;
+    }
+
+    public function setNbSales(?int $nbSales): self
+    {
+        $this->nbSales = $nbSales;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DrugstoreSupplyMedicine>
+     */
+    public function getDrugstoreSupplyMedicines(): Collection
+    {
+        return $this->drugstoreSupplyMedicines;
+    }
+
+    public function addDrugstoreSupplyMedicine(DrugstoreSupplyMedicine $drugstoreSupplyMedicine): self
+    {
+        if (!$this->drugstoreSupplyMedicines->contains($drugstoreSupplyMedicine)) {
+            $this->drugstoreSupplyMedicines->add($drugstoreSupplyMedicine);
+            $drugstoreSupplyMedicine->setMedicine($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDrugstoreSupplyMedicine(DrugstoreSupplyMedicine $drugstoreSupplyMedicine): self
+    {
+        if ($this->drugstoreSupplyMedicines->removeElement($drugstoreSupplyMedicine)) {
+            // set the owning side to null (unless already changed)
+            if ($drugstoreSupplyMedicine->getMedicine() === $this) {
+                $drugstoreSupplyMedicine->setMedicine(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MedicinesSold>
+     */
+    public function getMedicinesSolds(): Collection
+    {
+        return $this->medicinesSolds;
+    }
+
+    public function addMedicinesSold(MedicinesSold $medicinesSold): self
+    {
+        if (!$this->medicinesSolds->contains($medicinesSold)) {
+            $this->medicinesSolds->add($medicinesSold);
+            $medicinesSold->setMedicine($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMedicinesSold(MedicinesSold $medicinesSold): self
+    {
+        if ($this->medicinesSolds->removeElement($medicinesSold)) {
+            // set the owning side to null (unless already changed)
+            if ($medicinesSold->getMedicine() === $this) {
+                $medicinesSold->setMedicine(null);
+            }
+        }
 
         return $this;
     }

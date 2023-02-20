@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Operation;
 use App\Entity\Act;
 use App\Entity\ActCategory;
 use App\Entity\Agent;
+use App\Entity\Appointment;
 use App\Entity\Bed;
 use App\Entity\Bedroom;
 use App\Entity\BedroomCategory;
@@ -16,21 +17,27 @@ use App\Entity\Box;
 use App\Entity\BoxExpense;
 use App\Entity\BoxInput;
 use App\Entity\BoxOutput;
+use App\Entity\Consultation;
 use App\Entity\ConsultationsType;
 use App\Entity\ConsumptionUnit;
 use App\Entity\Covenant;
 use App\Entity\Department;
+use App\Entity\DrugstoreSupply;
 use App\Entity\Exam;
 use App\Entity\ExamCategory;
 use App\Entity\ExpenseCategory;
 use App\Entity\ImageObject;
+use App\Entity\Invoice;
 use App\Entity\Medicine;
 use App\Entity\MedicineCategories;
+use App\Entity\MedicineInvoice;
+use App\Entity\MedicinesSold;
 use App\Entity\MedicineSubCategories;
 use App\Entity\Office;
 use App\Entity\Parameters;
 use App\Entity\Patient;
 use App\Entity\PersonalImageObject;
+use App\Entity\Provider;
 use App\Entity\Service;
 use App\Entity\Treatment;
 use App\Entity\TreatmentCategory;
@@ -534,6 +541,130 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
       }
     }
     // End Medicine
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Provider
+    if (
+      ($resourceClass === Provider::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter())
+          ->setParameter('isDeleted', false);
+      }
+      else {
+        $qb->andWhere("$alias.user = :user");
+        $qb->setParameter('user', $user);
+      }
+    }
+    // End Provider
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // DrugstoreSupply
+    if (
+      ($resourceClass === DrugstoreSupply::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+      else {
+        $qb->andWhere("$alias.user = :user");
+        $qb->setParameter('user', $user);
+      }
+    }
+    // End DrugstoreSupply
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // MedicineInvoice
+    if (
+      ($resourceClass === MedicineInvoice::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+      else {
+        $qb->andWhere("$alias.user = :user");
+        $qb->setParameter('user', $user);
+      }
+    }
+    // End MedicineInvoice
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Invoice
+    if (
+      ($resourceClass === Invoice::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->setParameter('isDeleted', false)
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Invoice
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Consultation
+    if (
+      ($resourceClass === Consultation::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter())
+          ->setParameter('isDeleted', false);
+      }
+      else {
+        $qb->andWhere("$alias.user = :user");
+        $qb->setParameter('user', $user);
+      }
+    }
+    // End Consultation
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Appointment
+    if (
+      ($resourceClass === Appointment::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.isDeleted = :isDeleted")
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter())
+          ->setParameter('isDeleted', false);
+      }
+      else {
+        $qb->andWhere("$alias.user = :user");
+        $qb->setParameter('user', $user);
+      }
+    }
+    // End Appointment
 
     /** ----------------------------------------------------------------------------------- **/
   }

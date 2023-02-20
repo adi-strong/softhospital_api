@@ -37,7 +37,7 @@ class ConsumptionUnit
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['consumptionUnit:read', 'medicine:read'])]
+    #[Groups(['consumptionUnit:read', 'medicine:read', 'medicineInvoice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -48,7 +48,7 @@ class ConsumptionUnit
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['consumptionUnit:read', 'medicine:read'])]
+    #[Groups(['consumptionUnit:read', 'medicine:read', 'medicineInvoice:read'])]
     private ?string $wording = null;
 
     #[ORM\OneToMany(mappedBy: 'consumptionUnit', targetEntity: Medicine::class)]

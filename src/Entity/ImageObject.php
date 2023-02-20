@@ -68,12 +68,21 @@ class ImageObject
       'hospital:read',
       'user:read',
       'param:read',
-      'covenant:read'
+      'covenant:read',
+      'consult:read',
     ])]
     private ?int $id = null;
 
     #[ApiProperty(types: ['https://schema.org/contentUrl'])]
-    #[Groups(['img_obj:read', 'patient:read', 'hospital:read', 'user:read', 'param:read', 'covenant:read'])]
+    #[Groups([
+      'img_obj:read',
+      'patient:read',
+      'hospital:read',
+      'user:read',
+      'param:read',
+      'covenant:read',
+      'consult:read',
+    ])]
     public ?string $contentUrl = null;
 
     #[Vich\UploadableField(mapping: 'img_obj', fileNameProperty: 'filePath')]
