@@ -65,9 +65,13 @@ class Act
     #[ORM\ManyToMany(targetEntity: Consultation::class, mappedBy: 'acts')]
     private Collection $consultations;
 
+    #[ORM\OneToMany(mappedBy: 'act', targetEntity: ActsInvoiceBasket::class)]
+    private Collection $actsInvoiceBaskets;
+
     public function __construct()
     {
         $this->consultations = new ArrayCollection();
+        $this->actsInvoiceBaskets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -145,6 +149,36 @@ class Act
     {
         if ($this->consultations->removeElement($consultation)) {
             $consultation->removeAct($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ActsInvoiceBasket>
+     */
+    public function getActsInvoiceBaskets(): Collection
+    {
+        return $this->actsInvoiceBaskets;
+    }
+
+    public function addActsInvoiceBasket(ActsInvoiceBasket $actsInvoiceBasket): self
+    {
+        if (!$this->actsInvoiceBaskets->contains($actsInvoiceBasket)) {
+            $this->actsInvoiceBaskets->add($actsInvoiceBasket);
+            $actsInvoiceBasket->setAct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActsInvoiceBasket(ActsInvoiceBasket $actsInvoiceBasket): self
+    {
+        if ($this->actsInvoiceBaskets->removeElement($actsInvoiceBasket)) {
+            // set the owning side to null (unless already changed)
+            if ($actsInvoiceBasket->getAct() === $this) {
+                $actsInvoiceBasket->setAct(null);
+            }
         }
 
         return $this;

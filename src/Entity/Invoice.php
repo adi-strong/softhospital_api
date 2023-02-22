@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -68,6 +69,8 @@ class Invoice
     private ?\DateTimeInterface $releasedAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoices')]
+    #[Assert\NotBlank(message: 'Ce champs doit être renseigné.')]
+    #[Assert\NotNull(message: 'Le patient doit être renseigné.')]
     #[Groups(['invoice:read'])]
     private ?Patient $patient = null;
 
@@ -79,9 +82,24 @@ class Invoice
     #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: InvoiceStoric::class)]
     private Collection $invoiceStorics;
 
+    #[ORM\ManyToOne(inversedBy: 'invoices')]
+    private ?User $user = null;
+
+    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ActsInvoiceBasket::class, cascade: ['persist'])]
+    private Collection $actsInvoiceBaskets;
+
+    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ExamsInvoiceBasket::class, cascade: ['persist'])]
+    private Collection $examsInvoiceBaskets;
+
+    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: TreatmentInvoiceBasket::class)]
+    private Collection $treatmentInvoiceBaskets;
+
     public function __construct()
     {
         $this->invoiceStorics = new ArrayCollection();
+        $this->actsInvoiceBaskets = new ArrayCollection();
+        $this->examsInvoiceBaskets = new ArrayCollection();
+        $this->treatmentInvoiceBaskets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -197,30 +215,102 @@ class Invoice
         return $this;
     }
 
-    /**
-     * @return Collection<int, InvoiceStoric>
-     */
-    public function getInvoiceStorics(): Collection
+    public function getUser(): ?User
     {
-        return $this->invoiceStorics;
+        return $this->user;
     }
 
-    public function addInvoiceStoric(InvoiceStoric $invoiceStoric): self
+    public function setUser(?UserInterface $user): self
     {
-        if (!$this->invoiceStorics->contains($invoiceStoric)) {
-            $this->invoiceStorics->add($invoiceStoric);
-            $invoiceStoric->setInvoice($this);
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ActsInvoiceBasket>
+     */
+    public function getActsInvoiceBaskets(): Collection
+    {
+        return $this->actsInvoiceBaskets;
+    }
+
+    public function addActsInvoiceBasket(ActsInvoiceBasket $actsInvoiceBasket): self
+    {
+        if (!$this->actsInvoiceBaskets->contains($actsInvoiceBasket)) {
+            $this->actsInvoiceBaskets->add($actsInvoiceBasket);
+            $actsInvoiceBasket->setInvoice($this);
         }
 
         return $this;
     }
 
-    public function removeInvoiceStoric(InvoiceStoric $invoiceStoric): self
+    public function removeActsInvoiceBasket(ActsInvoiceBasket $actsInvoiceBasket): self
     {
-        if ($this->invoiceStorics->removeElement($invoiceStoric)) {
+        if ($this->actsInvoiceBaskets->removeElement($actsInvoiceBasket)) {
             // set the owning side to null (unless already changed)
-            if ($invoiceStoric->getInvoice() === $this) {
-                $invoiceStoric->setInvoice(null);
+            if ($actsInvoiceBasket->getInvoice() === $this) {
+                $actsInvoiceBasket->setInvoice(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ExamsInvoiceBasket>
+     */
+    public function getExamsInvoiceBaskets(): Collection
+    {
+        return $this->examsInvoiceBaskets;
+    }
+
+    public function addExamsInvoiceBasket(ExamsInvoiceBasket $examsInvoiceBasket): self
+    {
+        if (!$this->examsInvoiceBaskets->contains($examsInvoiceBasket)) {
+            $this->examsInvoiceBaskets->add($examsInvoiceBasket);
+            $examsInvoiceBasket->setInvoice($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExamsInvoiceBasket(ExamsInvoiceBasket $examsInvoiceBasket): self
+    {
+        if ($this->examsInvoiceBaskets->removeElement($examsInvoiceBasket)) {
+            // set the owning side to null (unless already changed)
+            if ($examsInvoiceBasket->getInvoice() === $this) {
+                $examsInvoiceBasket->setInvoice(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TreatmentInvoiceBasket>
+     */
+    public function getTreatmentInvoiceBaskets(): Collection
+    {
+        return $this->treatmentInvoiceBaskets;
+    }
+
+    public function addTreatmentInvoiceBasket(TreatmentInvoiceBasket $treatmentInvoiceBasket): self
+    {
+        if (!$this->treatmentInvoiceBaskets->contains($treatmentInvoiceBasket)) {
+            $this->treatmentInvoiceBaskets->add($treatmentInvoiceBasket);
+            $treatmentInvoiceBasket->setInvoice($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTreatmentInvoiceBasket(TreatmentInvoiceBasket $treatmentInvoiceBasket): self
+    {
+        if ($this->treatmentInvoiceBaskets->removeElement($treatmentInvoiceBasket)) {
+            // set the owning side to null (unless already changed)
+            if ($treatmentInvoiceBasket->getInvoice() === $this) {
+                $treatmentInvoiceBasket->setInvoice(null);
             }
         }
 

@@ -10,10 +10,12 @@ use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Repository\ConsultationRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -32,6 +34,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Consultation
 {
   use CreatedAtTrait, IsDeletedTrait;
+
+  public ?DateTime $appointmentDate = null;
+
+  public ?Bed $bed = null;
+
+  public ?DateTime $hospReleasedAt = null;
   
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -111,6 +119,16 @@ class Consultation
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
     private ?Appointment $appointment = null;
+
+    #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    private ?Nursing $nursing = null;
+
+    #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    private ?Hospitalization $hospitalization = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['consult:read'])]
+    private ?string $note = null;
 
     public function __construct()
     {
@@ -254,7 +272,7 @@ class Consultation
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
 
@@ -375,6 +393,57 @@ class Consultation
         }
 
         $this->appointment = $appointment;
+
+        return $this;
+    }
+
+    public function getNursing(): ?Nursing
+    {
+        return $this->nursing;
+    }
+
+    public function setNursing(?Nursing $nursing): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($nursing === null && $this->nursing !== null) {
+            $this->nursing->setConsultation(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($nursing !== null && $nursing->getConsultation() !== $this) {
+            $nursing->setConsultation($this);
+        }
+
+        $this->nursing = $nursing;
+
+        return $this;
+    }
+
+    public function getHospitalization(): ?Hospitalization
+    {
+        return $this->hospitalization;
+    }
+
+    public function setHospitalization(Hospitalization $hospitalization): self
+    {
+        // set the owning side of the relation if necessary
+        if ($hospitalization->getConsultation() !== $this) {
+            $hospitalization->setConsultation($this);
+        }
+
+        $this->hospitalization = $hospitalization;
+
+        return $this;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): self
+    {
+        $this->note = $note;
 
         return $this;
     }

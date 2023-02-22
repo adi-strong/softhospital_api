@@ -10,6 +10,8 @@ use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Repository\BedRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -71,6 +73,14 @@ class Bed
     #[Assert\NotNull(message: 'Aucune valeur renseignée pour la chambre.')]
     #[Groups(['bed:read'])]
     private ?Bedroom $bedroom = null;
+
+    #[ORM\OneToMany(mappedBy: 'bed', targetEntity: Hospitalization::class)]
+    private Collection $hospitalizations;
+
+    public function __construct()
+    {
+        $this->hospitalizations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -145,6 +155,36 @@ class Bed
     public function setBedroom(?Bedroom $bedroom): self
     {
         $this->bedroom = $bedroom;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Hospitalization>
+     */
+    public function getHospitalizations(): Collection
+    {
+        return $this->hospitalizations;
+    }
+
+    public function addHospitalization(Hospitalization $hospitalization): self
+    {
+        if (!$this->hospitalizations->contains($hospitalization)) {
+            $this->hospitalizations->add($hospitalization);
+            $hospitalization->setBed($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHospitalization(Hospitalization $hospitalization): self
+    {
+        if ($this->hospitalizations->removeElement($hospitalization)) {
+            // set the owning side to null (unless already changed)
+            if ($hospitalization->getBed() === $this) {
+                $hospitalization->setBed(null);
+            }
+        }
 
         return $this;
     }

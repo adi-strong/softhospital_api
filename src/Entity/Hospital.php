@@ -177,6 +177,12 @@ class Hospital
     #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Appointment::class)]
     private Collection $appointments;
 
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Hospitalization::class)]
+    private Collection $hospitalizations;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Lab::class)]
+    private Collection $labs;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -213,6 +219,8 @@ class Hospital
         $this->invoices = new ArrayCollection();
         $this->consultations = new ArrayCollection();
         $this->appointments = new ArrayCollection();
+        $this->hospitalizations = new ArrayCollection();
+        $this->labs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1318,6 +1326,66 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($appointment->getHospital() === $this) {
                 $appointment->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Hospitalization>
+     */
+    public function getHospitalizations(): Collection
+    {
+        return $this->hospitalizations;
+    }
+
+    public function addHospitalization(Hospitalization $hospitalization): self
+    {
+        if (!$this->hospitalizations->contains($hospitalization)) {
+            $this->hospitalizations->add($hospitalization);
+            $hospitalization->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHospitalization(Hospitalization $hospitalization): self
+    {
+        if ($this->hospitalizations->removeElement($hospitalization)) {
+            // set the owning side to null (unless already changed)
+            if ($hospitalization->getHospital() === $this) {
+                $hospitalization->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Lab>
+     */
+    public function getLabs(): Collection
+    {
+        return $this->labs;
+    }
+
+    public function addLab(Lab $lab): self
+    {
+        if (!$this->labs->contains($lab)) {
+            $this->labs->add($lab);
+            $lab->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLab(Lab $lab): self
+    {
+        if ($this->labs->removeElement($lab)) {
+            // set the owning side to null (unless already changed)
+            if ($lab->getHospital() === $this) {
+                $lab->setHospital(null);
             }
         }
 

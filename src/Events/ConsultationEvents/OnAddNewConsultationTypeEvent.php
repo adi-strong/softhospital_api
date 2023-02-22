@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Events\ConsultationEvenrs;
+namespace App\Events\ConsultationEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
 use App\Entity\ConsultationsType;

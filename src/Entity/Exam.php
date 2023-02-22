@@ -65,9 +65,17 @@ class Exam
     #[ORM\ManyToMany(targetEntity: Consultation::class, mappedBy: 'exams')]
     private Collection $consultations;
 
+    #[ORM\OneToMany(mappedBy: 'exam', targetEntity: ExamsInvoiceBasket::class)]
+    private Collection $examsInvoiceBaskets;
+
+    #[ORM\OneToMany(mappedBy: 'exam', targetEntity: LabResult::class, cascade: ['persist'])]
+    private Collection $labResults;
+
     public function __construct()
     {
         $this->consultations = new ArrayCollection();
+        $this->examsInvoiceBaskets = new ArrayCollection();
+        $this->labResults = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -145,6 +153,66 @@ class Exam
     {
         if ($this->consultations->removeElement($consultation)) {
             $consultation->removeExam($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ExamsInvoiceBasket>
+     */
+    public function getExamsInvoiceBaskets(): Collection
+    {
+        return $this->examsInvoiceBaskets;
+    }
+
+    public function addExamsInvoiceBasket(ExamsInvoiceBasket $examsInvoiceBasket): self
+    {
+        if (!$this->examsInvoiceBaskets->contains($examsInvoiceBasket)) {
+            $this->examsInvoiceBaskets->add($examsInvoiceBasket);
+            $examsInvoiceBasket->setExam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExamsInvoiceBasket(ExamsInvoiceBasket $examsInvoiceBasket): self
+    {
+        if ($this->examsInvoiceBaskets->removeElement($examsInvoiceBasket)) {
+            // set the owning side to null (unless already changed)
+            if ($examsInvoiceBasket->getExam() === $this) {
+                $examsInvoiceBasket->setExam(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LabResult>
+     */
+    public function getLabResults(): Collection
+    {
+        return $this->labResults;
+    }
+
+    public function addLabResult(LabResult $labResult): self
+    {
+        if (!$this->labResults->contains($labResult)) {
+            $this->labResults->add($labResult);
+            $labResult->setExam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabResult(LabResult $labResult): self
+    {
+        if ($this->labResults->removeElement($labResult)) {
+            // set the owning side to null (unless already changed)
+            if ($labResult->getExam() === $this) {
+                $labResult->setExam(null);
+            }
         }
 
         return $this;

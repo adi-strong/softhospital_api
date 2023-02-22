@@ -177,6 +177,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Appointment::class)]
     private Collection $appointments;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Invoice::class)]
+    private Collection $invoices;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Lab::class)]
+    private Collection $labs;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -191,6 +197,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->consultations = new ArrayCollection();
         $this->invoiceStorics = new ArrayCollection();
         $this->appointments = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
+        $this->labs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -745,6 +753,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($appointment->getUser() === $this) {
                 $appointment->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function getInvoices(): Collection
+    {
+        return $this->invoices;
+    }
+
+    public function addInvoice(Invoice $invoice): self
+    {
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices->add($invoice);
+            $invoice->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoice(Invoice $invoice): self
+    {
+        if ($this->invoices->removeElement($invoice)) {
+            // set the owning side to null (unless already changed)
+            if ($invoice->getUser() === $this) {
+                $invoice->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Lab>
+     */
+    public function getLabs(): Collection
+    {
+        return $this->labs;
+    }
+
+    public function addLab(Lab $lab): self
+    {
+        if (!$this->labs->contains($lab)) {
+            $this->labs->add($lab);
+            $lab->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLab(Lab $lab): self
+    {
+        if ($this->labs->removeElement($lab)) {
+            // set the owning side to null (unless already changed)
+            if ($lab->getUser() === $this) {
+                $lab->setUser(null);
             }
         }
 
