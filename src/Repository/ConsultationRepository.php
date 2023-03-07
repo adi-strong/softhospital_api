@@ -3,7 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Consultation;
+use App\Entity\Exam;
+use App\Entity\ExamsInvoiceBasket;
+use App\Entity\Lab;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**

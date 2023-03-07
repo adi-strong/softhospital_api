@@ -20,11 +20,14 @@ class Nursing
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'nursing', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'nursing', cascade: ['persist'])]
     private ?Consultation $consultation = null;
 
     #[ORM\OneToMany(mappedBy: 'nursing', targetEntity: NursingTreatment::class, cascade: ['persist', 'remove'])]
     private Collection $nursingTreatments;
+
+    #[ORM\ManyToOne(inversedBy: 'nursings')]
+    private ?Patient $patient = null;
 
     public function __construct()
     {
@@ -74,6 +77,18 @@ class Nursing
                 $nursingTreatment->setNursing(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPatient(): ?Patient
+    {
+        return $this->patient;
+    }
+
+    public function setPatient(?Patient $patient): self
+    {
+        $this->patient = $patient;
 
         return $this;
     }

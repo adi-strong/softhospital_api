@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -40,6 +42,11 @@ use Symfony\Component\Validator\Constraints as Assert;
   uriVariables: [ 'id' => new Link(fromProperty: 'patients', fromClass: Covenant::class) ],
   normalizationContext: ['groups' => ['patient:read']]
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+  'name' => 'ipartial',
+  'firstName' => 'ipartial',
+  'lastName' => 'ipartial',
+])]
 class Patient
 {
   use CreatedAtTrait, IsDeletedTrait, PrivateKeyTrait;
@@ -51,8 +58,8 @@ class Patient
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['patient:read', 'covenant:read', 'covenant:read', 'consult:read'])]
     #[Assert\NotBlank(message: 'Le nom du patient doit être renseigné.')]
+    #[Groups(['patient:read', 'covenant:read', 'covenant:read', 'consult:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -142,11 +149,15 @@ class Patient
     #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Appointment::class)]
     private Collection $appointments;
 
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Nursing::class)]
+    private Collection $nursings;
+
     public function __construct()
     {
         $this->consultations = new ArrayCollection();
         $this->invoices = new ArrayCollection();
         $this->appointments = new ArrayCollection();
+        $this->nursings = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -346,7 +357,7 @@ class Patient
         return $this;
     }
 
-  #[Groups(['patient:read', 'covenant:read'])]
+  #[Groups(['patient:read', 'covenant:read', 'consult:read'])]
   public function getSlug(): ?string
   {
     return (new Slugify())->slugify($this->name.' '.($this->firstName ?? ''));
@@ -460,6 +471,36 @@ class Patient
           // set the owning side to null (unless already changed)
           if ($appointment->getPatient() === $this) {
               $appointment->setPatient(null);
+          }
+      }
+
+      return $this;
+  }
+
+  /**
+   * @return Collection<int, Nursing>
+   */
+  public function getNursings(): Collection
+  {
+      return $this->nursings;
+  }
+
+  public function addNursing(Nursing $nursing): self
+  {
+      if (!$this->nursings->contains($nursing)) {
+          $this->nursings->add($nursing);
+          $nursing->setPatient($this);
+      }
+
+      return $this;
+  }
+
+  public function removeNursing(Nursing $nursing): self
+  {
+      if ($this->nursings->removeElement($nursing)) {
+          // set the owning side to null (unless already changed)
+          if ($nursing->getPatient() === $this) {
+              $nursing->setPatient(null);
           }
       }
 

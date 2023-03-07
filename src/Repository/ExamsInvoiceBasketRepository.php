@@ -2,8 +2,12 @@
 
 namespace App\Repository;
 
+use App\Entity\Consultation;
+use App\Entity\Exam;
 use App\Entity\ExamsInvoiceBasket;
+use App\Entity\Invoice;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,4 +67,28 @@ class ExamsInvoiceBasketRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  private function handleFindExamBasket(Exam $exam, Invoice $invoice)
+  {
+    $qb = $this->createQueryBuilder('eib')
+      ->join('eib.invoice', 'i', 'WITH', 'i.id = :invoice')
+      ->andWhere('eib.exam = :exam');
+
+    $result = null;
+
+    $query = $qb
+      ->setParameter('exam', $exam)
+      ->setParameter('invoice', $invoice);
+
+    try {
+      $result = $query->getQuery()->getOneOrNullResult();
+    } catch (NonUniqueResultException $e) { }
+
+    return $result;
+  }
+
+  public function findInvoiceExamBasket(Exam $exam, Invoice $invoice): ?ExamsInvoiceBasket
+  {
+    return $this->handleFindExamBasket($exam, $invoice);
+  }
 }

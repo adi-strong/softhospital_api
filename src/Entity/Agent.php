@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -30,6 +32,11 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['agent:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: [
+  'name' => 'ipartial',
+  'lastName' => 'ipartial',
+  'firstName' => 'ipartial',
+])]
 class Agent
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -37,7 +44,7 @@ class Agent
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
@@ -51,15 +58,15 @@ class Agent
       minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.',
       maxMessage: 'Ce champs doit faire {{ limit }} caractères au maximum.',
     )]
-    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['agent:read', 'user:read', 'medicine:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 4, nullable: true)]
@@ -81,7 +88,7 @@ class Agent
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
     #[Assert\NotBlank(message: 'La fonction doit être renseigné.')]
-    #[Groups(['agent:read', 'user:read'])]
+    #[Groups(['agent:read', 'user:read', 'consult:read'])]
     private ?Office $office = null;
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
@@ -97,6 +104,7 @@ class Agent
     private ?User $userAccount = null;
 
     #[ORM\OneToMany(mappedBy: 'doctor', targetEntity: Consultation::class)]
+    #[ORM\JoinColumn(referencedColumnName: 'id', unique: false)]
     private Collection $consultations;
 
     #[ORM\OneToMany(mappedBy: 'doctor', targetEntity: Appointment::class)]

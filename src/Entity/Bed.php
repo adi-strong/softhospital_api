@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -29,6 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['bed:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['number' => 'ipartial'])]
 class Bed
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -36,7 +39,7 @@ class Bed
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['bed:read'])]
+    #[Groups(['bed:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -47,7 +50,7 @@ class Bed
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['bed:read'])]
+    #[Groups(['bed:read', 'consult:read'])]
     private ?string $number = null;
 
     #[ORM\Column(nullable: true)]
@@ -71,7 +74,7 @@ class Bed
     #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotBlank(message: 'La chambre doit être renseignée.')]
     #[Assert\NotNull(message: 'Aucune valeur renseignée pour la chambre.')]
-    #[Groups(['bed:read'])]
+    #[Groups(['bed:read', 'consult:read'])]
     private ?Bedroom $bedroom = null;
 
     #[ORM\OneToMany(mappedBy: 'bed', targetEntity: Hospitalization::class)]

@@ -14,15 +14,15 @@ class ExamsInvoiceBasket
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'examsInvoiceBaskets')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'examsInvoiceBaskets')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Invoice $invoice = null;
 
     #[ORM\ManyToOne(inversedBy: 'examsInvoiceBaskets')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Exam $exam = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $price = null;
 
     public function getId(): ?int
@@ -59,7 +59,7 @@ class ExamsInvoiceBasket
         return $this->price;
     }
 
-    public function setPrice(string $price): self
+    public function setPrice(?string $price): self
     {
         $this->price = $price;
 

@@ -54,6 +54,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'medicine:read',
       'supply:read',
       'medicineInvoice:read',
+      'consult:read',
     ])]
     private ?int $id = null;
 
@@ -70,6 +71,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'medicine:read',
       'supply:read',
       'medicineInvoice:read',
+      'consult:read',
     ])]
     #[Assert\NotBlank(message: 'Le username doit être renseigné.')]
     private ?string $username = null;
@@ -149,6 +151,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'medicine:read',
       'supply:read',
       'medicineInvoice:read',
+      'consult:read',
     ])]
     private ?string $name = null;
 
@@ -183,6 +186,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Lab::class)]
     private Collection $labs;
 
+    #[ORM\OneToMany(mappedBy: 'assistant', targetEntity: Lab::class)]
+    private Collection $labAssistants;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -199,6 +205,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->appointments = new ArrayCollection();
         $this->invoices = new ArrayCollection();
         $this->labs = new ArrayCollection();
+        $this->labAssistants = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -813,6 +820,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($lab->getUser() === $this) {
                 $lab->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Lab>
+     */
+    public function getLabAssistants(): Collection
+    {
+        return $this->labAssistants;
+    }
+
+    public function addLabAssistant(Lab $labAssistant): self
+    {
+        if (!$this->labAssistants->contains($labAssistant)) {
+            $this->labAssistants->add($labAssistant);
+            $labAssistant->setAssistant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabAssistant(Lab $labAssistant): self
+    {
+        if ($this->labAssistants->removeElement($labAssistant)) {
+            // set the owning side to null (unless already changed)
+            if ($labAssistant->getAssistant() === $this) {
+                $labAssistant->setAssistant(null);
             }
         }
 

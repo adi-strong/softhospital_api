@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\HospitalizationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: HospitalizationRepository::class)]
@@ -15,6 +16,7 @@ class Hospitalization
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['consult:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'hospitalization', cascade: ['persist', 'remove'])]
@@ -26,11 +28,13 @@ class Hospitalization
     #[ORM\JoinColumn(nullable: false)]
 
     #[Assert\NotBlank(message: 'Le lit doit être renseigné.')]
+    #[Groups(['consult:read'])]
     private ?Bed $bed = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
 
     #[Assert\NotBlank(message: 'Le prix doit être renseigné.')]
+    #[Groups(['consult:read'])]
     private ?string $price = '0';
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]

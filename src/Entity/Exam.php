@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -29,6 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['exam:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]
 class Exam
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -36,7 +39,7 @@ class Exam
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['exam:read'])]
+    #[Groups(['exam:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -47,7 +50,7 @@ class Exam
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['exam:read'])]
+    #[Groups(['exam:read', 'consult:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'exams')]

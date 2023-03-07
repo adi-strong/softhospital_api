@@ -28,10 +28,10 @@ class Lab
     #[ORM\ManyToOne(inversedBy: 'labs')]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'labs')]
+    #[ORM\ManyToOne(inversedBy: 'labAssistants')]
     private ?User $assistant = null;
 
-    #[ORM\OneToMany(mappedBy: 'lab', targetEntity: LabResult::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'lab', targetEntity: LabResult::class, cascade: ['persist', 'remove'])]
     private Collection $labResults;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -43,8 +43,8 @@ class Lab
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\OneToOne(inversedBy: 'lab')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Consultation $consultation = null;
 
     public function __construct()
@@ -164,7 +164,7 @@ class Lab
         return $this->consultation;
     }
 
-    public function setConsultation(Consultation $consultation): self
+    public function setConsultation(?Consultation $consultation): self
     {
         $this->consultation = $consultation;
 

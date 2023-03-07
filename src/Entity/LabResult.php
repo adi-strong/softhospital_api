@@ -17,11 +17,11 @@ class LabResult
     private ?int $id = null;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'labResults')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Lab $lab = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'labResults')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'labResults')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Exam $exam = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

@@ -74,7 +74,7 @@ class Invoice
     #[Groups(['invoice:read'])]
     private ?Patient $patient = null;
 
-    #[ORM\OneToOne(inversedBy: 'invoice', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'invoice', cascade: ['persist'])]
     #[Groups(['invoice:read'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?Consultation $consultation = null;
@@ -85,13 +85,13 @@ class Invoice
     #[ORM\ManyToOne(inversedBy: 'invoices')]
     private ?User $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ActsInvoiceBasket::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ActsInvoiceBasket::class, cascade: ['persist', 'remove'])]
     private Collection $actsInvoiceBaskets;
 
-    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ExamsInvoiceBasket::class, cascade: ['persist'])]
+    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ExamsInvoiceBasket::class, cascade: ['persist', 'remove'])]
     private Collection $examsInvoiceBaskets;
 
-    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: TreatmentInvoiceBasket::class)]
+    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: TreatmentInvoiceBasket::class, cascade: ['persist', 'remove'])]
     private Collection $treatmentInvoiceBaskets;
 
     public function __construct()

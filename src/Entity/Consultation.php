@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
@@ -28,6 +29,14 @@ use Symfony\Component\Validator\Constraints as Assert;
     new Get(),
     new Patch(),
   ],
+  normalizationContext: ['groups' => ['consult:read']],
+  order: ['id' => 'DESC'],
+)]
+#[ApiResource(
+  uriTemplate: '/agents/{id}/consultations',
+  types: ['https://schema.org/Consultation'],
+  operations: [ new GetCollection() ],
+  uriVariables: [ 'id' => new Link(fromProperty: 'consultations', fromClass: Agent::class) ],
   normalizationContext: ['groups' => ['consult:read']],
   order: ['id' => 'DESC'],
 )]
@@ -86,49 +95,60 @@ class Consultation
     #[Groups(['consult:read'])]
     private ?bool $isComplete = false;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: '0', nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: '0', nullable: true)]
+    #[Assert\Length(max: 9, maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
     #[Groups(['consult:read'])]
     private ?string $temperature = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 2, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
+    #[Assert\Length(max: 9, maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
     #[Groups(['consult:read'])]
     private ?string $weight = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Length(max: 20, maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
     #[Groups(['consult:read'])]
     private ?string $arterialTension = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Length(max: 20, maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
     #[Groups(['consult:read'])]
     private ?string $cardiacFrequency = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Length(max: 20, maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
     #[Groups(['consult:read'])]
     private ?string $respiratoryFrequency = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Length(max: 20, maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
     #[Groups(['consult:read'])]
     private ?string $oxygenSaturation = null;
 
     #[ORM\ManyToOne(inversedBy: 'consultations')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: 'La fiche doit être renseignée.')]
+    #[Assert\NotBlank(message: 'Le médecin doit être renseignée.')]
     #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
     #[Groups(['consult:read'])]
     private ?Agent $doctor = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[Groups(['consult:read'])]
     private ?Appointment $appointment = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
     private ?Nursing $nursing = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[Groups(['consult:read'])]
     private ?Hospitalization $hospitalization = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['consult:read'])]
     private ?string $note = null;
+
+    #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    private ?Lab $lab;
 
     public function __construct()
     {
@@ -444,6 +464,28 @@ class Consultation
     public function setNote(?string $note): self
     {
         $this->note = $note;
+
+        return $this;
+    }
+
+    public function getLab(): ?Lab
+    {
+        return $this->lab;
+    }
+
+    public function setLab(?Lab $lab): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($lab === null && $this->lab !== null) {
+            $this->lab->setConsultation(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($lab !== null && $lab->getConsultation() !== $this) {
+            $lab->setConsultation($this);
+        }
+
+        $this->lab = $lab;
 
         return $this;
     }

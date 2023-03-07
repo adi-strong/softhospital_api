@@ -35,7 +35,7 @@ class Appointment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['appointment:read'])]
+    #[Groups(['appointment:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\Column]
@@ -54,7 +54,7 @@ class Appointment
     private ?Consultation $consultation = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Groups(['appointment:read'])]
+    #[Groups(['appointment:read', 'consult:read'])]
     private ?\DateTimeInterface $appointmentDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'appointments')]

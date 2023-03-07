@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -30,6 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['fileType:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]
 class ConsultationsType
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -37,7 +40,7 @@ class ConsultationsType
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['fileType:read'])]
+    #[Groups(['fileType:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -48,7 +51,7 @@ class ConsultationsType
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['fileType:read'])]
+    #[Groups(['fileType:read', 'consult:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'consultationsTypes')]

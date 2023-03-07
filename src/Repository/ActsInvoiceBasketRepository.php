@@ -2,8 +2,11 @@
 
 namespace App\Repository;
 
+use App\Entity\Act;
 use App\Entity\ActsInvoiceBasket;
+use App\Entity\Invoice;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,4 +66,20 @@ class ActsInvoiceBasketRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  public function findInvoiceAct(Act $act, Invoice $invoice): ?ActsInvoiceBasket
+  {
+    $qb = $this->createQueryBuilder('aib')
+      ->join('aib.invoice', 'i', 'WITH', 'i.id = :invoice')
+      ->where('aib.act = :act')
+      ->setParameter('act', $act)
+      ->setParameter('invoice', $invoice);
+
+    $result = null;
+    try {
+      $result = $qb->getQuery()->getOneOrNullResult();
+    } catch (NonUniqueResultException $e) { }
+
+    return $result;
+  }
 }

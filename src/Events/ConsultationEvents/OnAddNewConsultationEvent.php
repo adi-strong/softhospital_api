@@ -37,12 +37,6 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
     ];
   }
 
-  public function __construct(
-    private readonly HandleCurrentUserService $user,
-    private readonly EntityManagerInterface $em)
-  {
-  }
-
   /**
    * @throws Exception
    */
@@ -105,7 +99,9 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
           }
         }
 
+        $nursing->setCreatedAt($createdAt);
         $nursing->setConsultation($consultation);
+        $nursing->setPatient($patient);
 
         $this->em->persist($nursing);
         $this->em->persist($nursingTreatment);
@@ -203,5 +199,11 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
 
       $this->em->flush();
     }
+  }
+
+  public function __construct(
+    private readonly HandleCurrentUserService $user,
+    private readonly EntityManagerInterface $em)
+  {
   }
 }

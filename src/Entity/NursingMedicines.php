@@ -13,11 +13,11 @@ class NursingMedicines
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(cascade: ['persist', 'remove'], inversedBy: 'nursingMedicines')]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'nursingMedicines')]
     #[ORM\JoinColumn(nullable: false)]
     private ?NursingTreatment $nursing = null;
 
-    #[ORM\ManyToOne(cascade: ['persist', 'remove'], inversedBy: 'nursingMedicines')]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'nursingMedicines')]
     private ?Medicine $medicine = null;
 
     #[ORM\Column(nullable: true)]

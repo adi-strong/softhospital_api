@@ -2,8 +2,11 @@
 
 namespace App\Repository;
 
+use App\Entity\Consultation;
+use App\Entity\Exam;
 use App\Entity\Lab;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,4 +66,23 @@ class LabRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  public function findLabExam(Exam $exam, Lab $lab): ?Lab
+  {
+    $qb = $this->createQueryBuilder('l')
+      ->join('l.labResults', 'r')
+      ->where('l.id = :lab')
+      ->andWhere('r.exam = :exam');
+
+    $result = null;
+    $query = $qb
+      ->setParameter('lab', $lab)
+      ->setParameter('exam', $exam);
+
+    try {
+      $result = $query->getQuery()->getOneOrNullResult();
+    } catch (NonUniqueResultException $e) { }
+
+    return $result;
+  }
 }

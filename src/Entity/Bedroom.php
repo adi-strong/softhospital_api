@@ -38,7 +38,7 @@ class Bedroom
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['bedroom:read', 'bed:read'])]
+    #[Groups(['bedroom:read', 'bed:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -49,11 +49,11 @@ class Bedroom
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['bedroom:read', 'bed:read'])]
+    #[Groups(['bedroom:read', 'bed:read', 'consult:read'])]
     private ?string $number = null;
 
     #[ORM\ManyToOne(inversedBy: 'bedrooms')]
-    #[Groups(['bedroom:read', 'bed:read'])]
+    #[Groups(['bedroom:read', 'bed:read', 'consult:read'])]
     private ?BedroomCategory $category = null;
 
     #[ORM\ManyToOne(inversedBy: 'bedrooms')]

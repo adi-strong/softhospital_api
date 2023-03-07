@@ -14,15 +14,15 @@ class TreatmentInvoiceBasket
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'treatmentInvoiceBaskets')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'treatmentInvoiceBaskets')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Invoice $invoice = null;
 
-    #[ORM\ManyToOne(inversedBy: 'treatmentInvoiceBaskets')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'treatmentInvoiceBaskets')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Treatment $treatment = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $price = null;
 
     public function getId(): ?int
@@ -59,7 +59,7 @@ class TreatmentInvoiceBasket
         return $this->price;
     }
 
-    public function setPrice(string $price): self
+    public function setPrice(?string $price): self
     {
         $this->price = $price;
 
