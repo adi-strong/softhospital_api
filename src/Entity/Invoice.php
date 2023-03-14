@@ -47,7 +47,7 @@ class Invoice
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Groups(['invoice:read'])]
-    private ?string $totalAmount = null;
+    private ?string $totalAmount = '0';
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Groups(['invoice:read'])]
@@ -93,6 +93,10 @@ class Invoice
 
     #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: TreatmentInvoiceBasket::class, cascade: ['persist', 'remove'])]
     private Collection $treatmentInvoiceBaskets;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['invoice:read'])]
+    private ?string $hospitalizationAmount = '0';
 
     public function __construct()
     {
@@ -313,6 +317,18 @@ class Invoice
                 $treatmentInvoiceBasket->setInvoice(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getHospitalizationAmount(): ?string
+    {
+        return $this->hospitalizationAmount;
+    }
+
+    public function setHospitalizationAmount(?string $hospitalizationAmount): self
+    {
+        $this->hospitalizationAmount = $hospitalizationAmount;
 
         return $this;
     }

@@ -65,7 +65,6 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       $exams = $consultation->getExams();
 
       $nursing = new Nursing();
-      $nursingTreatment = new NursingTreatment();
       $lab = new Lab();
 
       // handle get acts prices
@@ -86,8 +85,9 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       if ($treatments->count() > 0) {
         foreach ($treatments as $treatment) {
           if (null !== $treatment->getPrice()) {
-            $nursingTreatment->setTreatment($treatment);
-            $nursingTreatment->setNursing($nursing);
+            $nursingTreatment = (new NursingTreatment())
+              ->setTreatment($treatment)
+              ->setNursing($nursing);
 
             $treatmentInvoiceBasket = (new TreatmentInvoiceBasket())
               ->setInvoice($invoice)
@@ -95,16 +95,17 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
               ->setPrice($treatment->getPrice());
 
             $invoiceAmount += $treatment->getPrice();
+            $this->em->persist($nursingTreatment);
             $this->em->persist($treatmentInvoiceBasket);
           }
         }
 
         $nursing->setCreatedAt($createdAt);
+        $nursing->setHospital($hospital);
         $nursing->setConsultation($consultation);
         $nursing->setPatient($patient);
 
         $this->em->persist($nursing);
-        $this->em->persist($nursingTreatment);
       } // End handle nursing
 
       // handle get exams prices
@@ -133,7 +134,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
 
 
       // Handle hospitalization
-      $bed = $consultation->bed ?? null;
+      $bed = $consultation?->bed;
       $hospReleasedAt = $consultation->hospReleasedAt ?? $createdAt;
       if (null !== $bed) {
         $hospDaysCounter = $hospReleasedAt->diff($createdAt)->days + 1;
@@ -146,7 +147,9 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
             ->setDaysCounter($hospDaysCounter)
             ->setHospital($hospital);
 
-          $invoiceAmount += ($bed->getPrice() * $hospDaysCounter);
+          $hospAmount = $bed->getPrice() * $hospDaysCounter;
+          $invoice->setHospitalizationAmount($hospAmount);
+
           $bed->setItHasTaken(true);
           $this->em->persist($hosp);
         }
@@ -166,6 +169,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
         ->setConsultation($consultation)
         ->setUser($currentUser)
         ->setHospital($hospital)
+        ->setFullName($patient->getFullName())
         ->setAppointmentDate($appointmentDate)
         ->setPatient($patient)
         ->setCreatedAt($createdAt);
@@ -186,14 +190,17 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       $invoice->setAmount($invoiceAmount);
       $invoice->setTotalAmount($invoiceAmount);
 
-      $note = $consultation->getNote() ?? null;
-      $lab->setHospital($hospital);
-      $lab->setUser($currentUser);
-      $lab->setNote($note);
-      $lab->setConsultation($consultation);
-      $lab->setCreatedAt($createdAt);
+      if ($exams->count() > 0) {
+        $note = $consultation->getNote() ?? null;
+        $lab->setHospital($hospital);
+        $lab->setUser($currentUser);
+        $lab->setNote($note);
+        $lab->setConsultation($consultation);
+        $lab->setCreatedAt($createdAt);
+        $lab->setPatient($patient);
+        $this->em->persist($lab);
+      }
 
-      $this->em->persist($lab);
       $this->em->persist($invoice);
       $this->em->persist($appointment);
 

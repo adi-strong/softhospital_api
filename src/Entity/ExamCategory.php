@@ -37,7 +37,7 @@ class ExamCategory
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['examCategory:read', 'exam:read'])]
+    #[Groups(['examCategory:read', 'exam:read', 'lab:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -48,7 +48,7 @@ class ExamCategory
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['examCategory:read', 'exam:read'])]
+    #[Groups(['examCategory:read', 'exam:read', 'lab:read'])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'examCategories')]

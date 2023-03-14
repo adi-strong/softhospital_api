@@ -67,21 +67,18 @@ class LabResultRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-  public function findLabResultExam(Exam $exam, Lab $lab): ?LabResult
+  public function findLabExam(Exam $exam, Lab $lab)
   {
     $qb = $this->createQueryBuilder('lr')
       ->join('lr.lab', 'l')
+      ->join('lr.exam', 'e', 'WITH', 'e.id = :exam')
       ->where('lr.lab = :lab')
-      ->andWhere('lr.exam = :exam');
-
-    $result = null;
-
-    $query = $qb
       ->setParameter('lab', $lab)
       ->setParameter('exam', $exam);
 
+    $result = null;
     try {
-      $result = $query->getQuery()->getOneOrNullResult();
+      $result = $qb->getQuery()->getOneOrNullResult();
     } catch (NonUniqueResultException $e) { }
 
     return $result;

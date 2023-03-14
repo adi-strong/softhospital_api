@@ -32,6 +32,8 @@ class Appointment
 {
   use CreatedAtTrait, IsDeletedTrait;
 
+  public ?bool $isConsultation = null;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -72,10 +74,16 @@ class Appointment
     private ?User $user = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['appointment:read'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['appointment:read'])]
     private ?string $reason = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['appointment:read'])]
+    private ?string $fullName = null;
 
     public function getId(): ?int
     {
@@ -186,6 +194,18 @@ class Appointment
     public function setReason(string $reason): self
     {
         $this->reason = $reason;
+
+        return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
+    }
+
+    public function setFullName(?string $fullName): self
+    {
+        $this->fullName = $fullName;
 
         return $this;
     }

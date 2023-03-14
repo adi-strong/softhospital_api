@@ -3,17 +3,30 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\LabResultRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LabResultRepository::class)]
-#[ApiResource]
+#[ApiResource(
+  types: ['https://schema.org/LabResult'],
+  operations: [
+    new GetCollection(),
+    new Get(),
+  ],
+  normalizationContext: ['groups' => ['labResult:read']],
+  order: ['id' => 'DESC'],
+)]
 class LabResult
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['labResult:read', 'lab:read', 'prescript:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'labResults')]
@@ -22,13 +35,8 @@ class LabResult
 
     #[ORM\ManyToOne(inversedBy: 'labResults')]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['labResult:read', 'lab:read', 'prescript:read'])]
     private ?Exam $exam = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $results = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $comment = null;
 
     public function getId(): ?int
     {
@@ -55,30 +63,6 @@ class LabResult
     public function setExam(?Exam $exam): self
     {
         $this->exam = $exam;
-
-        return $this;
-    }
-
-    public function getResults(): ?string
-    {
-        return $this->results;
-    }
-
-    public function setResults(?string $results): self
-    {
-        $this->results = $results;
-
-        return $this;
-    }
-
-    public function getComment(): ?string
-    {
-        return $this->comment;
-    }
-
-    public function setComment(?string $comment): self
-    {
-        $this->comment = $comment;
 
         return $this;
     }

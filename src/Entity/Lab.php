@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
 use App\AppTraits\CreatedAtTrait;
 use App\Repository\LabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -10,42 +13,77 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: LabRepository::class)]
-#[ApiResource]
+#[ApiResource(
+  types: ['https://schema.org/Lab'],
+  operations: [
+    new GetCollection(),
+    new Get(),
+    new Patch(),
+  ],
+  normalizationContext: ['groups' => ['lab:read']],
+  order: ['id' => 'DESC'],
+)]
 class Lab
 {
   use CreatedAtTrait;
 
+  public ?array $values = [];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['lab:read', 'prescript:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'labs')]
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'labs')]
+    #[Groups(['lab:read'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'labAssistants')]
+    #[Groups(['lab:read'])]
     private ?User $assistant = null;
 
     #[ORM\OneToMany(mappedBy: 'lab', targetEntity: LabResult::class, cascade: ['persist', 'remove'])]
+    #[Groups(['lab:read', 'prescript:read'])]
     private Collection $labResults;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['lab:read', 'prescript:read'])]
     private ?string $note = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['lab:read', 'prescript:read'])]
     private ?string $comment = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['lab:read'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\OneToOne(inversedBy: 'lab')]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['lab:read'])]
     private ?Consultation $consultation = null;
+
+    #[ORM\ManyToOne(inversedBy: 'labs')]
+    #[Groups(['lab:read'])]
+    private ?Patient $patient = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['lab:read'])]
+    private ?bool $isPublished = false;
+
+    #[ORM\OneToOne(mappedBy: 'lab', cascade: ['persist', 'remove'])]
+    private ?Prescription $prescription = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['lab:read', 'prescript:read'])]
+    private ?string $descriptions = null;
 
     public function __construct()
     {
@@ -86,7 +124,7 @@ class Lab
         return $this->assistant;
     }
 
-    public function setAssistant(?User $assistant): self
+    public function setAssistant(?UserInterface $assistant): self
     {
         $this->assistant = $assistant;
 
@@ -170,4 +208,68 @@ class Lab
 
         return $this;
     }
+
+  #[Groups(['lab:read'])]
+  public function getLabNumber(): ?string
+  {
+    return sprintf('%05d', $this->id);
+  }
+
+  public function getPatient(): ?Patient
+  {
+      return $this->patient;
+  }
+
+  public function setPatient(?Patient $patient): self
+  {
+      $this->patient = $patient;
+
+      return $this;
+  }
+
+  public function isIsPublished(): ?bool
+  {
+      return $this->isPublished;
+  }
+
+  public function setIsPublished(?bool $isPublished): self
+  {
+      $this->isPublished = $isPublished;
+
+      return $this;
+  }
+
+  public function getPrescription(): ?Prescription
+  {
+      return $this->prescription;
+  }
+
+  public function setPrescription(?Prescription $prescription): self
+  {
+      // unset the owning side of the relation if necessary
+      if ($prescription === null && $this->prescription !== null) {
+          $this->prescription->setLab(null);
+      }
+
+      // set the owning side of the relation if necessary
+      if ($prescription !== null && $prescription->getLab() !== $this) {
+          $prescription->setLab($this);
+      }
+
+      $this->prescription = $prescription;
+
+      return $this;
+  }
+
+  public function getDescriptions(): ?string
+  {
+      return $this->descriptions;
+  }
+
+  public function setDescriptions(?string $descriptions): self
+  {
+      $this->descriptions = $descriptions;
+
+      return $this;
+  }
 }

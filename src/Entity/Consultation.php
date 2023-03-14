@@ -53,7 +53,7 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'consultations')]
@@ -65,7 +65,7 @@ class Consultation
 
     #[ORM\ManyToOne(inversedBy: 'consultations')]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read'])]
     private ?ConsultationsType $file = null;
 
     #[ORM\ManyToMany(targetEntity: Act::class, inversedBy: 'consultations')]
@@ -129,7 +129,7 @@ class Consultation
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank(message: 'Le médecin doit être renseignée.')]
     #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'lab:read'])]
     private ?Agent $doctor = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
@@ -139,16 +139,26 @@ class Consultation
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
     private ?Nursing $nursing = null;
 
-    #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['remove'])]
     #[Groups(['consult:read'])]
     private ?Hospitalization $hospitalization = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'lab:read'])]
     private ?string $note = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
     private ?Lab $lab;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['consult:read', 'lab:read'])]
+    private ?string $diagnostic = null;
+
+    #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    private ?Prescription $prescription = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $comment = null;
 
     public function __construct()
     {
@@ -444,18 +454,6 @@ class Consultation
         return $this->hospitalization;
     }
 
-    public function setHospitalization(Hospitalization $hospitalization): self
-    {
-        // set the owning side of the relation if necessary
-        if ($hospitalization->getConsultation() !== $this) {
-            $hospitalization->setConsultation($this);
-        }
-
-        $this->hospitalization = $hospitalization;
-
-        return $this;
-    }
-
     public function getNote(): ?string
     {
         return $this->note;
@@ -486,6 +484,69 @@ class Consultation
         }
 
         $this->lab = $lab;
+
+        return $this;
+    }
+
+    public function setHospitalization(?Hospitalization $hospitalization): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($hospitalization === null && $this->hospitalization !== null) {
+            $this->hospitalization->setConsultation(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($hospitalization !== null && $hospitalization->getConsultation() !== $this) {
+            $hospitalization->setConsultation($this);
+        }
+
+        $this->hospitalization = $hospitalization;
+
+        return $this;
+    }
+
+    public function getDiagnostic(): ?string
+    {
+        return $this->diagnostic;
+    }
+
+    public function setDiagnostic(?string $diagnostic): self
+    {
+        $this->diagnostic = $diagnostic;
+
+        return $this;
+    }
+
+    public function getPrescription(): ?Prescription
+    {
+        return $this->prescription;
+    }
+
+    public function setPrescription(?Prescription $prescription): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($prescription === null && $this->prescription !== null) {
+            $this->prescription->setConsultation(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($prescription !== null && $prescription->getConsultation() !== $this) {
+            $prescription->setConsultation($this);
+        }
+
+        $this->prescription = $prescription;
+
+        return $this;
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function setComment(?string $comment): self
+    {
+        $this->comment = $comment;
 
         return $this;
     }

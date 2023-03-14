@@ -19,14 +19,13 @@ class Hospitalization
     #[Groups(['consult:read'])]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'hospitalization', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\OneToOne(inversedBy: 'hospitalization')]
+    #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotBlank(message: 'La consultation doit être renseignée.')]
     private ?Consultation $consultation = null;
 
     #[ORM\ManyToOne(inversedBy: 'hospitalizations')]
-    #[ORM\JoinColumn(nullable: false)]
-
+    #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotBlank(message: 'Le lit doit être renseigné.')]
     #[Groups(['consult:read'])]
     private ?Bed $bed = null;
@@ -50,6 +49,9 @@ class Hospitalization
     #[ORM\ManyToOne(inversedBy: 'hospitalizations')]
     private ?Hospital $hospital = null;
 
+    #[ORM\Column]
+    private ?bool $isCompleted = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,7 +62,7 @@ class Hospitalization
         return $this->consultation;
     }
 
-    public function setConsultation(Consultation $consultation): self
+    public function setConsultation(?Consultation $consultation): self
     {
         $this->consultation = $consultation;
 
@@ -135,6 +137,18 @@ class Hospitalization
     public function setHospital(?Hospital $hospital): self
     {
         $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function isIsCompleted(): ?bool
+    {
+        return $this->isCompleted;
+    }
+
+    public function setIsCompleted(bool $isCompleted): self
+    {
+        $this->isCompleted = $isCompleted;
 
         return $this;
     }

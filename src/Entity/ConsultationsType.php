@@ -40,7 +40,7 @@ class ConsultationsType
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['fileType:read', 'consult:read'])]
+    #[Groups(['fileType:read', 'consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -51,7 +51,7 @@ class ConsultationsType
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['fileType:read', 'consult:read'])]
+    #[Groups(['fileType:read', 'consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'consultationsTypes')]

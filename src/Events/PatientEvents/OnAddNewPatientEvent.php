@@ -28,6 +28,11 @@ class OnAddNewPatientEvent implements EventSubscriberInterface
       $patient->setHospital($this->user->getHospital() ?? $this->user->getHospitalCenter());
       $patient->setUser($this->user->getUser());
       $patient->setCreatedAt(new DateTime('now'));
+
+      $lastName = $patient?->getLastName();
+      $firstName = $patient?->getFirstName();
+      $fullName = $patient->getName().' '.$lastName.' '.$firstName;
+      $patient->setFullName(trim($fullName, ' '));
     }
   }
 

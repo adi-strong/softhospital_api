@@ -42,11 +42,8 @@ use Symfony\Component\Validator\Constraints as Assert;
   uriVariables: [ 'id' => new Link(fromProperty: 'patients', fromClass: Covenant::class) ],
   normalizationContext: ['groups' => ['patient:read']]
 )]
-#[ApiFilter(SearchFilter::class, properties: [
-  'name' => 'ipartial',
-  'firstName' => 'ipartial',
-  'lastName' => 'ipartial',
-])]
+#[ORM\HasLifecycleCallbacks]
+#[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Patient
 {
   use CreatedAtTrait, IsDeletedTrait, PrivateKeyTrait;
@@ -54,24 +51,64 @@ class Patient
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['patient:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le nom du patient doit être renseigné.')]
-    #[Groups(['patient:read', 'covenant:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?string $sex = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -84,7 +121,15 @@ class Patient
     private ?string $birthPlace = null;
 
     #[ORM\Column(length: 12, nullable: true)]
-    #[Groups(['patient:read', 'covenant:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?string $maritalStatus = null;
 
     #[ORM\Column(length: 20, nullable: true)]
@@ -96,7 +141,15 @@ class Patient
       minMessage: 'Ce champs doit contenir au moins {{ limit }} caractères.',
       maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
     #[Assert\Regex('#^([+]|0)?[0-9]([-. ]?[0-9]{2}){4,}$#', message: 'N° de téléphone invalide.')]
-    #[Groups(['patient:read', 'covenant:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?string $tel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -125,7 +178,15 @@ class Patient
     private ?Covenant $covenant = null;
 
     #[ORM\ManyToOne]
-    #[Groups(['patient:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?ImageObject $profile = null;
 
     #[ORM\ManyToOne(inversedBy: 'patients')]
@@ -133,7 +194,15 @@ class Patient
     private ?Hospital $hospital = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['patient:read', 'covenant:read', 'consult:read'])]
+    #[Groups([
+      'patient:read',
+      'covenant:read',
+      'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
+    ])]
     private ?int $age = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -152,12 +221,23 @@ class Patient
     #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Nursing::class)]
     private Collection $nursings;
 
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Lab::class)]
+    private Collection $labs;
+
+    #[ORM\OneToMany(mappedBy: 'patient', targetEntity: Prescription::class)]
+    private Collection $prescriptions;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $fullName = null;
+
     public function __construct()
     {
         $this->consultations = new ArrayCollection();
         $this->invoices = new ArrayCollection();
         $this->appointments = new ArrayCollection();
         $this->nursings = new ArrayCollection();
+        $this->labs = new ArrayCollection();
+        $this->prescriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -357,7 +437,15 @@ class Patient
         return $this;
     }
 
-  #[Groups(['patient:read', 'covenant:read', 'consult:read'])]
+  #[Groups([
+    'patient:read',
+    'covenant:read',
+    'consult:read',
+    'lab:read',
+    'prescript:read',
+    'nursing:read',
+    'appointment:read',
+  ])]
   public function getSlug(): ?string
   {
     return (new Slugify())->slugify($this->name.' '.($this->firstName ?? ''));
@@ -505,5 +593,86 @@ class Patient
       }
 
       return $this;
+  }
+
+  /**
+   * @return Collection<int, Lab>
+   */
+  public function getLabs(): Collection
+  {
+      return $this->labs;
+  }
+
+  public function addLab(Lab $lab): self
+  {
+      if (!$this->labs->contains($lab)) {
+          $this->labs->add($lab);
+          $lab->setPatient($this);
+      }
+
+      return $this;
+  }
+
+  public function removeLab(Lab $lab): self
+  {
+      if ($this->labs->removeElement($lab)) {
+          // set the owning side to null (unless already changed)
+          if ($lab->getPatient() === $this) {
+              $lab->setPatient(null);
+          }
+      }
+
+      return $this;
+  }
+
+  /**
+   * @return Collection<int, Prescription>
+   */
+  public function getPrescriptions(): Collection
+  {
+      return $this->prescriptions;
+  }
+
+  public function addPrescription(Prescription $prescription): self
+  {
+      if (!$this->prescriptions->contains($prescription)) {
+          $this->prescriptions->add($prescription);
+          $prescription->setPatient($this);
+      }
+
+      return $this;
+  }
+
+  public function removePrescription(Prescription $prescription): self
+  {
+      if ($this->prescriptions->removeElement($prescription)) {
+          // set the owning side to null (unless already changed)
+          if ($prescription->getPatient() === $this) {
+              $prescription->setPatient(null);
+          }
+      }
+
+      return $this;
+  }
+
+  public function getFullName(): ?string
+  {
+      return $this->fullName;
+  }
+
+  public function setFullName(?string $fullName): self
+  {
+      $this->fullName = $fullName;
+
+      return $this;
+  }
+
+  #[ORM\PreUpdate]
+  public function onSetFullName(): void
+  {
+    $lastName = $this?->lastName;
+    $firstName = $this?->firstName;
+    $fullName = $this->name.' '.$lastName.' '.$firstName;
+    $this->fullName = trim($fullName, ' ');
   }
 }

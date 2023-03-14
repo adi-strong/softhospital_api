@@ -77,7 +77,7 @@ class Bed
     #[Groups(['bed:read', 'consult:read'])]
     private ?Bedroom $bedroom = null;
 
-    #[ORM\OneToMany(mappedBy: 'bed', targetEntity: Hospitalization::class)]
+    #[ORM\OneToMany(mappedBy: 'bed', targetEntity: Hospitalization::class, cascade: ['remove'])]
     private Collection $hospitalizations;
 
     public function __construct()

@@ -2,8 +2,11 @@
 
 namespace App\Repository;
 
+use App\Entity\Invoice;
+use App\Entity\Treatment;
 use App\Entity\TreatmentInvoiceBasket;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,4 +66,20 @@ class TreatmentInvoiceBasketRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  public function findInvoiceTreatmentBasket(Treatment $treatment, Invoice $invoice): ?TreatmentInvoiceBasket
+  {
+    $qb = $this->createQueryBuilder('tib')
+      ->join('tib.invoice', 'i', 'WITH', 'i.id = :invoice')
+      ->where('tib.treatment = :treatment')
+      ->setParameter('treatment', $treatment)
+      ->setParameter('invoice', $invoice);
+
+    $result = null;
+    try {
+      $result = $qb->getQuery()->getOneOrNullResult();
+    } catch (NonUniqueResultException $e) { }
+
+    return $result;
+  }
 }

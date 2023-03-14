@@ -32,11 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['agent:read']],
   order: ['id' => 'DESC'],
 )]
-#[ApiFilter(SearchFilter::class, properties: [
-  'name' => 'ipartial',
-  'lastName' => 'ipartial',
-  'firstName' => 'ipartial',
-])]
+#[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Agent
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -44,7 +40,7 @@ class Agent
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read', 'lab:read', 'appointment:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
@@ -58,15 +54,15 @@ class Agent
       minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.',
       maxMessage: 'Ce champs doit faire {{ limit }} caractères au maximum.',
     )]
-    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read', 'lab:read', 'appointment:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read', 'lab:read', 'appointment:read'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read'])]
+    #[Groups(['agent:read', 'user:read', 'medicine:read', 'consult:read', 'lab:read', 'appointment:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 4, nullable: true)]
@@ -78,7 +74,7 @@ class Agent
     #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné.')]
     #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
     #[Assert\Regex('#^([+]\d{2}[-. ])?\d{9,14}$#', message: 'Numéro de téléphone non valide.')]
-    #[Groups(['agent:read', 'user:read'])]
+    #[Groups(['agent:read', 'user:read', 'appointment:read'])]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -88,7 +84,7 @@ class Agent
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
     #[Assert\NotBlank(message: 'La fonction doit être renseigné.')]
-    #[Groups(['agent:read', 'user:read', 'consult:read'])]
+    #[Groups(['agent:read', 'user:read', 'consult:read', 'lab:read', 'appointment:read'])]
     private ?Office $office = null;
 
     #[ORM\ManyToOne(inversedBy: 'agents')]
@@ -109,6 +105,9 @@ class Agent
 
     #[ORM\OneToMany(mappedBy: 'doctor', targetEntity: Appointment::class)]
     private Collection $appointments;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $fullName = null;
 
     public function __construct()
     {
@@ -315,6 +314,18 @@ class Agent
               $appointment->setDoctor(null);
           }
       }
+
+      return $this;
+  }
+
+  public function getFullName(): ?string
+  {
+      return $this->fullName;
+  }
+
+  public function setFullName(?string $fullName): self
+  {
+      $this->fullName = $fullName;
 
       return $this;
   }

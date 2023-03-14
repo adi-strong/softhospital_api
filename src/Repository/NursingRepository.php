@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Nursing;
+use App\Entity\Treatment;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,4 +65,21 @@ class NursingRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  public function findTreatmentNurse(Treatment $treatment, Nursing $nursing): ?Nursing
+  {
+    $qb = $this->createQueryBuilder('n')
+      ->join('n.nursingTreatments', 'nrs')
+      ->where('n.id = :nursing')
+      ->andWhere('nrs.treatment = :treatment')
+      ->setParameter('nursing', $nursing)
+      ->setParameter('treatment', $treatment);
+
+    $result = null;
+    try {
+      $result = $qb->getQuery()->getOneOrNullResult();
+    } catch (NonUniqueResultException $e) { }
+
+    return $result;
+  }
 }

@@ -39,7 +39,7 @@ class Office
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['office:read', 'agent:read', 'consult:read'])]
+    #[Groups(['office:read', 'agent:read', 'consult:read', 'lab:read', 'appointment:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -49,7 +49,7 @@ class Office
       max: 255,
       minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.',
       maxMessage: 'Ce champs doit faire {{ limit }} caractères maximum.')]
-    #[Groups(['office:read', 'agent:read', 'user:read', 'consult:read'])]
+    #[Groups(['office:read', 'agent:read', 'user:read', 'consult:read', 'lab:read', 'appointment:read'])]
     private ?string $title = null;
 
     #[ORM\ManyToOne(inversedBy: 'offices')]

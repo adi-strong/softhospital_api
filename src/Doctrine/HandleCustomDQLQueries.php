@@ -28,6 +28,7 @@ use App\Entity\ExamCategory;
 use App\Entity\ExpenseCategory;
 use App\Entity\ImageObject;
 use App\Entity\Invoice;
+use App\Entity\Lab;
 use App\Entity\Medicine;
 use App\Entity\MedicineCategories;
 use App\Entity\MedicineInvoice;
@@ -37,6 +38,7 @@ use App\Entity\Office;
 use App\Entity\Parameters;
 use App\Entity\Patient;
 use App\Entity\PersonalImageObject;
+use App\Entity\Prescription;
 use App\Entity\Provider;
 use App\Entity\Service;
 use App\Entity\Treatment;
@@ -665,6 +667,38 @@ class HandleCustomDQLQueries implements QueryCollectionExtensionInterface, Query
       }
     }
     // End Appointment
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Lab
+    if (
+      ($resourceClass === Lab::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Lab
+
+    /** ----------------------------------------------------------------------------------- **/
+
+    // Prescription
+    if (
+      ($resourceClass === Prescription::class) &&
+      !$this->currentUser->getAuth()->isGranted('ROLE_SUPER_ADMIN') &&
+      $user instanceof User) {
+      $alias = $this->rootAlias($qb);
+      if (null !== $user->getUId()) {
+        $qb->join("$alias.hospital", 'h')
+          ->andWhere("$alias.hospital = :hospital")
+          ->setParameter('hospital', $user->getHospital() ?? $user->getHospitalCenter());
+      }
+    }
+    // End Prescription
 
     /** ----------------------------------------------------------------------------------- **/
   }

@@ -70,6 +70,10 @@ class ImageObject
       'param:read',
       'covenant:read',
       'consult:read',
+      'prescript:read',
+      'lab:read',
+      'nursing:read',
+      'appointment:read',
     ])]
     private ?int $id = null;
 
@@ -82,6 +86,9 @@ class ImageObject
       'param:read',
       'covenant:read',
       'consult:read',
+      'prescript:read',
+      'lab:read',
+      'nursing:read',
     ])]
     public ?string $contentUrl = null;
 

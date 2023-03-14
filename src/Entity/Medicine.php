@@ -112,14 +112,10 @@ class Medicine
     #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: MedicinesSold::class)]
     private Collection $medicinesSolds;
 
-    #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: NursingMedicines::class, cascade: ['persist', 'remove'])]
-    private Collection $nursingMedicines;
-
     public function __construct()
     {
         $this->drugstoreSupplyMedicines = new ArrayCollection();
         $this->medicinesSolds = new ArrayCollection();
-        $this->nursingMedicines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -363,36 +359,6 @@ class Medicine
     public function setNbSales(?int $nbSales): self
     {
         $this->nbSales = $nbSales;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, NursingMedicines>
-     */
-    public function getNursingMedicines(): Collection
-    {
-        return $this->nursingMedicines;
-    }
-
-    public function addNursingMedicine(NursingMedicines $nursingMedicine): self
-    {
-        if (!$this->nursingMedicines->contains($nursingMedicine)) {
-            $this->nursingMedicines->add($nursingMedicine);
-            $nursingMedicine->setMedicine($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNursingMedicine(NursingMedicines $nursingMedicine): self
-    {
-        if ($this->nursingMedicines->removeElement($nursingMedicine)) {
-            // set the owning side to null (unless already changed)
-            if ($nursingMedicine->getMedicine() === $this) {
-                $nursingMedicine->setMedicine(null);
-            }
-        }
 
         return $this;
     }

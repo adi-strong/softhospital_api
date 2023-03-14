@@ -25,8 +25,13 @@ class OnAddNewAgentEvent implements EventSubscriberInterface
 
     if ($agent instanceof Agent && $method === Request::METHOD_POST) {
       if ($this->user->getUser() !== null) {
+        $lastName = $agent?->getLastName();
+        $firstName = $agent?->getFirstName();
         $agent->setUser($this->user->getUser());
         $agent->setHospital($this->user->getHospital() ?? $this->user->getHospitalCenter());
+
+        $fullName = $agent->getName().' '.$lastName.' '.$firstName;
+        $agent->setFullName(trim($fullName, ' '));
       }
 
       $agent->setCreatedAt(new DateTime('now'));

@@ -39,7 +39,7 @@ class Exam
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['exam:read', 'consult:read'])]
+    #[Groups(['exam:read', 'consult:read', 'labResult:read', 'lab:read', 'prescript:read', 'prescript:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -50,14 +50,14 @@ class Exam
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['exam:read', 'consult:read'])]
+    #[Groups(['exam:read', 'consult:read', 'labResult:read', 'lab:read', 'prescript:read', 'prescript:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'exams')]
     private ?Hospital $hospital = null;
 
     #[ORM\ManyToOne(inversedBy: 'exams')]
-    #[Groups(['exam:read'])]
+    #[Groups(['exam:read', 'lab:read'])]
     private ?ExamCategory $category = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]

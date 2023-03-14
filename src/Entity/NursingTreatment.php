@@ -2,34 +2,35 @@
 
 namespace App\Entity;
 
+use App\AppTraits\CreatedAtTrait;
 use App\Repository\NursingTreatmentRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NursingTreatmentRepository::class)]
 class NursingTreatment
 {
+  use CreatedAtTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['nursing:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'nursingTreatments')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Nursing $nursing = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'nursingTreatments')]
+    #[ORM\ManyToOne(inversedBy: 'nursingTreatments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['nursing:read'])]
     private ?Treatment $treatment = null;
 
-    #[ORM\OneToMany(mappedBy: 'nursing', targetEntity: NursingMedicines::class, cascade: ['persist', 'remove'])]
-    private Collection $nursingMedicines;
-
-    public function __construct()
-    {
-        $this->nursingMedicines = new ArrayCollection();
-    }
+    #[ORM\ManyToOne(inversedBy: 'nursingTreatments')]
+    #[Groups(['nursing:read'])]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -60,32 +61,14 @@ class NursingTreatment
         return $this;
     }
 
-    /**
-     * @return Collection<int, NursingMedicines>
-     */
-    public function getNursingMedicines(): Collection
+    public function getUser(): ?User
     {
-        return $this->nursingMedicines;
+        return $this->user;
     }
 
-    public function addNursingMedicine(NursingMedicines $nursingMedicine): self
+    public function setUser(?UserInterface $user): self
     {
-        if (!$this->nursingMedicines->contains($nursingMedicine)) {
-            $this->nursingMedicines->add($nursingMedicine);
-            $nursingMedicine->setNursing($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNursingMedicine(NursingMedicines $nursingMedicine): self
-    {
-        if ($this->nursingMedicines->removeElement($nursingMedicine)) {
-            // set the owning side to null (unless already changed)
-            if ($nursingMedicine->getNursing() === $this) {
-                $nursingMedicine->setNursing(null);
-            }
-        }
+        $this->user = $user;
 
         return $this;
     }

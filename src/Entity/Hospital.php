@@ -183,6 +183,12 @@ class Hospital
     #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Lab::class)]
     private Collection $labs;
 
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Prescription::class)]
+    private Collection $prescriptions;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Nursing::class)]
+    private Collection $nursings;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -221,6 +227,8 @@ class Hospital
         $this->appointments = new ArrayCollection();
         $this->hospitalizations = new ArrayCollection();
         $this->labs = new ArrayCollection();
+        $this->prescriptions = new ArrayCollection();
+        $this->nursings = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1386,6 +1394,66 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($lab->getHospital() === $this) {
                 $lab->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Prescription>
+     */
+    public function getPrescriptions(): Collection
+    {
+        return $this->prescriptions;
+    }
+
+    public function addPrescription(Prescription $prescription): self
+    {
+        if (!$this->prescriptions->contains($prescription)) {
+            $this->prescriptions->add($prescription);
+            $prescription->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removePrescription(Prescription $prescription): self
+    {
+        if ($this->prescriptions->removeElement($prescription)) {
+            // set the owning side to null (unless already changed)
+            if ($prescription->getHospital() === $this) {
+                $prescription->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Nursing>
+     */
+    public function getNursings(): Collection
+    {
+        return $this->nursings;
+    }
+
+    public function addNursing(Nursing $nursing): self
+    {
+        if (!$this->nursings->contains($nursing)) {
+            $this->nursings->add($nursing);
+            $nursing->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNursing(Nursing $nursing): self
+    {
+        if ($this->nursings->removeElement($nursing)) {
+            // set the owning side to null (unless already changed)
+            if ($nursing->getHospital() === $this) {
+                $nursing->setHospital(null);
             }
         }
 

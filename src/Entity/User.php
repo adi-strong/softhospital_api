@@ -55,6 +55,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'supply:read',
       'medicineInvoice:read',
       'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
     ])]
     private ?int $id = null;
 
@@ -72,6 +76,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'supply:read',
       'medicineInvoice:read',
       'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
     ])]
     #[Assert\NotBlank(message: 'Le username doit être renseigné.')]
     private ?string $username = null;
@@ -152,11 +160,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'supply:read',
       'medicineInvoice:read',
       'consult:read',
+      'lab:read',
+      'prescript:read',
+      'nursing:read',
+      'appointment:read',
     ])]
     private ?string $name = null;
 
     #[ORM\OneToOne(mappedBy: 'userAccount', cascade: ['persist', 'remove'])]
-    #[Groups(['user:read', 'medicine:read'])]
+    #[Groups(['user:read', 'medicine:read', 'lab:read'])]
     private ?Agent $agent = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Medicine::class)]
@@ -189,6 +201,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'assistant', targetEntity: Lab::class)]
     private Collection $labAssistants;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Prescription::class)]
+    private Collection $prescriptions;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: NursingTreatment::class)]
+    private Collection $nursingTreatments;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -206,6 +224,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->invoices = new ArrayCollection();
         $this->labs = new ArrayCollection();
         $this->labAssistants = new ArrayCollection();
+        $this->prescriptions = new ArrayCollection();
+        $this->nursingTreatments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -850,6 +870,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($labAssistant->getAssistant() === $this) {
                 $labAssistant->setAssistant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Prescription>
+     */
+    public function getPrescriptions(): Collection
+    {
+        return $this->prescriptions;
+    }
+
+    public function addPrescription(Prescription $prescription): self
+    {
+        if (!$this->prescriptions->contains($prescription)) {
+            $this->prescriptions->add($prescription);
+            $prescription->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePrescription(Prescription $prescription): self
+    {
+        if ($this->prescriptions->removeElement($prescription)) {
+            // set the owning side to null (unless already changed)
+            if ($prescription->getUser() === $this) {
+                $prescription->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, NursingTreatment>
+     */
+    public function getNursingTreatments(): Collection
+    {
+        return $this->nursingTreatments;
+    }
+
+    public function addNursingTreatment(NursingTreatment $nursingTreatment): self
+    {
+        if (!$this->nursingTreatments->contains($nursingTreatment)) {
+            $this->nursingTreatments->add($nursingTreatment);
+            $nursingTreatment->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNursingTreatment(NursingTreatment $nursingTreatment): self
+    {
+        if ($this->nursingTreatments->removeElement($nursingTreatment)) {
+            // set the owning side to null (unless already changed)
+            if ($nursingTreatment->getUser() === $this) {
+                $nursingTreatment->setUser(null);
             }
         }
 

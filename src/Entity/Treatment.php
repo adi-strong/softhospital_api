@@ -39,7 +39,7 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['treatment:read', 'consult:read'])]
+    #[Groups(['treatment:read', 'consult:read', 'nursing:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -50,7 +50,7 @@ class Treatment
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['treatment:read', 'consult:read'])]
+    #[Groups(['treatment:read', 'consult:read', 'nursing:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'treatments')]
