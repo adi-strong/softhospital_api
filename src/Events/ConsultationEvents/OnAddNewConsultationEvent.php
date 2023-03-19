@@ -88,15 +88,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
             $nursingTreatment = (new NursingTreatment())
               ->setTreatment($treatment)
               ->setNursing($nursing);
-
-            $treatmentInvoiceBasket = (new TreatmentInvoiceBasket())
-              ->setInvoice($invoice)
-              ->setTreatment($treatment)
-              ->setPrice($treatment->getPrice());
-
-            $invoiceAmount += $treatment->getPrice();
             $this->em->persist($nursingTreatment);
-            $this->em->persist($treatmentInvoiceBasket);
           }
         }
 
@@ -144,7 +136,6 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
             ->setConsultation($consultation)
             ->setReleasedAt($hospReleasedAt)
             ->setBed($bed)
-            ->setDaysCounter($hospDaysCounter)
             ->setHospital($hospital);
 
           $hospAmount = $bed->getPrice() * $hospDaysCounter;
@@ -186,7 +177,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       $invoice->setConsultation($consultation);
       // End Handle Consultation's Invoice
 
-
+      $invoice->setLeftover($invoiceAmount - $invoice->getPaid());
       $invoice->setAmount($invoiceAmount);
       $invoice->setTotalAmount($invoiceAmount);
 

@@ -13,10 +13,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource]
 class Hospitalization
 {
+  public ?bool $isBedroomLeaved = false;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'hospitalization')]
@@ -27,29 +29,33 @@ class Hospitalization
     #[ORM\ManyToOne(inversedBy: 'hospitalizations')]
     #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotBlank(message: 'Le lit doit être renseigné.')]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'invoice:read'])]
     private ?Bed $bed = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
 
     #[Assert\NotBlank(message: 'Le prix doit être renseigné.')]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'invoice:read'])]
     private ?string $price = '0';
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['invoice:read'])]
     private ?\DateTimeInterface $releasedAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['invoice:read'])]
     private ?\DateTimeInterface $leaveAt = null;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'Le nombre de jours effétué est inconnu.')]
+    #[Groups(['invoice:read'])]
     private ?int $daysCounter = 1;
 
     #[ORM\ManyToOne(inversedBy: 'hospitalizations')]
     private ?Hospital $hospital = null;
 
     #[ORM\Column]
+    #[Groups(['invoice:read'])]
     private ?bool $isCompleted = false;
 
     public function getId(): ?int
@@ -98,7 +104,7 @@ class Hospitalization
         return $this->releasedAt;
     }
 
-    public function setReleasedAt(?\DateTimeInterface $releasedAt): self
+    public function setReleasedAt(\DateTimeInterface $releasedAt): self
     {
         $this->releasedAt = $releasedAt;
 

@@ -39,7 +39,7 @@ class Act
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['act:read', 'consult:read'])]
+    #[Groups(['act:read', 'consult:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -50,7 +50,7 @@ class Act
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['act:read', 'consult:read'])]
+    #[Groups(['act:read', 'consult:read', 'invoice:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'acts')]

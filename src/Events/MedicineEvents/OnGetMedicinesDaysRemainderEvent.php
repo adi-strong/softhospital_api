@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-class OnGetMedicinesEvent implements EventSubscriberInterface
+class OnGetMedicinesDaysRemainderEvent implements EventSubscriberInterface
 {
   #[ArrayShape([KernelEvents::VIEW => "array"])]
   public static function getSubscribedEvents(): array
@@ -37,8 +37,9 @@ class OnGetMedicinesEvent implements EventSubscriberInterface
 
     if ($method === Request::METHOD_GET) {
       $medicines = $this->repository->findAll();
+      $currentDate = new DateTime();
+
       foreach ($medicines as $medicine) {
-        $currentDate = new DateTime();
         $releasedAt = $medicine->getReleased() ?? null;
         $expiryDate = $medicine->getExpiryDate() ?? null;
         if (null !== $releasedAt && $expiryDate !== null) {
@@ -51,6 +52,7 @@ class OnGetMedicinesEvent implements EventSubscriberInterface
           }
         }
       }
+
     }
   }
 }

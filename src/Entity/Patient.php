@@ -59,6 +59,7 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?int $id = null;
 
@@ -72,6 +73,7 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?string $name = null;
 
@@ -84,6 +86,7 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?string $lastName = null;
 
@@ -96,6 +99,7 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?string $firstName = null;
 
@@ -108,11 +112,11 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?string $sex = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Assert\NotBlank(message: 'La date de naissance doit être renseigné.')]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     #[Groups(['patient:read', 'covenant:read'])]
     private ?\DateTimeInterface $birthDate = null;
 
@@ -129,18 +133,16 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?string $maritalStatus = null;
 
     #[ORM\Column(length: 20, nullable: true)]
-    #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné.')]
-    #[Assert\NotNull(message: 'Le numéro de téléphone doit être renseigné.')]
     #[Assert\Length(
       min: 9,
       max: 20,
       minMessage: 'Ce champs doit contenir au moins {{ limit }} caractères.',
       maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
-    #[Assert\Regex('#^([+]|0)?[0-9]([-. ]?[0-9]{2}){4,}$#', message: 'N° de téléphone invalide.')]
     #[Groups([
       'patient:read',
       'covenant:read',
@@ -149,6 +151,7 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?string $tel = null;
 
@@ -186,6 +189,7 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?ImageObject $profile = null;
 
@@ -202,6 +206,7 @@ class Patient
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?int $age = null;
 
@@ -298,7 +303,7 @@ class Patient
         return $this->birthDate;
     }
 
-    public function setBirthDate(\DateTimeInterface $birthDate): self
+    public function setBirthDate(?\DateTimeInterface $birthDate): self
     {
         $this->birthDate = $birthDate;
 
@@ -445,6 +450,7 @@ class Patient
     'prescript:read',
     'nursing:read',
     'appointment:read',
+    'invoice:read',
   ])]
   public function getSlug(): ?string
   {

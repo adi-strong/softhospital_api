@@ -6,6 +6,7 @@ use App\AppTraits\CreatedAtTrait;
 use App\Repository\InvoiceStoricRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: InvoiceStoricRepository::class)]
@@ -16,20 +17,23 @@ class InvoiceStoric
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['invoice:read'])]
+    #[Groups(['invoice:read', 'nursing:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoiceStorics')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Invoice $invoice = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    #[Groups(['invoice:read'])]
+    #[Groups(['invoice:read', 'nursing:read'])]
     private ?string $amount = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoiceStorics')]
-    #[Groups(['invoice:read'])]
+    #[Groups(['invoice:read', 'nursing:read'])]
     private ?User $user = null;
+
+    #[ORM\ManyToOne(inversedBy: 'invoiceStorics')]
+    private ?Nursing $nursing = null;
 
     public function getId(): ?int
     {
@@ -65,9 +69,21 @@ class InvoiceStoric
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getNursing(): ?Nursing
+    {
+        return $this->nursing;
+    }
+
+    public function setNursing(?Nursing $nursing): self
+    {
+        $this->nursing = $nursing;
 
         return $this;
     }

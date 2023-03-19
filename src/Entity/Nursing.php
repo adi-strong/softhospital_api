@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use App\AppTraits\CreatedAtTrait;
 use App\Repository\NursingRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -33,10 +34,16 @@ class Nursing
 
   public ?bool $isNursingCompleted = null;
 
+  public ?DateTime $arrivedAt = null;
+
+  public ?DateTime $leaveAt = null;
+
+  public ?string $sum = null;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['nursing:read'])]
+    #[Groups(['nursing:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'nursing')]
@@ -66,9 +73,41 @@ class Nursing
     #[Groups(['nursing:read'])]
     private ?bool $isCompleted = false;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $amount = '0';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $totalAmount = '0';
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?float $discount = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?float $vTA = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $paid = '0';
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $leftover = '0';
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $fullName = null;
+
+    #[ORM\OneToMany(mappedBy: 'nursing', targetEntity: InvoiceStoric::class)]
+    private Collection $invoiceStorics;
+
     public function __construct()
     {
         $this->nursingTreatments = new ArrayCollection();
+        $this->invoiceStorics = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -180,6 +219,120 @@ class Nursing
   public function setIsCompleted(bool $isCompleted): self
   {
       $this->isCompleted = $isCompleted;
+
+      return $this;
+  }
+
+  public function getAmount(): ?string
+  {
+      return $this->amount;
+  }
+
+  public function setAmount(?string $amount): self
+  {
+      $this->amount = $amount;
+
+      return $this;
+  }
+
+  public function getTotalAmount(): ?string
+  {
+      return $this->totalAmount;
+  }
+
+  public function setTotalAmount(?string $totalAmount): self
+  {
+      $this->totalAmount = $totalAmount;
+
+      return $this;
+  }
+
+  public function getDiscount(): ?float
+  {
+      return $this->discount;
+  }
+
+  public function setDiscount(?float $discount): self
+  {
+      $this->discount = $discount;
+
+      return $this;
+  }
+
+  public function getVTA(): ?float
+  {
+      return $this->vTA;
+  }
+
+  public function setVTA(?float $vTA): self
+  {
+      $this->vTA = $vTA;
+
+      return $this;
+  }
+
+  public function getPaid(): ?string
+  {
+      return $this->paid;
+  }
+
+  public function setPaid(?string $paid): self
+  {
+      $this->paid = $paid;
+
+      return $this;
+  }
+
+  public function getLeftover(): ?string
+  {
+      return $this->leftover;
+  }
+
+  public function setLeftover(?string $leftover): self
+  {
+      $this->leftover = $leftover;
+
+      return $this;
+  }
+
+  public function getFullName(): ?string
+  {
+      return $this->fullName;
+  }
+
+  public function setFullName(?string $fullName): self
+  {
+      $this->fullName = $fullName;
+
+      return $this;
+  }
+
+  /**
+   * @return Collection<int, InvoiceStoric>
+   */
+  public function getInvoiceStorics(): Collection
+  {
+      return $this->invoiceStorics;
+  }
+
+  public function addInvoiceStoric(InvoiceStoric $invoiceStoric): self
+  {
+      if (!$this->invoiceStorics->contains($invoiceStoric)) {
+          $this->invoiceStorics->add($invoiceStoric);
+          $invoiceStoric->setNursing($this);
+      }
+
+      return $this;
+  }
+
+  public function removeInvoiceStoric(InvoiceStoric $invoiceStoric): self
+  {
+      if ($this->invoiceStorics->removeElement($invoiceStoric)) {
+          // set the owning side to null (unless already changed)
+          if ($invoiceStoric->getNursing() === $this) {
+              $invoiceStoric->setNursing(null);
+          }
+      }
 
       return $this;
   }

@@ -53,7 +53,7 @@ class Consultation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read'])]
+    #[Groups(['consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'consultations')]
@@ -65,7 +65,7 @@ class Consultation
 
     #[ORM\ManyToOne(inversedBy: 'consultations')]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read'])]
+    #[Groups(['consult:read', 'lab:read', 'prescript:read', 'nursing:read', 'appointment:read', 'invoice:read'])]
     private ?ConsultationsType $file = null;
 
     #[ORM\ManyToMany(targetEntity: Act::class, inversedBy: 'consultations')]
@@ -137,10 +137,11 @@ class Consultation
     private ?Appointment $appointment = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[Groups(['invoice:read'])]
     private ?Nursing $nursing = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['remove'])]
-    #[Groups(['consult:read'])]
+    #[Groups(['consult:read', 'invoice:read'])]
     private ?Hospitalization $hospitalization = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -159,6 +160,9 @@ class Consultation
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $comment = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $fullName = null;
 
     public function __construct()
     {
@@ -547,6 +551,18 @@ class Consultation
     public function setComment(?string $comment): self
     {
         $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
+    }
+
+    public function setFullName(?string $fullName): self
+    {
+        $this->fullName = $fullName;
 
         return $this;
     }

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\AppTraits\CreatedAtTrait;
 use App\Repository\NursingTreatmentRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -31,6 +32,14 @@ class NursingTreatment
     #[ORM\ManyToOne(inversedBy: 'nursingTreatments')]
     #[Groups(['nursing:read'])]
     private ?User $user = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?array $medicines = [];
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?\DateTimeInterface $leaveAt = null;
 
     public function getId(): ?int
     {
@@ -69,6 +78,30 @@ class NursingTreatment
     public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getMedicines(): ?array
+    {
+        return $this->medicines;
+    }
+
+    public function setMedicines(?array $medicines): self
+    {
+        $this->medicines = $medicines;
+
+        return $this;
+    }
+
+    public function getLeaveAt(): ?\DateTimeInterface
+    {
+        return $this->leaveAt;
+    }
+
+    public function setLeaveAt(?\DateTimeInterface $leaveAt): self
+    {
+        $this->leaveAt = $leaveAt;
 
         return $this;
     }

@@ -120,7 +120,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné')]
     #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
-    #[Assert\Regex('#^([+]\d{2}[-. ])?\d{9,14}$#', message: 'Numéro de téléphone invalide.')]
     #[Groups(['user:read'])]
     private ?string $tel = null;
 

@@ -74,6 +74,7 @@ class ImageObject
       'lab:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
     ])]
     private ?int $id = null;
 
@@ -89,6 +90,7 @@ class ImageObject
       'prescript:read',
       'lab:read',
       'nursing:read',
+      'invoice:read',
     ])]
     public ?string $contentUrl = null;
 

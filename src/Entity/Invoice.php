@@ -33,6 +33,10 @@ class Invoice
 {
   use IsDeletedTrait;
 
+  public ?string $sum = '0';
+
+  public ?bool $isBedroomLeaved = false;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -86,24 +90,38 @@ class Invoice
     private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ActsInvoiceBasket::class, cascade: ['persist', 'remove'])]
+    #[Groups(['invoice:read'])]
     private Collection $actsInvoiceBaskets;
 
     #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ExamsInvoiceBasket::class, cascade: ['persist', 'remove'])]
+    #[Groups(['invoice:read'])]
     private Collection $examsInvoiceBaskets;
-
-    #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: TreatmentInvoiceBasket::class, cascade: ['persist', 'remove'])]
-    private Collection $treatmentInvoiceBaskets;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Groups(['invoice:read'])]
     private ?string $hospitalizationAmount = '0';
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['invoice:read'])]
+    private ?float $discount = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['invoice:read'])]
+    private ?float $vTA = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['invoice:read'])]
+    private ?string $fullName = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['invoice:read'])]
+    private ?\DateTimeInterface $updatedAt = null;
 
     public function __construct()
     {
         $this->invoiceStorics = new ArrayCollection();
         $this->actsInvoiceBaskets = new ArrayCollection();
         $this->examsInvoiceBaskets = new ArrayCollection();
-        $this->treatmentInvoiceBaskets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -291,36 +309,6 @@ class Invoice
         return $this;
     }
 
-    /**
-     * @return Collection<int, TreatmentInvoiceBasket>
-     */
-    public function getTreatmentInvoiceBaskets(): Collection
-    {
-        return $this->treatmentInvoiceBaskets;
-    }
-
-    public function addTreatmentInvoiceBasket(TreatmentInvoiceBasket $treatmentInvoiceBasket): self
-    {
-        if (!$this->treatmentInvoiceBaskets->contains($treatmentInvoiceBasket)) {
-            $this->treatmentInvoiceBaskets->add($treatmentInvoiceBasket);
-            $treatmentInvoiceBasket->setInvoice($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTreatmentInvoiceBasket(TreatmentInvoiceBasket $treatmentInvoiceBasket): self
-    {
-        if ($this->treatmentInvoiceBaskets->removeElement($treatmentInvoiceBasket)) {
-            // set the owning side to null (unless already changed)
-            if ($treatmentInvoiceBasket->getInvoice() === $this) {
-                $treatmentInvoiceBasket->setInvoice(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getHospitalizationAmount(): ?string
     {
         return $this->hospitalizationAmount;
@@ -332,4 +320,82 @@ class Invoice
 
         return $this;
     }
+
+  #[Groups(['invoice:read'])]
+  public function getTotalSum(): ?string
+  {
+    $hospAmount = $this->hospitalizationAmount;
+    $amount = $this->amount + $hospAmount;
+
+    if (null !== $this->vTA && null !== $this->discount) {
+      $vTA = ($amount * $this->vTA) / 100;
+      $discount = ($amount * $this->discount) / 100;
+      $total = ($amount + $vTA) + ($amount - $discount);
+    }
+    elseif (null !== $this->discount) {
+      $discount = ($amount * $this->discount) / 100;
+      $total = $amount - $discount;
+    }
+    elseif (null !== $this->vTA) {
+      $vTA = ($amount * $this->vTA) / 100;
+      $total = $amount + $vTA;
+    }
+    else $total = $amount;
+
+    return round($total, 2);
+  }
+
+  #[Groups(['invoice:read'])]
+  public function getInvoiceNumber(): ?string
+  {
+    return sprintf('%05d', $this->id);
+  }
+
+  public function getDiscount(): ?float
+  {
+      return $this->discount;
+  }
+
+  public function setDiscount(?float $discount): self
+  {
+      $this->discount = $discount;
+
+      return $this;
+  }
+
+  public function getVTA(): ?float
+  {
+      return $this->vTA;
+  }
+
+  public function setVTA(?float $vTA): self
+  {
+      $this->vTA = $vTA;
+
+      return $this;
+  }
+
+  public function getFullName(): ?string
+  {
+      return $this->fullName;
+  }
+
+  public function setFullName(?string $fullName): self
+  {
+      $this->fullName = $fullName;
+
+      return $this;
+  }
+
+  public function getUpdatedAt(): ?\DateTimeInterface
+  {
+      return $this->updatedAt;
+  }
+
+  public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+  {
+      $this->updatedAt = $updatedAt;
+
+      return $this;
+  }
 }

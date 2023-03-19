@@ -73,7 +73,7 @@ class Agent
     #[ORM\Column(length: 16)]
     #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné.')]
     #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
-    #[Assert\Regex('#^([+]\d{2}[-. ])?\d{9,14}$#', message: 'Numéro de téléphone non valide.')]
+    #[Assert\Regex('#^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$#', message: 'Numéro de téléphone non valide.')]
     #[Groups(['agent:read', 'user:read', 'appointment:read'])]
     private ?string $phone = null;
 

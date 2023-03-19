@@ -39,7 +39,7 @@ class Treatment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['treatment:read', 'consult:read', 'nursing:read'])]
+    #[Groups(['treatment:read', 'consult:read', 'nursing:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -50,14 +50,14 @@ class Treatment
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['treatment:read', 'consult:read', 'nursing:read'])]
+    #[Groups(['treatment:read', 'consult:read', 'nursing:read', 'invoice:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'treatments')]
     private ?Hospital $hospital = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    #[Groups(['treatment:read'])]
+    #[Groups(['treatment:read', 'nursing:read'])]
     private ?string $price = '0';
 
     #[ORM\ManyToOne(inversedBy: 'treatments')]
@@ -70,14 +70,10 @@ class Treatment
     #[ORM\OneToMany(mappedBy: 'treatment', targetEntity: NursingTreatment::class, cascade: ['persist', 'remove'])]
     private Collection $nursingTreatments;
 
-    #[ORM\OneToMany(mappedBy: 'treatment', targetEntity: TreatmentInvoiceBasket::class)]
-    private Collection $treatmentInvoiceBaskets;
-
     public function __construct()
     {
         $this->consultations = new ArrayCollection();
         $this->nursingTreatments = new ArrayCollection();
-        $this->treatmentInvoiceBaskets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -184,36 +180,6 @@ class Treatment
             // set the owning side to null (unless already changed)
             if ($nursingTreatment->getTreatment() === $this) {
                 $nursingTreatment->setTreatment(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, TreatmentInvoiceBasket>
-     */
-    public function getTreatmentInvoiceBaskets(): Collection
-    {
-        return $this->treatmentInvoiceBaskets;
-    }
-
-    public function addTreatmentInvoiceBasket(TreatmentInvoiceBasket $treatmentInvoiceBasket): self
-    {
-        if (!$this->treatmentInvoiceBaskets->contains($treatmentInvoiceBasket)) {
-            $this->treatmentInvoiceBaskets->add($treatmentInvoiceBasket);
-            $treatmentInvoiceBasket->setTreatment($this);
-        }
-
-        return $this;
-    }
-
-    public function removeTreatmentInvoiceBasket(TreatmentInvoiceBasket $treatmentInvoiceBasket): self
-    {
-        if ($this->treatmentInvoiceBaskets->removeElement($treatmentInvoiceBasket)) {
-            // set the owning side to null (unless already changed)
-            if ($treatmentInvoiceBasket->getTreatment() === $this) {
-                $treatmentInvoiceBasket->setTreatment(null);
             }
         }
 

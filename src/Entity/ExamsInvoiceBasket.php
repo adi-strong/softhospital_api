@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ExamsInvoiceBasketRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ExamsInvoiceBasketRepository::class)]
 class ExamsInvoiceBasket
@@ -12,6 +13,7 @@ class ExamsInvoiceBasket
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['invoice:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'examsInvoiceBaskets')]
@@ -19,10 +21,12 @@ class ExamsInvoiceBasket
     private ?Invoice $invoice = null;
 
     #[ORM\ManyToOne(inversedBy: 'examsInvoiceBaskets')]
+    #[Groups(['invoice:read'])]
     #[ORM\JoinColumn(nullable: true)]
     private ?Exam $exam = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['invoice:read'])]
     private ?string $price = null;
 
     public function getId(): ?int

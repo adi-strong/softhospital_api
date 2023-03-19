@@ -64,7 +64,7 @@ class Bed
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     #[Assert\NotNull(message: 'Le prix doit être renseigné.')]
-    #[Groups(['bed:read'])]
+    #[Groups(['bed:read', 'invoice:read'])]
     private ?string $price = '0';
 
     #[ORM\ManyToOne(inversedBy: 'beds')]
