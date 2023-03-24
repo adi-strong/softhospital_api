@@ -42,7 +42,6 @@ use Symfony\Component\Validator\Constraints as Assert;
   uriVariables: [ 'id' => new Link(fromProperty: 'patients', fromClass: Covenant::class) ],
   normalizationContext: ['groups' => ['patient:read']]
 )]
-#[ORM\HasLifecycleCallbacks]
 #[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Patient
 {
@@ -671,14 +670,5 @@ class Patient
       $this->fullName = $fullName;
 
       return $this;
-  }
-
-  #[ORM\PreUpdate]
-  public function onSetFullName(): void
-  {
-    $lastName = $this?->lastName;
-    $firstName = $this?->firstName;
-    $fullName = $this->name.' '.$lastName.' '.$firstName;
-    $this->fullName = trim($fullName, ' ');
   }
 }

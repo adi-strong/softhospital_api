@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -29,6 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['invoice:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Invoice
 {
   use IsDeletedTrait;

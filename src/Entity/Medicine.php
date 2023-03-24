@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -30,6 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['medicine:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial', 'code' => 'ipartial'])]
 class Medicine
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -65,7 +68,7 @@ class Medicine
 
     #[ORM\Column(nullable: true)]
     #[Groups(['medicine:read'])]
-    private ?int $quantity = 0;
+    private ?float $quantity = 0;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['medicine:read'])]
@@ -100,17 +103,17 @@ class Medicine
 
     #[ORM\Column(nullable: true)]
     #[Groups(['medicine:read'])]
-    private ?int $totalQuantity = 0;
-
-    #[ORM\Column(nullable: true)]
-    #[Groups(['medicine:read'])]
-    private ?int $nbSales = 0;
+    private ?float $totalQuantity = 0;
 
     #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: DrugstoreSupplyMedicine::class, cascade: ['persist'])]
     private Collection $drugstoreSupplyMedicines;
 
     #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: MedicinesSold::class)]
     private Collection $medicinesSolds;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['medicine:read'])]
+    private ?float $vTA = null;
 
     public function __construct()
     {
@@ -171,12 +174,12 @@ class Medicine
         return $this;
     }
 
-    public function getQuantity(): ?int
+    public function getQuantity(): ?float
     {
         return $this->quantity;
     }
 
-    public function setQuantity(?int $quantity): self
+    public function setQuantity(?float $quantity): self
     {
         $this->quantity = $quantity;
 
@@ -279,12 +282,12 @@ class Medicine
         return $this;
     }
 
-    public function getTotalQuantity(): ?int
+    public function getTotalQuantity(): ?float
     {
         return $this->totalQuantity;
     }
 
-    public function setTotalQuantity(?int $totalQuantity): self
+    public function setTotalQuantity(?float $totalQuantity): self
     {
         $this->totalQuantity = $totalQuantity;
 
@@ -351,14 +354,14 @@ class Medicine
         return $this;
     }
 
-    public function getNbSales(): ?int
+    public function getVTA(): ?float
     {
-        return $this->nbSales;
+        return $this->vTA;
     }
 
-    public function setNbSales(?int $nbSales): self
+    public function setVTA(?float $vTA): self
     {
-        $this->nbSales = $nbSales;
+        $this->vTA = $vTA;
 
         return $this;
     }

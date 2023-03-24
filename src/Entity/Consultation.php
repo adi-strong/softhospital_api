@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -40,6 +42,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['consult:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Consultation
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -126,7 +129,7 @@ class Consultation
     private ?string $oxygenSaturation = null;
 
     #[ORM\ManyToOne(inversedBy: 'consultations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotBlank(message: 'Le médecin doit être renseignée.')]
     #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
     #[Groups(['consult:read', 'lab:read'])]
@@ -159,9 +162,11 @@ class Consultation
     private ?Prescription $prescription = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['consult:read'])]
     private ?string $comment = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['consult:read'])]
     private ?string $fullName = null;
 
     public function __construct()

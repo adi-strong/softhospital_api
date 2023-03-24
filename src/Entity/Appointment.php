@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -28,6 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   normalizationContext: ['groups' => ['appointment:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Appointment
 {
   use CreatedAtTrait, IsDeletedTrait;
@@ -45,7 +48,7 @@ class Appointment
     private ?bool $isComplete = false;
 
     #[ORM\ManyToOne(inversedBy: 'appointments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Assert\NotBlank(message: 'Le médecin ou docteur doit être renseigné.')]
     #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
     #[Groups(['appointment:read'])]

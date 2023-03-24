@@ -58,16 +58,26 @@ class MedicineInvoice
     private ?Hospital $hospital = null;
 
     #[ORM\Column(length: 10, nullable: true)]
+    #[Assert\NotBlank(message: 'La devise doit être renseignée.')]
     #[Groups(['medicineInvoice:read'])]
     private ?string $currency = null;
 
     #[ORM\Column(nullable: true)]
     #[Groups(['medicineInvoice:read'])]
-    private ?int $discount = null;
+    private ?float $discount = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Groups(['medicineInvoice:read'])]
     private ?string $totalAmount = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['medicineInvoice:read'])]
+    private ?float $vTA = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Assert\NotBlank(message: 'Le sous total doit être renseigné.')]
+    #[Groups(['medicineInvoice:read'])]
+    private ?string $subTotal = '0';
 
     public function __construct()
     {
@@ -175,12 +185,12 @@ class MedicineInvoice
       return $this;
   }
 
-  public function getDiscount(): ?int
+  public function getDiscount(): ?float
   {
       return $this->discount;
   }
 
-  public function setDiscount(?int $discount): self
+  public function setDiscount(?float $discount): self
   {
       $this->discount = $discount;
 
@@ -195,6 +205,30 @@ class MedicineInvoice
   public function setTotalAmount(?string $totalAmount): self
   {
       $this->totalAmount = $totalAmount;
+
+      return $this;
+  }
+
+  public function getVTA(): ?float
+  {
+      return $this->vTA;
+  }
+
+  public function setVTA(?float $vTA): self
+  {
+      $this->vTA = $vTA;
+
+      return $this;
+  }
+
+  public function getSubTotal(): ?string
+  {
+      return $this->subTotal;
+  }
+
+  public function setSubTotal(?string $subTotal): self
+  {
+      $this->subTotal = $subTotal;
 
       return $this;
   }

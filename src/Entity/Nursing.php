@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
@@ -26,6 +28,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   normalizationContext: ['groups' => ['nursing:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Nursing
 {
   use CreatedAtTrait;
@@ -103,6 +106,12 @@ class Nursing
 
     #[ORM\OneToMany(mappedBy: 'nursing', targetEntity: InvoiceStoric::class)]
     private Collection $invoiceStorics;
+
+    #[ORM\Column(nullable: true)]
+    private array $arrivalDates = [];
+
+    #[ORM\Column(nullable: true)]
+    private array $releasedAtItems = [];
 
     public function __construct()
     {
@@ -333,6 +342,30 @@ class Nursing
               $invoiceStoric->setNursing(null);
           }
       }
+
+      return $this;
+  }
+
+  public function getArrivalDates(): array
+  {
+      return $this->arrivalDates;
+  }
+
+  public function setArrivalDates(?array $arrivalDates): self
+  {
+      $this->arrivalDates = $arrivalDates;
+
+      return $this;
+  }
+
+  public function getReleasedAtItems(): array
+  {
+      return $this->releasedAtItems;
+  }
+
+  public function setReleasedAtItems(?array $releasedAtItems): self
+  {
+      $this->releasedAtItems = $releasedAtItems;
 
       return $this;
   }

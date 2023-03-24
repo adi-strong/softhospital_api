@@ -37,6 +37,17 @@ class DrugstoreSupplyMedicine
     #[Groups(['supply:read'])]
     private ?\DateTimeInterface $expiryDate = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['supply:read'])]
+    private ?string $quantityLabel = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['supply:read'])]
+    private ?int $otherQty = 0;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $vTA = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -98,6 +109,42 @@ class DrugstoreSupplyMedicine
     public function setExpiryDate(?\DateTimeInterface $expiryDate): self
     {
         $this->expiryDate = $expiryDate;
+
+        return $this;
+    }
+
+    public function getQuantityLabel(): ?string
+    {
+        return $this->quantityLabel;
+    }
+
+    public function setQuantityLabel(?string $quantityLabel): self
+    {
+        $this->quantityLabel = $quantityLabel;
+
+        return $this;
+    }
+
+    public function getOtherQty(): ?int
+    {
+        return $this->otherQty;
+    }
+
+    public function setOtherQty(?int $otherQty): self
+    {
+        $this->otherQty = $otherQty;
+
+        return $this;
+    }
+
+    public function getVTA(): ?float
+    {
+        return $this->vTA;
+    }
+
+    public function setVTA(?float $vTA): self
+    {
+        $this->vTA = $vTA;
 
         return $this;
     }

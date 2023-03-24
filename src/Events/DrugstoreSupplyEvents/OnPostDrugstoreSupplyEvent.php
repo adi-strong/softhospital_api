@@ -3,10 +3,8 @@
 namespace App\Events\DrugstoreSupplyEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
-use App\Entity\BoxHistoric;
 use App\Entity\DrugstoreSupply;
 use App\Entity\DrugstoreSupplyMedicine;
-use App\Repository\BoxRepository;
 use App\Repository\MedicineRepository;
 use App\Services\HandleCurrentUserService;
 use DateTime;
@@ -34,7 +32,6 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
   public function __construct(
     private readonly HandleCurrentUserService $user,
     private readonly MedicineRepository $repository,
-    private readonly BoxRepository $boxRepository,
     private readonly EntityManagerInterface $em)
   {
   }
@@ -63,6 +60,9 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
             $quantity = (int) $medicine['quantity'] ?? null;
             $cost = $medicine['cost'] ?? null;
             $price = $medicine['price'] ?? null;
+            $vTA = $medicine['vTA'] ?? null;
+            $quantityLabel = $medicine['quantityLabel'] ?? null;
+            $otherQty = $medicine['otherQty'] ?? 0;
             $expiryDate = null;
             $date = isset($medicine['expiryDate'])
               ? $expiryDate = new DateTime($medicine['expiryDate'])
@@ -74,6 +74,7 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
             if (null !== $quantity) {
               $findMedicine->setQuantity($findMedicine->getQuantity() + $quantity);
               $findMedicine->setTotalQuantity($findMedicine->getQuantity());
+              $findMedicine->setVTA($vTA);
               $findMedicine->setReleased($released);
 
               if (null !== $date && $released < new $expiryDate) {
@@ -84,10 +85,13 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
               else throw new Exception("Date de péremption non valide.");
 
               $supply = (new DrugstoreSupplyMedicine())
+                ->setOtherQty($otherQty)
+                ->setQuantityLabel($quantityLabel ?? 'Pièce')
                 ->setQuantity($quantity)
                 ->setExpiryDate($expiryDate)
                 ->setMedicine($findMedicine)
                 ->setDrugstoreSupply($drugstore)
+                ->setVTA($vTA)
                 ->setCost($findMedicine->getCost());
 
               $drugstore->addDrugstoreSupplyMedicine($supply);
@@ -97,18 +101,7 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
         }
       }
 
-      $findBox = $this->boxRepository->findBox($hospital->getId());
-      if (null !== $findBox) {
-        $boxHistoric = (new BoxHistoric())
-          ->setBox($findBox)
-          ->setCreatedAt($released)
-          ->setAmount($drugstore->getAmount())
-          ->setTag('output');
-        $this->em->persist($boxHistoric);
-      }
-
       $this->em->flush();
-
     }
   }
 }

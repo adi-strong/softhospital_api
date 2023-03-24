@@ -21,7 +21,7 @@ class MedicinesSold
     #[Assert\NotBlank(message: 'La quantité doit être renseignée.')]
     #[Assert\NotNull(message: 'La quantité doit être renseignée.')]
     #[Groups(['medicineInvoice:read'])]
-    private ?int $quantity = null;
+    private ?float $quantity = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'Le prix doit être renseigné.')]
@@ -42,17 +42,21 @@ class MedicinesSold
     #[ORM\JoinColumn(nullable: false)]
     private ?MedicineInvoice $invoice = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['medicineInvoice:read'])]
+    private ?string $cost = '0';
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getQuantity(): ?int
+    public function getQuantity(): ?float
     {
         return $this->quantity;
     }
 
-    public function setQuantity(int $quantity): self
+    public function setQuantity(float $quantity): self
     {
         $this->quantity = $quantity;
 
@@ -103,6 +107,18 @@ class MedicinesSold
     public function setInvoice(?MedicineInvoice $invoice): self
     {
         $this->invoice = $invoice;
+
+        return $this;
+    }
+
+    public function getCost(): ?string
+    {
+        return $this->cost;
+    }
+
+    public function setCost(?string $cost): self
+    {
+        $this->cost = $cost;
 
         return $this;
     }

@@ -58,7 +58,7 @@ class DrugstoreSupply
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'Le montant de la facture est inconnu.')]
     #[Groups(['supply:read'])]
-    private ?string $amount = null;
+    private ?string $subTotal = null;
 
     #[ORM\ManyToOne(inversedBy: 'drugstoreSupplies')]
     #[Groups(['supply:read'])]
@@ -67,6 +67,16 @@ class DrugstoreSupply
     #[ORM\OneToMany(mappedBy: 'drugstoreSupply', targetEntity: DrugstoreSupplyMedicine::class, cascade: ['persist'])]
     #[Groups(['supply:read'])]
     private Collection $drugstoreSupplyMedicines;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\NotBlank(message: 'La devise doit être renseignée.')]
+    #[Groups(['supply:read'])]
+    private ?string $currency = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Assert\NotBlank(message: 'Le montant total de la facture est inconnu.')]
+    #[Groups(['supply:read'])]
+    private ?string $total = null;
 
     public function __construct()
     {
@@ -126,14 +136,14 @@ class DrugstoreSupply
         return $this;
     }
 
-    public function getAmount(): ?string
+    public function getSubTotal(): ?string
     {
-        return $this->amount;
+        return $this->subTotal;
     }
 
-    public function setAmount(string $amount): self
+    public function setSubTotal(string $subTotal): self
     {
-        $this->amount = $amount;
+        $this->subTotal = $subTotal;
 
         return $this;
     }
@@ -176,6 +186,30 @@ class DrugstoreSupply
                 $drugstoreSupplyMedicine->setDrugstoreSupply(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCurrency(): ?string
+    {
+        return $this->currency;
+    }
+
+    public function setCurrency(?string $currency): self
+    {
+        $this->currency = $currency;
+
+        return $this;
+    }
+
+    public function getTotal(): ?string
+    {
+        return $this->total;
+    }
+
+    public function setTotal(?string $total): self
+    {
+        $this->total = $total;
 
         return $this;
     }

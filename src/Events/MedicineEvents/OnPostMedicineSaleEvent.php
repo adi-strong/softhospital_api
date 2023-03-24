@@ -57,13 +57,13 @@ class OnPostMedicineSaleEvent implements EventSubscriberInterface
       
       $values = $invoice->values;
       foreach ($values as $value) {
-        
         if (null !== $value['id']) {
           $findMedicine = $this->repository->findMedicine($value['id']);
           if (null !== $findMedicine) {
-            $quantity = (int) $value['quantity'] ?? null;
+            $quantity = (float) $value['quantity'] ?? null;
             $price = $value['price'] ?? null;
-            
+            $cost = $value['cost'] ?? '0';
+
             if ($quantity !== null) {
               $newQty = $findMedicine->getQuantity() - $quantity;
               $sum = $quantity * $price;
@@ -74,6 +74,7 @@ class OnPostMedicineSaleEvent implements EventSubscriberInterface
                 ->setMedicine($findMedicine)
                 ->setPrice($price)
                 ->setSum($sum)
+                ->setCost($cost)
                 ->setInvoice($invoice);
               $invoice->addMedicinesSold($newSale);
             }
@@ -83,14 +84,6 @@ class OnPostMedicineSaleEvent implements EventSubscriberInterface
         }
         
       }
-
-      if (null !== $invoice->getDiscount()) {
-        $discount = $invoice->getDiscount();
-        $amount = $invoice->getAmount();
-        $totalAmount = ($amount * $discount) / 100;
-        $invoice->setTotalAmount($totalAmount);
-      }
-      else $invoice->setTotalAmount($invoice->getAmount());
 
       $findBox = $this->boxRepository->findBox($hospital->getId());
       if (null !== $findBox) {

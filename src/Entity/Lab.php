@@ -2,11 +2,14 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use App\AppTraits\CreatedAtTrait;
+use App\AppTraits\FullNameTrait;
 use App\Repository\LabRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -26,9 +29,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
   normalizationContext: ['groups' => ['lab:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Lab
 {
-  use CreatedAtTrait;
+  use CreatedAtTrait, FullNameTrait;
 
   public ?array $values = [];
 

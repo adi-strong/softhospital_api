@@ -70,7 +70,7 @@ class Agent
     #[Groups(['agent:read', 'user:read'])]
     private ?string $sex = null;
 
-    #[ORM\Column(length: 16)]
+    #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné.')]
     #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
     #[Assert\Regex('#^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$#', message: 'Numéro de téléphone non valide.')]
