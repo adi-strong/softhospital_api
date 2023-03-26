@@ -113,6 +113,10 @@ class Nursing
     #[ORM\Column(nullable: true)]
     private array $releasedAtItems = [];
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $subTotal = '0';
+
     public function __construct()
     {
         $this->nursingTreatments = new ArrayCollection();
@@ -366,6 +370,18 @@ class Nursing
   public function setReleasedAtItems(?array $releasedAtItems): self
   {
       $this->releasedAtItems = $releasedAtItems;
+
+      return $this;
+  }
+
+  public function getSubTotal(): ?string
+  {
+      return $this->subTotal;
+  }
+
+  public function setSubTotal(?string $subTotal): self
+  {
+      $this->subTotal = $subTotal;
 
       return $this;
   }

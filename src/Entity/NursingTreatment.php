@@ -21,11 +21,11 @@ class NursingTreatment
     private ?int $id = null;
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'nursingTreatments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Nursing $nursing = null;
 
     #[ORM\ManyToOne(inversedBy: 'nursingTreatments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['nursing:read'])]
     private ?Treatment $treatment = null;
 
@@ -40,6 +40,10 @@ class NursingTreatment
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['nursing:read'])]
     private ?\DateTimeInterface $leaveAt = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $price = '0';
 
     public function getId(): ?int
     {
@@ -102,6 +106,18 @@ class NursingTreatment
     public function setLeaveAt(?\DateTimeInterface $leaveAt): self
     {
         $this->leaveAt = $leaveAt;
+
+        return $this;
+    }
+
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?string $price): self
+    {
+        $this->price = $price;
 
         return $this;
     }

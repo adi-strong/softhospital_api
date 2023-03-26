@@ -11,16 +11,14 @@ use App\Entity\Lab;
 use App\Entity\LabResult;
 use App\Entity\Nursing;
 use App\Entity\NursingTreatment;
-use App\Repository\ActRepository;
 use App\Repository\ActsInvoiceBasketRepository;
-use App\Repository\ExamRepository;
 use App\Repository\ExamsInvoiceBasketRepository;
-use App\Repository\NursingRepository;
-use App\Repository\TreatmentRepository;
+use App\Repository\LabResultRepository;
+use App\Repository\NursingTreatmentRepository;
 use App\Services\HandleCurrentUserService;
 use DateTime;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,18 +27,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class OnUpdateConsultationEvent implements EventSubscriberInterface
 {
-  public function __construct(
-    private readonly HandleCurrentUserService $user,
-    private readonly EntityManagerInterface $em,
-    private readonly ExamRepository $examRepository,
-    private readonly ActRepository $actRepository,
-    private readonly TreatmentRepository $treatmentRepository,
-    private readonly ExamsInvoiceBasketRepository $examsInvoiceBasketRepository,
-    private readonly ActsInvoiceBasketRepository $actsInvoiceBasketRepository,
-    private readonly NursingRepository $nursingRepository)
-  {
-  }
-
   #[ArrayShape([KernelEvents::VIEW => "array"])]
   public static function getSubscribedEvents(): array
   {
@@ -52,273 +38,359 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
     ];
   }
 
+  public function __construct(
+    private readonly HandleCurrentUserService $user,
+    private readonly ActsInvoiceBasketRepository $actsInvoiceBasketRepository,
+    private readonly ExamsInvoiceBasketRepository $examsInvoiceBasketRepository,
+    private readonly LabResultRepository $labResultRepository,
+    private readonly NursingTreatmentRepository $nursingTreatmentRepository,
+    private readonly EntityManagerInterface $em)
+  {
+  }
+
   /**
    * @throws Exception
-   * @throws \Exception
    */
-  public function handler(ViewEvent $event)
-  {
-    $consultation = $event->getControllerResult();
+  public function handler(ViewEvent $event) {
+    $consult = $event->getControllerResult();
     $method = $event->getRequest()->getMethod();
 
-    if ($consultation instanceof Consultation && $method === Request::METHOD_PATCH) {
-      $createdAt = $consultation->getCreatedAt() ?? new DateTime();
-      $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
-      $note = $consultation->getNote() ?? null;
-      $patient = $consultation->getPatient();
-      $currentUser = $consultation->getUser() ?? $this->user->getUser();
-      $doctor = $consultation->getDoctor();
+    if ($consult instanceof Consultation && $method === Request::METHOD_PATCH)
+    {
+      if ($consult->isIsComplete() === false) {
+        if ($consult->isIsPublished() === true) {
+          $currentUser = $this->user->getUser();
+          $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
+          $createdAt = $consult->getCreatedAt() ?? new DateTime();
 
-      $invoice = $consultation->getInvoice();
-      $invoiceAmount = $consultation->getFile() ? $consultation->getFile()->getPrice() : 0;
+          $patient = $consult->getPatient();
+          $fullName = $patient->getFullName();
+          $agent = $consult->getDoctor();
 
-      if ($consultation->isIsComplete() === false) {
-        $exams = $consultation->getExams();
-        $examBaskets = $invoice->getExamsInvoiceBaskets();
-        $lab = $consultation->getLab() ?? null;
-        $newLab = (new Lab())
-          ->setNote($note)
-          ->setUser($currentUser)
-          ->setCreatedAt($createdAt)
-          ->setPatient($patient)
-          ->setHospital($hospital)
-          ->setConsultation($consultation);
-        $labResultsItems = $lab?->getLabResults();
-        // Exams
-        if ($exams->count() < 1 && $examBaskets->count() > 0) { // Si les examens n'existent pas
-          // Mais que le panier des examens existent...
-          foreach ($examBaskets as $basket)
-            $this->em->remove($basket);
+          $consult->setFullName($fullName);
+          $consult->setCreatedAt($createdAt);
 
-          if (null !== $lab) {
-            $consultation->setLab(null);
-            $this->em->remove($lab);
-          }
-          // On supprime les examens du panier
-          // Ainsi que les prescription des examens au Labo
-        } // Fin si...
-        elseif ($exams->count() > 0 && $examBaskets->count() < 1) { // Sinon si les examens existent ?
-          foreach ($exams as $exam) {
-            $newExamBasket = (new ExamsInvoiceBasket())
-              ->setPrice($exam->getPrice())
-              ->setExam($exam)
-              ->setInvoice($invoice);
+          $invoice = $consult->getInvoice();
+          $invoice->setFullName($fullName);
+          $file = $consult->getFile();
+          $invoiceAmount = $file ? $file->getPrice() : 0;
 
-            $labResults = (new LabResult())
-              ->setExam($exam)
-              ->setLab($lab ?? $newLab);
+          // appointment
+          $appointmentDate = $consult->appointmentDate ?? $createdAt;
+          $appointment = $consult->getAppointment();
+          $appointment->setPatient($patient);
+          $appointment->setFullName($fullName);
+          $appointment->setDoctor($agent);
+          $appointment->setAppointmentDate($appointmentDate);
+          // end appointment
 
-            $invoiceAmount += $exam->getPrice();
-
-            $this->em->persist($labResults);
-            $this->em->persist($newExamBasket);
-          }
-        } // Fin sinon si (1)...
-        elseif ($exams->count() > 0 && $examBaskets->count() > 0) { // Si les examens existent à la fois
-          // dans la consultation
-          // et dans le panier
-          foreach ($examBaskets as $examBasket) {
-            $examJoin = $this->examRepository->find($examBasket->getExam()->getId());
-            if ($exams->contains($examJoin) === false) $this->em->remove($examBasket);
-          } // Boucle ( 1 )
-          // Suppression des examens du panier qui n'existent plus ou modifiés
-
-          foreach ($exams as $exam) {
-            $findBasketExam = $this->examsInvoiceBasketRepository->findInvoiceExamBasket($exam, $invoice);
-            $invoiceAmount += $exam->getPrice();
-            if (null === $findBasketExam) {
-              $newExamBasket2 = (new ExamsInvoiceBasket())
-                ->setExam($exam)
-                ->setInvoice($invoice)
-                ->setPrice($exam->getPrice());
-              $invoice->addExamsInvoiceBasket($newExamBasket2);
-            } // Si l'examen n'existe pas dans le panier, on le rajoute
-
-            if (null === $lab) {
-              $newLabResult = (new LabResult())
-                ->setExam($exam)
-                ->setLab($newLab);
-              $this->em->persist($newLabResult);
-            } // On ajoute l'examen dans le labo
-          } // Boucle ( 2 )
-
-          if (null !== $labResultsItems) {
-            foreach ($labResultsItems as $item) {
-              $findJoinLabExam = $this->examRepository->find($item->getExam());
-              if ($exams->contains($findJoinLabExam) === false) $this->em->remove($item);
+          // acts
+          $acts = $consult->getActs();
+          $actBaskets = $invoice->getActsInvoiceBaskets();
+          if ($acts->count() < 1) {
+            if ($actBaskets->count() > 0) {
+              foreach ($actBaskets as $basket) $this->em->remove($basket);
             }
           }
-        } // Fin sinon si (2)...
-        // End Exams
+          else {
+            if ($actBaskets->count() > 0 && $acts->count() > 0) {
+              foreach ($acts as $act) {
+                $findAct = $this->actsInvoiceBasketRepository->findInvoiceAct($act, $invoice);
+                if ($findAct === null) {
+                  $actBasket = (new ActsInvoiceBasket())
+                    ->setInvoice($invoice)
+                    ->setAct($act)
+                    ->setPrice($act->getPrice());
+                  $this->em->persist($actBasket);
+                }
+              } // 1st si les actes n'existent pas dans le panier, on les ajoutes.
 
+              foreach ($actBaskets as $basket) {
+                $act = $basket->getAct();
+                if (null !== $act && $acts->contains($act) === false) $this->em->remove($basket);
+              }
+              // 2nd : on vérifie s'il y a cohérence entre les actes de la consultation et ceux du panier
+              // s'il n'y a pas d'occurence on supprime
 
+            } // si les actes existent déjà dans le panier ? => on évite les doublons...
 
+            if ($actBaskets->count() < 1) {
+              foreach ($acts as $act) {
+                $actBasket = (new ActsInvoiceBasket())
+                  ->setPrice($act->getPrice())
+                  ->setAct($act)
+                  ->setInvoice($invoice);
+                $this->em->persist($actBasket);
+              }
+            } // si les actes n'existent pas ? => on les ajoutent tout simplement
 
-
-
-
-
-        $acts = $consultation->getActs();
-        $actBaskets = $invoice->getActsInvoiceBaskets();
-        // Acts
-        if ($acts->count() < 1 && $actBaskets->count() > 0) {
-          foreach ($actBaskets as $basket2)
-            $this->em->remove($basket2);
-        }
-        elseif ($acts->count() > 0 && $actBaskets->count() < 1) {
-          foreach ($acts as $act) {
-            $newActBasket = (new ActsInvoiceBasket())
-              ->setPrice($act->getPrice())
-              ->setInvoice($invoice)
-              ->setAct($act);
-
-            $invoiceAmount += $act->getPrice();
-            $this->em->persist($newActBasket);
+            foreach ($acts as $act) {
+              $invoiceAmount += $act->getPrice();
+            } // ...
           }
-        }
-        elseif ($acts->count() > 0 && $actBaskets->count() > 0) {
-          foreach ($acts as $act) {
-            $findBasketAct = $this->actsInvoiceBasketRepository->findInvoiceAct($act, $invoice);
-            $invoiceAmount += $act->getPrice();
-            if (null === $findBasketAct) {
-              $newActBasket2 = (new ActsInvoiceBasket())
-                ->setAct($act)
-                ->setInvoice($invoice)
-                ->setPrice($act->getPrice());
+          // end acts
 
-              $this->em->persist($newActBasket2);
+          // exams
+          $exams = $consult->getExams();
+          $examBaskets = $invoice->getExamsInvoiceBaskets();
+          $lab = $consult->getLab();
+          if ($exams->count() < 1) {
+            $consult->setLab(null);
+            if (null !== $lab) {
+              $this->em->remove($lab);
+            } // on traite les données relatifs au labo
+
+            foreach ($examBaskets as $basket) $this->em->remove($basket);
+          }
+          else {
+            if (null !== $lab) {
+              $lab->setFullName($fullName);
+              $lab->setPatient($patient);
+              $lab->setNote($consult->getNote());
+
+              $labResults = $lab->getLabResults();
+              if ($labResults->count() > 0 && $exams->count() > 0) {
+                foreach ($exams as $exam) {
+                  $findExam = $this->labResultRepository->findLabExam($exam, $lab);
+                  if ($findExam === null) {
+                    $labResult = (new LabResult())
+                      ->setExam($exam)
+                      ->setLab($lab);
+                    $this->em->persist($labResult);
+                  }
+                }
+
+                foreach ($labResults as $labResult) {
+                  $exam = $labResult->getExam();
+                  if (null !== $exam && $exams->contains($exam) === false) $this->em->remove($labResult);
+                }
+              }
+
+              if ($labResults->count() < 1) {
+                foreach ($exams as $exam) {
+                  $examBasket = (new ExamsInvoiceBasket())
+                    ->setInvoice($invoice)
+                    ->setPrice($exam->getPrice())
+                    ->setExam($exam);
+                  $this->em->persist($examBasket);
+                }
+              }
+            } // si les examens existent dans le labo => on évite les doublons
+
+            if (null === $lab && $exams->count() > 0) {
+              $newLab = (new Lab())
+                ->setCreatedAt($createdAt)
+                ->setUser($currentUser)
+                ->setHospital($hospital)
+                ->setFullName($fullName)
+                ->setPatient($patient)
+                ->setConsultation($consult)
+                ->setNote($consult->getNote());
+              $this->em->persist($newLab);
+
+              foreach ($exams as $exam) {
+                $labResult = (new LabResult())
+                  ->setExam($exam)
+                  ->setLab($newLab);
+                $this->em->persist($labResult);
+              }
+            }
+            // si le labo n'existe pas, on le crée.
+
+            if ($examBaskets->count() > 0 && $exams->count() > 0) {
+              foreach ($exams as $exam) {
+                $findExam = $this->examsInvoiceBasketRepository->findInvoiceExamBasket($exam, $invoice);
+                if (null === $findExam) {
+                  $examBasket = (new ExamsInvoiceBasket())
+                    ->setExam($exam)
+                    ->setPrice($exam->getPrice())
+                    ->setInvoice($invoice);
+                  $this->em->persist($examBasket);
+                }
+              }
+              // si les examens existent mais pas dans le panier, on les ajoute.
+
+              foreach ($examBaskets as $basket) {
+                $exam = $basket->getExam();
+                if (null !== $exam && $exams->contains($exam) === false) $this->em->remove($basket);
+              }
+              // si les examens du panier n'existent pas dans la fiche, on les supprime.
+            }
+
+            if ($examBaskets->count() < 1) {
+              foreach ($exams as $exam) {
+                $examBasket = (new ExamsInvoiceBasket())
+                  ->setInvoice($invoice)
+                  ->setPrice($exam->getPrice())
+                  ->setExam($exam);
+                $this->em->persist($examBasket);
+              }
+            }
+
+            foreach ($exams as $exam) {
+              $invoiceAmount += $exam->getPrice();
             }
           }
+          // end exams
 
-          foreach ($actBaskets as $actBasket) {
-            $actJoin = $this->actRepository->find($actBasket->getAct()->getId());
-            if ($acts->contains($actJoin) === false) $this->em->remove($actBasket);
-          }
-        }
-        // End Acts
-
-
-
-
-
-
-
-
-        $treatments = $consultation->getTreatments();
-        $nursing = $consultation->getNursing();
-        $nurseTreatments = $nursing?->getNursingTreatments();
-        $newNursing = (new Nursing())
-          ->setConsultation($consultation)
-          ->setCreatedAt($createdAt)
-          ->setHospital($hospital)
-          ->setPatient($patient);
-        // Treatments
-        if ($treatments->count() < 1) {
-          if (null !== $nursing) {
-            foreach ($nurseTreatments as $nurseTreatment) $this->em->remove($nurseTreatment);
-            $this->em->remove($nursing);
-          }
-        }
-        elseif ($treatments->count() > 0) {
-          foreach ($treatments as $treatment) {
-            $findTreatmentNurses = $this->nursingRepository->findTreatmentNurse($treatment, $nursing);
-            if (null === $findTreatmentNurses) {
-              $newTreatmentNursing = (new NursingTreatment())
-                ->setTreatment($treatment)
-                ->setNursing($nursing ?? $newNursing);
-              $this->em->persist($newTreatmentNursing);
+          // treatments
+          $treatments = $consult->getTreatments();
+          $nursing = $consult->getNursing();
+          if ($treatments->count() < 1) {
+            $consult->setNursing(null);
+            if (null !== $nursing) {
+              $this->em->remove($nursing);
             }
           }
+          else {
+            if (null !== $nursing) {
+              $nursing->setPatient($patient);
+              $nursing->setFullName($fullName);
 
-          foreach ($nurseTreatments as $nurseTreatment) {
-            $treatmentJoin2 = $this->treatmentRepository->find($nurseTreatment->getTreatment()->getId());
-            if ($treatments->contains($treatmentJoin2) === false) $this->em->remove($nurseTreatment);
+              $nurses = $nursing->getNursingTreatments();
+              if ($nurses->count() > 0 && $treatments->count() > 0) {
+                foreach ($treatments as $treatment) {
+                  $findTr = $this->nursingTreatmentRepository->findNursingTreatment($treatment, $nursing);
+                  if (null === $findTr) {
+                    $nurse = (new NursingTreatment())
+                      ->setPrice($treatment->getPrice())
+                      ->setTreatment($treatment)
+                      ->setNursing($nursing);
+                    $this->em->persist($nurse);
+                  } // ...on les ajoute.
+
+                  foreach ($nurses as $nurse) {
+                    $treatment = $nurse->getTreatment();
+                    if (null !== $treatment && $treatments->contains($treatment) === false) $this->em->remove($nurse);
+                  } // si les treatments ne correspondent pas avec ceux de la fiche
+                  // ...on les supprime
+
+                } // si les traitements ne sont pas dans le nursing
+              } // si les items des treatments existent...
+
+              if ($nurses->count() < 1) {
+                foreach ($treatments as $treatment) {
+                  $nurse = (new NursingTreatment())
+                    ->setPrice($treatment->getPrice())
+                    ->setTreatment($treatment)
+                    ->setNursing($nursing);
+                  $this->em->persist($nurse);
+                }
+              } // s'ils n'existent pas, on les ajoute.
+
+              $nurseAmount = 0;
+              foreach ($treatments as $treatment) {
+                $nurseAmount += $treatment->getPrice();
+              }
+
+              $nursing->setSubTotal($nurseAmount);
+              $nursing->setAmount($nurseAmount);
+              $nursing->setTotalAmount($nurseAmount);
+            } // si le nursing existe
+
+            if (null === $nursing && $treatments->count() > 0) {
+              $newNursing = (new Nursing())
+                ->setFullName($fullName)
+                ->setPatient($patient)
+                ->setHospital($hospital)
+                ->setConsultation($consult)
+                ->setCreatedAt($createdAt);
+
+              $nurseAmount = 0;
+              foreach ($treatments as $treatment) {
+                $nurseAmount += $treatment->getPrice();
+                $nurse = (new NursingTreatment())
+                  ->setNursing($newNursing)
+                  ->setTreatment($treatment)
+                  ->setPrice($treatment->getPrice());
+                $this->em->persist($nurse);
+              }
+
+              $newNursing->setTotalAmount($nurseAmount);
+              $newNursing->setSubTotal($nurseAmount);
+              $newNursing->setAmount($nurseAmount);
+              $this->em->persist($newNursing);
+            }
           }
-        }
-        // End Treatments
+          // end treatments
 
+          // hospitalization
+          $hospReleasedAt = $consult->hospReleasedAt ?? $createdAt;
+          $bed = $consult->bed;
+          $hosp = $consult->getHospitalization();
+          if (null !== $hosp) {
+            $hosp->setFullName($fullName);
+            $oldBed = $hosp->getBed();
 
+            if (null !== $bed && $bed->getId() !== $oldBed?->getId()) {
+              if ($bed->isItHasTaken() === false) {
+                $oldBed?->setItHasTaken(false);
+                $bed->setItHasTaken(true);
 
+                $counter = (new DateTime())->diff($hospReleasedAt)->days + 1;
+                $price = $bed->getPrice() * $counter;
+                $invoiceAmount += $price;
+                $bed->setItHasTaken(true);
 
+                $hosp->setReleasedAt($hospReleasedAt);
+                $hosp->setDaysCounter($counter);
+                $hosp->setPrice($price);
+                $hosp->setBed($bed);
+              }
+              else throw new Exception('Ce lit est déjà prit.');
+            } // si l'hospitalisation est renseigné, on libère l'ancien lit...
 
+            if (null !== $bed && $bed->getId() === $oldBed?->getId()) {
+              $counter = (new DateTime())->diff($hospReleasedAt)->days + 1;
+              $price = $oldBed->getPrice() * $counter;
+              $invoiceAmount += $price;
 
-        // Handle Appointment
-        $appointmentDate = $consultation->appointmentDate ?? $createdAt;
-        $appointment = $consultation->getAppointment();
-        $appointment->setPatient($patient);
-        $appointment->setAppointmentDate($appointmentDate);
-        $appointment->setDoctor($doctor);
-        $appointment->setFullName($patient->getFullName());
-        // End Handle Appointment
+              $hosp->setReleasedAt($hospReleasedAt);
+              $hosp->setDaysCounter($counter);
+              $hosp->setPrice($price);
+            }
 
-
-
-
-
-
-        // Handle Hospitalization
-        $hospitalization = $consultation->getHospitalization();
-        $bed = $hospitalization?->getBed();
-        $newBed = $consultation?->bed;
-        $releasedAt = $consultation->hospReleasedAt ?? $createdAt;
-        if (null !== $bed && null !== $newBed) {
-          if ($bed->getId() !== $newBed->getId()) {
-            $bed->setItHasTaken(false);
-            $hospitalization->setConsultation(null);
-            $bed->removeHospitalization($hospitalization);
-            $this->em->flush();
-
-            $newHosp = (new Hospitalization())
-              ->setConsultation($consultation)
-              ->setPrice($newBed->getPrice())
-              ->setHospital($hospital)
-              ->setReleasedAt($releasedAt)
-              ->setBed($newBed);
-
-            $newBed->setItHasTaken(true);
-
-            $this->em->persist($newHosp);
+            if (null === $bed) {
+              $consult->setHospitalization(null);
+              $oldBed->setItHasTaken(false);
+              $this->em->remove($hosp);
+            }
+          } // si l'ospitalisation existe déjà
+          else {
+            if (null !== $bed) {
+              if ($bed->isItHasTaken() === false) {
+                $counter = (new DateTime())->diff($hospReleasedAt)->days + 1;
+                $price = $bed->getPrice() * $counter;
+                $invoiceAmount += $price;
+                $bed->setItHasTaken(true);
+                $newHosp = (new Hospitalization())
+                  ->setFullName($fullName)
+                  ->setHospital($hospital)
+                  ->setConsultation($consult)
+                  ->setReleasedAt($hospReleasedAt)
+                  ->setDaysCounter($counter)
+                  ->setPrice($price)
+                  ->setBed($bed);
+                $this->em->persist($newHosp);
+              }
+              else throw new Exception('Ce lit est déjà prit.');
+            }
           }
+          // end hospitalization
+
+          $invoice->setSubTotal($invoiceAmount);
+          $invoice->setAmount($invoiceAmount);
+          $invoice->setTotalAmount($invoiceAmount);
+          $invoice->setLeftover($invoiceAmount);
+
+          // we finish here
+          $this->em->flush();
+          // **********************************************************************************************
         }
-        elseif (null === $bed && null !== $newBed) {
-          if ($newBed->isItHasTaken() === false) {
-            $hosp = (new Hospitalization())
-              ->setPrice($newBed->getPrice())
-              ->setConsultation($consultation)
-              ->setReleasedAt($releasedAt)
-              ->setBed($newBed)
-              ->setHospital($hospital);
-
-            $newBed->setItHasTaken(true);
-            $this->em->persist($hosp);
-          }
-          else throw new Exception('Ce lit n\'est pas disponible.');
-        }
-        elseif (null !== $bed && null === $newBed) {
-          $bed->setItHasTaken(false);
-          $hospitalization->setBed(null);
-          $hospitalization->setConsultation(null);
-          $invoice->setHospitalizationAmount(0);
-        }
-        elseif (null !== $hospitalization) {
-          $consultation->setHospitalization(null);
-          $invoice->setHospitalizationAmount(0);
-        }
-        // End Handle Hospitalization
-
-
-        $lab?->setPatient($patient);
-
-
-
-
-        $invoice->setLeftover($invoiceAmount - $invoice->getPaid());
-        $invoice->setAmount($invoiceAmount);
-        $invoice->setTotalAmount($invoiceAmount);
-        $invoice->setPatient($patient);
+        else throw new Exception('Ce dossier est déjà clos.');
       }
-
-      $this->em->flush();
+      else throw new Exception('Ce dossier est déjà clos.');
     }
+
   }
 }

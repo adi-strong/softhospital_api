@@ -2,6 +2,8 @@
 
 namespace App\Repository;
 
+use ApiPlatform\OpenApi\Model\Parameter;
+use App\Entity\Hospital;
 use App\Entity\Parameters;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -46,6 +48,7 @@ class ParametersRepository extends ServiceEntityRepository
   public function findLastParameters($hospitalId)
   {
     $qb = $this->createQueryBuilder('p')
+      ->addSelect('p.currency')
       ->join('p.hospital', 'h')
       ->andWhere('p.hospital = :hospital')
       ->setParameter('hospital', $hospitalId)
@@ -78,4 +81,16 @@ class ParametersRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  public function findLastParameter(Hospital $hospital): array|float|int|string
+  {
+    $qb = $this->createQueryBuilder('p')
+      ->select('p.currency')
+      ->join('p.hospital', 'h', 'WITH', 'h.id = :hospital')
+      ->orderBy('p.id', 'DESC')
+      ->setParameter(':hospital', $hospital)
+      ->setMaxResults(1);
+
+    return $qb->getQuery()->getSingleColumnResult();
+  }
 }

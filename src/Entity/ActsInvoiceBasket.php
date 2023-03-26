@@ -16,11 +16,11 @@ class ActsInvoiceBasket
     #[Groups(['invoice:read'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'actsInvoiceBaskets')]
+    #[ORM\ManyToOne(inversedBy: 'actsInvoiceBaskets')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Invoice $invoice = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'actsInvoiceBaskets')]
+    #[ORM\ManyToOne(inversedBy: 'actsInvoiceBaskets')]
     #[Groups(['invoice:read'])]
     #[ORM\JoinColumn(nullable: true)]
     private ?Act $act = null;

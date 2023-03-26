@@ -108,6 +108,7 @@ class AppFixtures extends Fixture
       $agentName = $faker->name;
       $agentLastName = $faker->lastName;
       $agentFirstName = $faker->firstName;
+      $agentUsername = $faker->userName;
       $agentFullName = trim($agentName . ' ' . $agentLastName . ' ' . $agentFirstName);
 
       $user = (new User())
@@ -117,7 +118,7 @@ class AppFixtures extends Fixture
         ->setUser($root)
         ->setPassword('pass')
         ->setRoles([$faker->randomElement(['ROLE_DOCTOR', 'ROLE_MEDIC'])])
-        ->setUsername($agentFirstName)
+        ->setUsername($agentUsername)
         ->setUId($root->getUId())
         ->setTel($faker->phoneNumber)
         ->setHospitalCenter($hospital);
@@ -209,6 +210,10 @@ class AppFixtures extends Fixture
               ->setUser($root)
               ->setFullName($patient->getFullName())
               ->setAmount($file->getPrice())
+              ->setSubTotal($file->getPrice())
+              ->setTotalAmount($file->getPrice())
+              ->setLeftover($file->getPrice())
+              ->setCurrency('$')
               ->setReleasedAt($consult->getCreatedAt());
             $manager->persist($invoice);
           }

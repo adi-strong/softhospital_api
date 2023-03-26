@@ -169,6 +169,10 @@ class Consultation
     #[Groups(['consult:read'])]
     private ?string $fullName = null;
 
+    #[ORM\Column]
+    #[Groups(['consult:read'])]
+    private ?bool $isPublished = true;
+
     public function __construct()
     {
         $this->acts = new ArrayCollection();
@@ -568,6 +572,18 @@ class Consultation
     public function setFullName(?string $fullName): self
     {
         $this->fullName = $fullName;
+
+        return $this;
+    }
+
+    public function isIsPublished(): ?bool
+    {
+        return $this->isPublished;
+    }
+
+    public function setIsPublished(bool $isPublished): self
+    {
+        $this->isPublished = $isPublished;
 
         return $this;
     }

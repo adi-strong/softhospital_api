@@ -38,6 +38,8 @@ class Invoice
 
   public ?string $sum = '0';
 
+  public ?int $daysCounter = null;
+
   public ?bool $isBedroomLeaved = false;
 
     #[ORM\Id]
@@ -100,10 +102,6 @@ class Invoice
     #[Groups(['invoice:read'])]
     private Collection $examsInvoiceBaskets;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    #[Groups(['invoice:read'])]
-    private ?string $hospitalizationAmount = '0';
-
     #[ORM\Column(nullable: true)]
     #[Groups(['invoice:read'])]
     private ?float $discount = null;
@@ -119,6 +117,18 @@ class Invoice
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(['invoice:read'])]
     private ?\DateTimeInterface $updatedAt = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['invoice:read'])]
+    private ?string $subTotal = '0';
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['invoice:read'])]
+    private ?string $currency = null;
+
+    #[ORM\Column]
+    #[Groups(['invoice:read'])]
+    private ?bool $isPublished = false;
 
     public function __construct()
     {
@@ -312,42 +322,6 @@ class Invoice
         return $this;
     }
 
-    public function getHospitalizationAmount(): ?string
-    {
-        return $this->hospitalizationAmount;
-    }
-
-    public function setHospitalizationAmount(?string $hospitalizationAmount): self
-    {
-        $this->hospitalizationAmount = $hospitalizationAmount;
-
-        return $this;
-    }
-
-  #[Groups(['invoice:read'])]
-  public function getTotalSum(): ?string
-  {
-    $hospAmount = $this->hospitalizationAmount;
-    $amount = $this->amount + $hospAmount;
-
-    if (null !== $this->vTA && null !== $this->discount) {
-      $vTA = ($amount * $this->vTA) / 100;
-      $discount = ($amount * $this->discount) / 100;
-      $total = ($amount + $vTA) + ($amount - $discount);
-    }
-    elseif (null !== $this->discount) {
-      $discount = ($amount * $this->discount) / 100;
-      $total = $amount - $discount;
-    }
-    elseif (null !== $this->vTA) {
-      $vTA = ($amount * $this->vTA) / 100;
-      $total = $amount + $vTA;
-    }
-    else $total = $amount;
-
-    return round($total, 2);
-  }
-
   #[Groups(['invoice:read'])]
   public function getInvoiceNumber(): ?string
   {
@@ -398,6 +372,42 @@ class Invoice
   public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
   {
       $this->updatedAt = $updatedAt;
+
+      return $this;
+  }
+
+  public function getSubTotal(): ?string
+  {
+      return $this->subTotal;
+  }
+
+  public function setSubTotal(?string $subTotal): self
+  {
+      $this->subTotal = $subTotal;
+
+      return $this;
+  }
+
+  public function getCurrency(): ?string
+  {
+      return $this->currency;
+  }
+
+  public function setCurrency(?string $currency): self
+  {
+      $this->currency = $currency;
+
+      return $this;
+  }
+
+  public function isIsPublished(): ?bool
+  {
+      return $this->isPublished;
+  }
+
+  public function setIsPublished(bool $isPublished): self
+  {
+      $this->isPublished = $isPublished;
 
       return $this;
   }

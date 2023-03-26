@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230324103410 extends AbstractMigration
+final class Version20230325114058 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,14 +20,12 @@ final class Version20230324103410 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE medicine_invoice CHANGE discount discount DOUBLE PRECISION DEFAULT NULL');
-        $this->addSql('ALTER TABLE medicines_sold CHANGE quantity quantity DOUBLE PRECISION NOT NULL');
+        $this->addSql('ALTER TABLE invoice DROP hospitalization_amount');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE medicine_invoice CHANGE discount discount INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE medicines_sold CHANGE quantity quantity INT NOT NULL');
+        $this->addSql('ALTER TABLE invoice ADD hospitalization_amount NUMERIC(10, 2) DEFAULT NULL');
     }
 }

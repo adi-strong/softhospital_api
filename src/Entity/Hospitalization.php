@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use App\AppTraits\IsDeletedTrait;
 use App\Repository\HospitalizationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -13,6 +14,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource]
 class Hospitalization
 {
+  use IsDeletedTrait;
+
   public ?bool $isBedroomLeaved = false;
 
     #[ORM\Id]
@@ -57,6 +60,10 @@ class Hospitalization
     #[ORM\Column]
     #[Groups(['invoice:read'])]
     private ?bool $isCompleted = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['consult:read', 'invoice:read'])]
+    private ?string $fullName = null;
 
     public function getId(): ?int
     {
@@ -155,6 +162,18 @@ class Hospitalization
     public function setIsCompleted(bool $isCompleted): self
     {
         $this->isCompleted = $isCompleted;
+
+        return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
+    }
+
+    public function setFullName(?string $fullName): self
+    {
+        $this->fullName = $fullName;
 
         return $this;
     }
