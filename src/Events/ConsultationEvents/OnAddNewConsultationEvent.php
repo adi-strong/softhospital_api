@@ -144,6 +144,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       if ($treatments->count() > 0) {
         $nursing = (new Nursing())
           ->setConsultation($consult)
+          ->setCurrency($parameter[0] ?? null)
           ->setPatient($patient)
           ->setFullName($fullName)
           ->setCreatedAt($createdAt)
@@ -188,6 +189,32 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
         else throw new Exception('Ce lit est déjà prit.');
       }
       // end hospitalization
+
+
+      $diagnostic = trim($consult?->getDiagnostic(), ' ');
+      $date = (new DateTime())->format('Y-m-d');
+      $followed = $consult?->getFollowed();
+
+
+      $followed[] = [
+        'date' => $date,
+        'diagnostic' => $diagnostic,
+        'temperature' => $consult->getTemperature(),
+        'weight' => $consult->getWeight(),
+        'arterialTension' => $consult->getArterialTension(),
+        'cardiacFrequency' => $consult->getCardiacFrequency(),
+        'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
+        'oxygenSaturation' => $consult->getOxygenSaturation()];
+
+      $consult->setFollowed($followed);
+      $consult->setDiagnostic(null);
+      $consult->setTemperature(null);
+      $consult->setWeight(null);
+      $consult->setArterialTension(null);
+      $consult->setCardiacFrequency(null);
+      $consult->setRespiratoryFrequency(null);
+      $consult->setOxygenSaturation(null);
+
 
       // we finish here
       $invoice->setSubTotal($invoiceAmount);

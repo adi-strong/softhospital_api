@@ -173,6 +173,10 @@ class Consultation
     #[Groups(['consult:read'])]
     private ?bool $isPublished = true;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['consult:read'])]
+    private ?array $followed = [];
+
     public function __construct()
     {
         $this->acts = new ArrayCollection();
@@ -584,6 +588,18 @@ class Consultation
     public function setIsPublished(bool $isPublished): self
     {
         $this->isPublished = $isPublished;
+
+        return $this;
+    }
+
+    public function getFollowed(): ?array
+    {
+        return $this->followed;
+    }
+
+    public function setFollowed(?array $followed): self
+    {
+        $this->followed = $followed;
 
         return $this;
     }

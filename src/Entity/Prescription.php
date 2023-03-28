@@ -71,6 +71,7 @@ class Prescription
     private ?Hospital $hospital = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['prescript:read'])]
     private ?array $orders = [];
 
     public function getId(): ?int

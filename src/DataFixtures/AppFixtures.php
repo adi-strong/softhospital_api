@@ -320,7 +320,7 @@ class AppFixtures extends Fixture
     // End Bedrooms
 
     // Conventions
-    for ($c = 0; $c < 50; $c++) {
+    for ($c = 0; $c < 11; $c++) {
       $covenant = (new Covenant())
         ->setTel($faker->phoneNumber)
         ->setEmail($faker->companyEmail)
@@ -330,6 +330,35 @@ class AppFixtures extends Fixture
         ->setDenomination($faker->company)
         ->setFocal($faker->name);
       $manager->persist($covenant);
+
+      for ($p = 0; $p < mt_rand(10, 20); $p++) {
+        $name = $faker->randomElement([$faker->name('male'), $faker->name('female')]);
+        $lastName = $faker->randomElement([$faker->name('male'), $faker->name('female')]);
+        $firstName = $faker->randomElement([$faker->firstNameMale, $faker->firstNameFemale]);
+        $fullName = trim($name.' '.$lastName.' '.$firstName);
+        $birthDate = $faker->dateTimeBetween('-50 years', '-2 years');
+        $age = (int) ($currentDate->format('Y') - $birthDate->format('Y'));
+
+        $patient = (new Patient())
+          ->setHospital($hospital)
+          ->setAddress($faker->address)
+          ->setTel($faker->phoneNumber)
+          ->setUser($root)
+          ->setCreatedAt($faker->dateTimeBetween('-6 months', 'now'))
+          ->setName($name)
+          ->setLastName($lastName)
+          ->setFirstName($firstName)
+          ->setFullName($fullName)
+          ->setBirthDate($birthDate)
+          ->setCovenant($covenant)
+          ->setAge($age)
+          ->setEmail($faker->email)
+          ->setBirthPlace($faker->city)
+          ->setMaritalStatus($faker->randomElement(['single', 'married']))
+          ->setNationality($faker->country)
+          ->setSex($faker->randomElement(['M', 'F']));
+        $manager->persist($patient);
+      }
     }
     // End Conventions
 

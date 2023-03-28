@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use App\AppTraits\CreatedAtTrait;
 use App\Repository\NursingRepository;
@@ -46,7 +47,7 @@ class Nursing
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['nursing:read', 'invoice:read'])]
+    #[Groups(['nursing:read', 'invoice:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'nursing')]
@@ -54,7 +55,7 @@ class Nursing
     private ?Consultation $consultation = null;
 
     #[ORM\OneToMany(mappedBy: 'nursing', targetEntity: NursingTreatment::class, cascade: ['remove', 'persist'])]
-    #[Groups(['nursing:read'])]
+    #[Groups(['nursing:read', 'invoice:read'])]
     private Collection $nursingTreatments;
 
     #[ORM\ManyToOne(inversedBy: 'nursings')]
@@ -116,6 +117,14 @@ class Nursing
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Groups(['nursing:read'])]
     private ?string $subTotal = '0';
+
+    #[ORM\Column]
+    #[Groups(['nursing:read'])]
+    private ?bool $isPayed = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?string $currency = null;
 
     public function __construct()
     {
@@ -382,6 +391,30 @@ class Nursing
   public function setSubTotal(?string $subTotal): self
   {
       $this->subTotal = $subTotal;
+
+      return $this;
+  }
+
+  public function isIsPayed(): ?bool
+  {
+      return $this->isPayed;
+  }
+
+  public function setIsPayed(bool $isPayed): self
+  {
+      $this->isPayed = $isPayed;
+
+      return $this;
+  }
+
+  public function getCurrency(): ?string
+  {
+      return $this->currency;
+  }
+
+  public function setCurrency(?string $currency): self
+  {
+      $this->currency = $currency;
 
       return $this;
   }

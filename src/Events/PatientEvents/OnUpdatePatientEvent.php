@@ -4,6 +4,7 @@ namespace App\Events\PatientEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
 use App\Entity\Patient;
+use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +24,8 @@ class OnUpdatePatientEvent implements EventSubscriberInterface
     ];
   }
 
+  public function __construct(private readonly EntityManagerInterface $em) { }
+
   public function handler(ViewEvent $event)
   {
     $patient = $event->getControllerResult();
@@ -36,7 +39,28 @@ class OnUpdatePatientEvent implements EventSubscriberInterface
       $patient->setFullName(trim($fullName, ' '));
       // End Patient fullName
 
-      // ...
+      $consultations = $patient->getConsultations();
+      $nursingItems = $patient->getNursings();
+      $prescriptions = $patient->getPrescriptions();
+      $labs = $patient->getLabs();
+
+      if ($consultations->count() > 0) {
+        foreach ($consultations as $consultation) $consultation->setFullName($fullName);
+      } // handle edit consultations full_name
+
+      if ($nursingItems->count() > 0) {
+        foreach ($nursingItems as $nursing) $nursing->setFullName($fullName);
+      } // handle edit nursing full_name
+
+      if ($prescriptions->count() > 0) {
+        foreach ($prescriptions as $prescription) $prescription->setFullName($fullName);
+      } // handle edit prescriptions full_name
+
+      if ($labs->count() > 0) {
+        foreach ($labs as $lab) $lab->setFullName($fullName);
+      } // handle edit labs full_name
+
+      $this->em->flush();
     }
   }
 }

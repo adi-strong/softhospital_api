@@ -54,7 +54,6 @@ class OnUpdateInvoiceEvent implements EventSubscriberInterface
 
       $invoice->setFullName($patient->getFullName());
       $invoice->setIsPublished(true);
-
       $consult?->setIsPublished(false);
 
       if ($sum > 0.00 && $sum) {
