@@ -68,7 +68,8 @@ class BoxRepository extends ServiceEntityRepository
   public function findBox(int $id): ?Box
   {
     $qb = $this->createQueryBuilder('b')
-      ->andWhere('b.id = :id')
+      ->leftJoin('b.hospital', 'h')
+      ->where('h.id = :id')
       ->setParameter('id', $id);
 
     $query = null;

@@ -5,13 +5,13 @@ namespace App\Entity;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
+use App\Controller\StatControllers\Stats1SectionController;
 use App\Repository\ConsultationsTypeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -28,6 +28,11 @@ use Symfony\Component\Validator\Constraints as Assert;
     new Get(),
     new Post(),
     new Patch(),
+    new Get(
+      uriTemplate: '/stats/{year}/{month}/{hospitalId}',
+      controller: Stats1SectionController::class,
+      name: 'stats',
+    )
   ],
   normalizationContext: ['groups' => ['fileType:read']],
   order: ['id' => 'DESC'],

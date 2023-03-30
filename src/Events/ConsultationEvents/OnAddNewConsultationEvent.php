@@ -191,29 +191,36 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       // end hospitalization
 
 
-      $diagnostic = trim($consult?->getDiagnostic(), ' ');
+      $diagnostic = null !== $consult->getDiagnostic() ? trim($consult?->getDiagnostic(), ' ') : null;
       $date = (new DateTime())->format('Y-m-d');
       $followed = $consult?->getFollowed();
 
-
-      $followed[] = [
-        'date' => $date,
-        'diagnostic' => $diagnostic,
-        'temperature' => $consult->getTemperature(),
-        'weight' => $consult->getWeight(),
-        'arterialTension' => $consult->getArterialTension(),
-        'cardiacFrequency' => $consult->getCardiacFrequency(),
-        'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
-        'oxygenSaturation' => $consult->getOxygenSaturation()];
+      if (null !== $diagnostic) {
+        $followed[] = [
+          'date' => $date,
+          'diagnostic' => $diagnostic,
+          'temperature' => $consult->getTemperature(),
+          'weight' => $consult->getWeight(),
+          'arterialTension' => $consult->getArterialTension(),
+          'cardiacFrequency' => $consult->getCardiacFrequency(),
+          'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
+          'oxygenSaturation' => $consult->getOxygenSaturation()];
+      }
+      else {
+        $followed[] = [
+          'date' => $date,
+          'temperature' => $consult->getTemperature(),
+          'weight' => $consult->getWeight(),
+          'arterialTension' => $consult->getArterialTension(),
+          'cardiacFrequency' => $consult->getCardiacFrequency(),
+          'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
+          'oxygenSaturation' => $consult->getOxygenSaturation()];
+      }
 
       $consult->setFollowed($followed);
       $consult->setDiagnostic(null);
-      $consult->setTemperature(null);
-      $consult->setWeight(null);
       $consult->setArterialTension(null);
-      $consult->setCardiacFrequency(null);
-      $consult->setRespiratoryFrequency(null);
-      $consult->setOxygenSaturation(null);
+      $consult->setTemperature(null);
 
 
       // we finish here

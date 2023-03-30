@@ -43,8 +43,8 @@ class OnUpdateLabEvent implements EventSubscriberInterface
     $method = $event->getRequest()->getMethod();
     if ($lab instanceof Lab && $method === Request::METHOD_PATCH) {
       $values = $lab->values;
-      $consultation = $lab?->getConsultation();
-      $prescription = $lab?->getPrescription();
+      $consultation = $lab->getConsultation();
+      $prescription = $lab->getPrescription();
       $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
 
       $patient = $lab->getPatient();
@@ -71,9 +71,10 @@ class OnUpdateLabEvent implements EventSubscriberInterface
         if (null === $prescription) {
           $initPrescription = (new Prescription())
             ->setLab($lab)
-            ->setPatient($lab?->getPatient())
+            ->setPatient($lab->getPatient())
             ->setConsultation($lab?->getConsultation())
             ->setIsPublished(false)
+            ->setFullName($patient?->getFullName())
             ->setHospital($hospital);
 
           $this->em->persist($initPrescription);

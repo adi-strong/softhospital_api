@@ -31,3 +31,6 @@ services:
                 method: 'onJWTAuthenticated'
             }
 
+    App\Services\QueryBuilderConnectionService:
+        arguments:
+            - '@doctrine.orm.entity_manager'

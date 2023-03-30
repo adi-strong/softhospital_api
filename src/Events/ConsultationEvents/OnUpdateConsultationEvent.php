@@ -387,13 +387,12 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
         // **********************************************************************************************
       }
 
-      $diagnostic = trim($consult?->getDiagnostic(), ' ');
-      $date = (new DateTime())->format('Y-m-d');
+      $diagnostic = null !== $consult->getDiagnostic() ? trim($consult?->getDiagnostic(), ' ') : null;
       $followed = $consult?->getFollowed();
 
-      if ($followed === null) {
+      if (null !== $diagnostic) {
         $followed[] = [
-          'date' => $date,
+          'date' => (new DateTime())->format('Y-m-d'),
           'diagnostic' => $diagnostic,
           'temperature' => $consult->getTemperature(),
           'weight' => $consult->getWeight(),
@@ -403,25 +402,20 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
           'oxygenSaturation' => $consult->getOxygenSaturation()];
       }
       else {
-        $followed[] = array_push($followed, [
-          'date' => $date,
-          'diagnostic' => $diagnostic,
+        $followed[] = [
+          'date' => (new DateTime())->format('Y-m-d'),
           'temperature' => $consult->getTemperature(),
           'weight' => $consult->getWeight(),
           'arterialTension' => $consult->getArterialTension(),
           'cardiacFrequency' => $consult->getCardiacFrequency(),
           'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
-          'oxygenSaturation' => $consult->getOxygenSaturation()]);
+          'oxygenSaturation' => $consult->getOxygenSaturation()];
       }
 
       $consult->setFollowed($followed);
       $consult->setDiagnostic(null);
-      $consult->setTemperature(null);
-      $consult->setWeight(null);
       $consult->setArterialTension(null);
-      $consult->setCardiacFrequency(null);
-      $consult->setRespiratoryFrequency(null);
-      $consult->setOxygenSaturation(null);
+      $consult->setTemperature(null);
     }
 
   }

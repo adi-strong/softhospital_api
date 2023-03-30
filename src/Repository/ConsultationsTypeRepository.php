@@ -4,6 +4,9 @@ namespace App\Repository;
 
 use App\Entity\ConsultationsType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,4 +66,41 @@ class ConsultationsTypeRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+  /**
+   * @throws Exception
+   */
+  public function countFiles($month, $year, $hospitalId): array
+  {
+    /*$queryBuilder = $this->createQueryBuilder('f')->select('COUNT(f.id) AS nbFiles');
+    $queryBuilder
+      ->where($queryBuilder->expr()->eq("DATE_FORMAT(f.createdAt, '%Y-%m')", "':format'"))
+      ->setParameter('format', $year.'-'.$month);
+
+    $result = null;
+    try {
+      $result = $queryBuilder->getQuery()->getSingleScalarResult();
+    } catch (NoResultException|NonUniqueResultException $e) { }
+
+    return $result;*/
+    $conn = $this->getEntityManager()->getConnection();
+
+    $sql = "
+      select count(c.id) nbFiles
+        FROM consultations_type c 
+          LEFT JOIN hospital h ON h.id = c.hospital_id
+        WHERE c.hospital_id IS NOT NULL 
+          AND h.id = :hospitalId
+          AND date_format(c.created_at, '%Y-%m') = :format
+          GROUP BY h.id
+    ";
+
+    $stm = $conn->prepare($sql);
+    $resSet = $stm->executeQuery([
+      'hospitalId' => $hospitalId,
+      'format' => $year.'-'.$month
+    ]);
+
+    return $resSet->fetchAllAssociative();
+  }
 }
