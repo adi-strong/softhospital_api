@@ -1,8 +1,21 @@
 security:
+    role_hierarchy:
+        ROLE_PHAR: ROLE_USER
+        ROLE_RECEIVER: ROLE_USER
+        ROLE_LAB: ROLE_RECEIVER
+        ROLE_MANAGER: [ ROLE_RECEIVER, ROLE_PHAR ]
+        ROLE_LOCKER: ROLE_MANAGER
+        ROLE_NURSE: ROLE_RECEIVER
+        ROLE_DOCTOR: ROLE_NURSE
+        ROLE_ADMIN: [ ROLE_DOCTOR, ROLE_LAB, ROLE_PHAR ]
+        ROLE_MD: [ ROLE_ADMIN, ROLE_LOCKER ]
+        ROLE_OWNER_ADMIN: ROLE_MD
+        ROLE_SUPER_ADMIN: [ ROLE_OWNER_ADMIN, ROLE_ALLOWED_TO_SWITCH ]
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
     providers:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
@@ -14,10 +27,15 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         api:
-            pattern: ^/api/
+            pattern: ^/api
             stateless: true
             provider: app_user_provider
             jwt: ~
+
+        # ---------------------------------------------------------------------------------------------
+
+        # ---------------------------------------------------------------------------------------------
+
         main:
             #lazy: true
             #stateless: true
@@ -39,6 +57,92 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/users, roles: ROLE_ADMIN, methods: PATCH }
+        - { path: ^/api/users, roles: [ ROLE_RECEIVER, ROLE_PHAR, ROLE_RECEIVER ], methods: GET }
+        - { path: ^/api/parameters, roles: ROLE_ADMIN, methods: [ PATCH, POST ] }
+        - { path: ^/api/parameters, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
+        - { path: ^/api/image_objects, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: [ POST, GET ] }
+        - { path: ^/api/image_objects, roles: ROLE_ADMIN, methods: DELETE }
+        - { path: ^/api/pdf_objects, roles: [ ROLE_MANAGER, ROLE_NURSE ], methods: [ POST, GET ] }
+        - { path: ^/api/pdf_objects, roles: [ ROLE_MANAGER, ROLE_NURSE ], methods: DELETE }
+        - { path: ^/api/personal_image_objects, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: [ POST, GET, DELETE ] }
+        - { path: ^/api/act_categories, roles: ROLE_ADMIN, methods: [ POST, PATCH, DELETE ] }
+        - { path: ^/api/act_categories, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/acts, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/acts, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/agents, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/agents, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/appointments, roles: ROLE_RECEIVER, methods: [ POST, PATCH ] }
+        - { path: ^/api/appointments, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
+        - { path: ^/api/consultations, roles: ROLE_RECEIVER, methods: POST }
+        - { path: ^/api/consultations, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
+        - { path: ^/api/consultations, roles: ROLE_NURSE, methods: PATCH }
+        - { path: ^/api/bedroom_categories, roles: ROLE_ADMIN, methods: [ POST, PATCH, DELETE ] }
+        - { path: ^/api/bedroom_categories, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/bedrooms, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/bedrooms, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/beds, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/beds, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/box_expenses, roles: ROLE_LOCKER, methods: [ POST, GET ] }
+        - { path: ^/api/box_historics, roles: ROLE_RECEIVER, methods: [ POST, GET ] }
+        - { path: ^/api/box_inputs, roles: ROLE_LOCKER, methods: [ POST, GET ] }
+        - { path: ^/api/box_outputs, roles: ROLE_LOCKER, methods: [ POST, GET ] }
+        - { path: ^/api/boxes, roles: ROLE_LOCKER, methods: [ POST, GET ] }
+        - { path: ^/api/consultations_type, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/consultations_type, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/consumption_units, roles: ROLE_PHAR, methods: [ POST, PATCH, DELETE ] }
+        - { path: ^/api/consumption_units, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
+        - { path: ^/api/patients, roles: ROLE_RECEIVER, methods: [ POST, PATCH ] }
+        - { path: ^/api/patients, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
+        - { path: ^/api/covenant_invoices, roles: ROLE_LOCKER, methods: [ POST, GET, PATCH ] }
+        - { path: ^/api/covenants, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/covenants, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/departments, roles: ROLE_ADMIN, methods: [ POST, GET, PATCH ] }
+        - { path: ^/api/services, roles: ROLE_ADMIN, methods: [ POST, GET, PATCH ] }
+        - { path: ^/api/drugstore_supplies, roles: ROLE_PHAR, methods: [ POST, GET, PATCH ] }
+        - { path: ^/api/exam_categories, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/exam_categories, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/exams, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
+        - { path: ^/api/exams, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/expense_categories, roles: ROLE_LOCKER, methods: [ POST, GET, PATCH, DELETE ] }
+        - { path: ^/api/get_box_by_month, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_box_by_year, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_most_sales_drugs, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_stats2_by_month, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_covenant_invoices, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/invoices, roles: ROLE_LOCKER, methods: [ GET, PATCH, POST ] }
+        - { path: ^/api/get_file_stats, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_file_stats_by_year, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_patients_stats, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_revenue_by_year_stats, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_revenue_stats, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_lasts_activities_by_month, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_lasts_activities_by_year, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_lasts_activities_by_last_month, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/hospitalizations, roles: ROLE_RECEIVER, methods: [ GET, POST, PATCH ] }
+        - { path: ^/api/hospitals, roles: ROLE_ADMIN, methods: [ GET, POST, PATCH ] }
+        - { path: ^/api/lab_results, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/labs, roles: ROLE_LAB, methods: PATCH }
+        - { path: ^/api/labs, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/medicine_categories, roles: ROLE_PHAR, methods: [ POST, PATCH, DELETE ] }
+        - { path: ^/api/medicine_categories, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
+        - { path: ^/api/medicine_sub_categories, roles: ROLE_PHAR, methods: [ POST, PATCH, DELETE ] }
+        - { path: ^/api/medicine_sub_categories, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
+        - { path: ^/api/medicine_invoices, roles: ROLE_PHAR, methods: [ GET, POST, PATCH ] }
+        - { path: ^/api/medicines, roles: ROLE_PHAR, methods: [ GET, POST, PATCH ] }
+        - { path: ^/api/nursings, roles: ROLE_NURSE, methods: [ POST, PATCH ] }
+        - { path: ^/api/nursings, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/offices, roles: ROLE_ADMIN, methods: [ GET, POST, PATCH ] }
+        - { path: ^/api/offices, roles: ROLE_ADMIN, methods: [ GET, POST, PATCH ] }
+        - { path: ^/api/prescriptions, roles: ROLE_DOCTOR, methods: [ PATCH, POST ] }
+        - { path: ^/api/prescriptions, roles: ROLE_DOCTOR, methods: PATCH }
+        - { path: ^/api/prescriptions, roles: ROLE_RECEIVER, methods: GET }
+        - { path: ^/api/providers, roles: ROLE_PHAR, methods: [ POST, PATCH ]  }
+        - { path: ^/api/providers, roles: [ ROLE_PHAR, ROLE_RECEIVER ], methods: GET }
+        - { path: ^/api/treatment_categories, roles: ROLE_ADMIN, methods: [ POST, PATCH ]  }
+        - { path: ^/api/treatment_categories, roles: ROLE_RECEIVER, methods: GET  }
+        - { path: ^/api/treatments, roles: ROLE_ADMIN, methods: [ POST, PATCH ]  }
+        - { path: ^/api/treatments, roles: ROLE_RECEIVER, methods: GET  }
 
 when@test:
     security:

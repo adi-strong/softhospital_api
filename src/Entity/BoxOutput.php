@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
@@ -19,6 +21,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   normalizationContext: ['groups' => ['output:read']],
   order: ['id' => 'DESC'],
 )]
+#[ApiFilter(SearchFilter::class, properties: ['reason' => 'ipartial'])]
 class BoxOutput
 {
   use CreatedAtTrait;

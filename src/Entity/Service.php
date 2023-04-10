@@ -30,7 +30,6 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['service:read']],
   order: ['id' => 'DESC'],
-  paginationEnabled: false,
 )]
 #[ApiResource(
   uriTemplate: '/departments/{id}/services',

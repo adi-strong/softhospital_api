@@ -117,7 +117,7 @@ class AppFixtures extends Fixture
         ->setEmail($faker->email)
         ->setUser($root)
         ->setPassword('pass')
-        ->setRoles([$faker->randomElement(['ROLE_DOCTOR', 'ROLE_MEDIC'])])
+        ->setRoles([$faker->randomElement(['ROLE_DOCTOR'])])
         ->setUsername($agentUsername)
         ->setUId($root->getUId())
         ->setTel($faker->phoneNumber)
@@ -172,7 +172,7 @@ class AppFixtures extends Fixture
           $file = (new ConsultationsType())
             ->setCreatedAt($faker->dateTimeBetween('-6 months', 'now'))
             ->setHospital($hospital)
-            ->setPrice($faker->biasedNumberBetween(0.1, 45.00))
+            ->setPrice($faker->biasedNumberBetween(1, 45.00))
             ->setWording($faker->realTextBetween(5, 35));
           $manager->persist($file);
 

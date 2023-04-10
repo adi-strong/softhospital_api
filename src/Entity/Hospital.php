@@ -189,6 +189,12 @@ class Hospital
     #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Nursing::class)]
     private Collection $nursings;
 
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Activities::class)]
+    private Collection $activities;
+
+    #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: CovenantInvoice::class)]
+    private Collection $covenantInvoices;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -229,6 +235,8 @@ class Hospital
         $this->labs = new ArrayCollection();
         $this->prescriptions = new ArrayCollection();
         $this->nursings = new ArrayCollection();
+        $this->activities = new ArrayCollection();
+        $this->covenantInvoices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1454,6 +1462,66 @@ class Hospital
             // set the owning side to null (unless already changed)
             if ($nursing->getHospital() === $this) {
                 $nursing->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Activities>
+     */
+    public function getActivities(): Collection
+    {
+        return $this->activities;
+    }
+
+    public function addActivity(Activities $activity): self
+    {
+        if (!$this->activities->contains($activity)) {
+            $this->activities->add($activity);
+            $activity->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivity(Activities $activity): self
+    {
+        if ($this->activities->removeElement($activity)) {
+            // set the owning side to null (unless already changed)
+            if ($activity->getHospital() === $this) {
+                $activity->setHospital(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CovenantInvoice>
+     */
+    public function getCovenantInvoices(): Collection
+    {
+        return $this->covenantInvoices;
+    }
+
+    public function addCovenantInvoice(CovenantInvoice $covenantInvoice): self
+    {
+        if (!$this->covenantInvoices->contains($covenantInvoice)) {
+            $this->covenantInvoices->add($covenantInvoice);
+            $covenantInvoice->setHospital($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCovenantInvoice(CovenantInvoice $covenantInvoice): self
+    {
+        if ($this->covenantInvoices->removeElement($covenantInvoice)) {
+            // set the owning side to null (unless already changed)
+            if ($covenantInvoice->getHospital() === $this) {
+                $covenantInvoice->setHospital(null);
             }
         }
 

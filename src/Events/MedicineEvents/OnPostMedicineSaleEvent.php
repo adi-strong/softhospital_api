@@ -8,7 +8,9 @@ use App\Entity\MedicineInvoice;
 use App\Entity\MedicinesSold;
 use App\Repository\BoxRepository;
 use App\Repository\MedicineRepository;
+use App\Repository\ParametersRepository;
 use App\Services\HandleCurrentUserService;
+use App\Services\RoundAmountService;
 use DateTime;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,6 +38,8 @@ class OnPostMedicineSaleEvent implements EventSubscriberInterface
     private readonly HandleCurrentUserService $user, 
     private readonly EntityManagerInterface $em, 
     private readonly MedicineRepository $repository,
+    private readonly RoundAmountService $amountService,
+    private readonly ParametersRepository $parametersRepository,
     private readonly BoxRepository $boxRepository)
   {
   }
@@ -51,9 +55,12 @@ class OnPostMedicineSaleEvent implements EventSubscriberInterface
       $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
       $released = new DateTime();
 
+      $parameter = $this->parametersRepository->findLastParameter($hospital);
+
       $invoice->setUser($this->user->getUser());
       $invoice->setReleased($released);
       $invoice->setHospital($hospital);
+      $invoice->setCurrency($parameter[0] ?? null);
       
       $values = $invoice->values;
       foreach ($values as $value) {
@@ -61,20 +68,23 @@ class OnPostMedicineSaleEvent implements EventSubscriberInterface
           $findMedicine = $this->repository->findMedicine($value['id']);
           if (null !== $findMedicine) {
             $quantity = (float) $value['quantity'] ?? null;
-            $price = $value['price'] ?? null;
-            $cost = $value['cost'] ?? '0';
+            $price = $value['price'] ?? $findMedicine->getPrice();
+            $cost = $value['cost'] ?? $findMedicine->getCost();
 
             if ($quantity !== null) {
               $newQty = $findMedicine->getQuantity() - $quantity;
               $sum = $quantity * $price;
               $findMedicine->setQuantity($newQty);
-              
+
+              $gain = ($findMedicine->getPrice() - $findMedicine->getCost()) * $quantity;
+
               $newSale = (new MedicinesSold())
                 ->setQuantity($quantity)
                 ->setMedicine($findMedicine)
                 ->setPrice($price)
-                ->setSum($sum)
+                ->setSum($this->amountService->roundAmount($sum, 2))
                 ->setCost($cost)
+                ->setGain($gain)
                 ->setInvoice($invoice);
               $invoice->addMedicinesSold($newSale);
             }

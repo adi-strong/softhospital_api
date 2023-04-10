@@ -61,17 +61,17 @@ class Provider
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['provider:read'])]
+    #[Groups(['provider:read', 'supply:read'])]
     private ?string $focal = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['provider:read'])]
+    #[Groups(['provider:read', 'supply:read'])]
     #[Assert\NotBlank(message: 'Le n° de téléphone doit être désigné.')]
     private ?string $tel = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Email(message: 'Adresse email invalide.')]
-    #[Groups(['provider:read'])]
+    #[Groups(['provider:read', 'supply:read'])]
     private ?string $email = null;
 
     #[ORM\ManyToOne(inversedBy: 'providers')]
@@ -89,7 +89,7 @@ class Provider
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['provider:read'])]
+    #[Groups(['provider:read', 'supply:read'])]
     private ?string $address = null;
 
     #[ORM\OneToMany(mappedBy: 'provider', targetEntity: DrugstoreSupply::class)]

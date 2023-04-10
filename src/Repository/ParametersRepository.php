@@ -93,4 +93,34 @@ class ParametersRepository extends ServiceEntityRepository
 
     return $qb->getQuery()->getSingleColumnResult();
   }
+
+  /**
+   * @throws NonUniqueResultException
+   */
+  public function getLastParam(Hospital $hospital)
+  {
+    $qb = $this->createQueryBuilder('p')
+      ->join('p.hospital', 'h')
+      ->where('p.hospital = :hospId')
+      ->setParameter('hospId', $hospital)
+      ->setMaxResults(1)
+      ->orderBy('p.id', 'DESC');
+
+    return $qb->getQuery()->getOneOrNullResult();
+  }
+
+  /**
+   * @throws NonUniqueResultException
+   */
+  public function findParameters(Hospital $hospital)
+  {
+    $qb = $this->createQueryBuilder('p')
+      ->join('p.hospital', 'h')
+      ->where('p.hospital = :hosp')
+      ->setParameter('hosp', $hospital)
+      ->orderBy('p.id', 'DESC')
+      ->setMaxResults(1);
+
+    return $qb->getQuery()->getOneOrNullResult();
+  }
 }

@@ -71,6 +71,16 @@ class Parameters
 
     public ?bool $isUpdated = false;
 
+    #[ORM\Column(length: 2, nullable: true, columnDefinition: 'char(1) default null')]
+    #[Assert\Choice(['+', '-', '*', '/'], message: 'Opération arithmétique non supportée.')]
+    #[Groups(['param:read'])]
+    private ?string $fOperation = null;
+
+    #[ORM\Column(length: 2, nullable: true, columnDefinition: 'char(1) default null')]
+    #[Assert\Choice(['+', '-', '*', '/'], message: 'Opération arithmétique non supportée.')]
+    #[Groups(['param:read'])]
+    private ?string $lOperation = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -156,6 +166,30 @@ class Parameters
     public function setHospital(?Hospital $hospital): self
     {
         $this->hospital = $hospital;
+
+        return $this;
+    }
+
+    public function getFOperation(): ?string
+    {
+        return $this->fOperation;
+    }
+
+    public function setFOperation(?string $fOperation): self
+    {
+        $this->fOperation = $fOperation;
+
+        return $this;
+    }
+
+    public function getLOperation(): ?string
+    {
+        return $this->lOperation;
+    }
+
+    public function setLOperation(?string $lOperation): self
+    {
+        $this->lOperation = $lOperation;
 
         return $this;
     }

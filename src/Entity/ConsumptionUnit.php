@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -30,6 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   order: ['id' => 'DESC'],
   paginationEnabled: false,
 )]
+#[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]
 class ConsumptionUnit
 {
   use CreatedAtTrait;
@@ -37,7 +40,7 @@ class ConsumptionUnit
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['consumptionUnit:read', 'medicine:read', 'medicineInvoice:read'])]
+    #[Groups(['consumptionUnit:read', 'medicine:read', 'medicineInvoice:read', 'supply:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -48,7 +51,7 @@ class ConsumptionUnit
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['consumptionUnit:read', 'medicine:read', 'medicineInvoice:read'])]
+    #[Groups(['consumptionUnit:read', 'medicine:read', 'medicineInvoice:read', 'supply:read'])]
     private ?string $wording = null;
 
     #[ORM\OneToMany(mappedBy: 'consumptionUnit', targetEntity: Medicine::class)]

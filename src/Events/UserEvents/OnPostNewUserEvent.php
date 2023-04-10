@@ -30,6 +30,7 @@ class OnPostNewUserEvent implements EventSubscriberInterface
     $user = $event->getControllerResult();
     $method = $event->getRequest()->getMethod();
     if ($user instanceof User && $method === Request::METHOD_POST) {
+      //$hosp = $this->user->getHospital() ?? $this->user->getHospitalCenter();
       if (null === $this->user->getUser()) {
         $user->setHospital(
           (new Hospital())

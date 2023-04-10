@@ -47,6 +47,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     #[Groups([
       'user:read',
+      'activity:read',
       'patient:read',
       'provider:read',
       'hospital:read',
@@ -62,6 +63,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
+      'destocking:read',
     ])]
     private ?int $id = null;
 
@@ -83,6 +86,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'activity:read',
+      'invoice:read',
+      'destocking:read',
     ])]
     #[Assert\NotBlank(message: 'Le username doit être renseigné.')]
     private ?string $username = null;
@@ -166,6 +172,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
       'prescript:read',
       'nursing:read',
       'appointment:read',
+      'invoice:read',
+      'destocking:read',
     ])]
     private ?string $name = null;
 
@@ -209,6 +217,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: NursingTreatment::class)]
     private Collection $nursingTreatments;
 
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Activities::class)]
+    private Collection $activities;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: CovenantInvoice::class)]
+    private Collection $covenantInvoices;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: DestockingOfMedicines::class)]
+    private Collection $destockingOfMedicines;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -228,6 +245,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->labAssistants = new ArrayCollection();
         $this->prescriptions = new ArrayCollection();
         $this->nursingTreatments = new ArrayCollection();
+        $this->activities = new ArrayCollection();
+        $this->covenantInvoices = new ArrayCollection();
+        $this->destockingOfMedicines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -932,6 +952,96 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($nursingTreatment->getUser() === $this) {
                 $nursingTreatment->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Activities>
+     */
+    public function getActivities(): Collection
+    {
+        return $this->activities;
+    }
+
+    public function addActivity(Activities $activity): self
+    {
+        if (!$this->activities->contains($activity)) {
+            $this->activities->add($activity);
+            $activity->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeActivity(Activities $activity): self
+    {
+        if ($this->activities->removeElement($activity)) {
+            // set the owning side to null (unless already changed)
+            if ($activity->getAuthor() === $this) {
+                $activity->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CovenantInvoice>
+     */
+    public function getCovenantInvoices(): Collection
+    {
+        return $this->covenantInvoices;
+    }
+
+    public function addCovenantInvoice(CovenantInvoice $covenantInvoice): self
+    {
+        if (!$this->covenantInvoices->contains($covenantInvoice)) {
+            $this->covenantInvoices->add($covenantInvoice);
+            $covenantInvoice->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCovenantInvoice(CovenantInvoice $covenantInvoice): self
+    {
+        if ($this->covenantInvoices->removeElement($covenantInvoice)) {
+            // set the owning side to null (unless already changed)
+            if ($covenantInvoice->getUser() === $this) {
+                $covenantInvoice->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DestockingOfMedicines>
+     */
+    public function getDestockingOfMedicines(): Collection
+    {
+        return $this->destockingOfMedicines;
+    }
+
+    public function addDestockingOfMedicine(DestockingOfMedicines $destockingOfMedicine): self
+    {
+        if (!$this->destockingOfMedicines->contains($destockingOfMedicine)) {
+            $this->destockingOfMedicines->add($destockingOfMedicine);
+            $destockingOfMedicine->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDestockingOfMedicine(DestockingOfMedicines $destockingOfMedicine): self
+    {
+        if ($this->destockingOfMedicines->removeElement($destockingOfMedicine)) {
+            // set the owning side to null (unless already changed)
+            if ($destockingOfMedicine->getUser() === $this) {
+                $destockingOfMedicine->setUser(null);
             }
         }
 

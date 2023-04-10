@@ -50,17 +50,17 @@ class Covenant
     public ?File $file = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['covenant:read', 'patient:read'])]
+    #[Groups(['covenant:read', 'patient:read', 'invoice:read'])]
     public ?string $filePath = null;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['covenant:read', 'patient:read', 'consult:read'])]
+    #[Groups(['covenant:read', 'patient:read', 'consult:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['covenant:read', 'covenant:write', 'patient:read', 'consult:read'])]
+    #[Groups(['covenant:read', 'covenant:write', 'patient:read', 'consult:read', 'invoice:read'])]
     #[Assert\NotBlank(message: 'La dénomination doit être renseigné.')]
     private ?string $denomination = null;
 
@@ -106,9 +106,14 @@ class Covenant
     #[Groups(['covenant:read', 'covenant:write', 'patient:read'])]
     private ?ImageObject $logo = null;
 
+    #[ORM\OneToMany(mappedBy: 'covenant', targetEntity: CovenantInvoice::class)]
+    #[ORM\JoinColumn(referencedColumnName: 'id', unique: false)]
+    private Collection $covenantInvoices;
+
     public function __construct()
     {
         $this->patients = new ArrayCollection();
+        $this->covenantInvoices = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -246,5 +251,35 @@ class Covenant
   public function getSlug(): string
   {
     return (new Slugify())->slugify($this->denomination);
+  }
+
+  /**
+   * @return Collection<int, CovenantInvoice>
+   */
+  public function getCovenantInvoices(): Collection
+  {
+      return $this->covenantInvoices;
+  }
+
+  public function addCovenantInvoice(CovenantInvoice $covenantInvoice): self
+  {
+      if (!$this->covenantInvoices->contains($covenantInvoice)) {
+          $this->covenantInvoices->add($covenantInvoice);
+          $covenantInvoice->setCovenant($this);
+      }
+
+      return $this;
+  }
+
+  public function removeCovenantInvoice(CovenantInvoice $covenantInvoice): self
+  {
+      if ($this->covenantInvoices->removeElement($covenantInvoice)) {
+          // set the owning side to null (unless already changed)
+          if ($covenantInvoice->getCovenant() === $this) {
+              $covenantInvoice->setCovenant(null);
+          }
+      }
+
+      return $this;
   }
 }

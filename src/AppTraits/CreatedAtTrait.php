@@ -47,6 +47,8 @@ trait CreatedAtTrait
     'appointment:read',
     'lab:read',
     'nursing:read',
+    'activity:read',
+    'destocking:read',
   ])]
   protected ?\DateTimeInterface $createdAt = null;
 

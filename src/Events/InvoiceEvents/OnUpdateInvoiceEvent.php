@@ -3,6 +3,7 @@
 namespace App\Events\InvoiceEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
+use App\Entity\Activities;
 use App\Entity\BoxHistoric;
 use App\Entity\Invoice;
 use App\Entity\InvoiceStoric;
@@ -87,18 +88,64 @@ class OnUpdateInvoiceEvent implements EventSubscriberInterface
             ->setTag('input');
           $this->em->persist($boxHistoric);
         }
+
+        $activity = (new Activities())
+          ->setDescription("Paiement d'une facture par : ".$patient->getFullName())
+          ->setAuthor($this->user->getUser())
+          ->setCreatedAt(new DateTime())
+          ->setTitle("Paiement");
+        $this->em->persist($activity);
+      }
+      elseif ($patient->getCovenant() !== null) {
+        if (null === $daysCounter) {
+          $price = $hosp->getBed()->getPrice() * $daysCounter;
+          $hosp->setPrice($price);
+          $hosp->setFullName($patient?->getFullName());
+          $hosp->setDaysCounter($daysCounter);
+        }
+
+        $consult?->setFullName($patient->getFullName());
+
+        $paid = $invoice->getPaid() + $sum;
+        $leftover = $invoice->getTotalAmount() - $paid;
+        $invoice->setPaid($paid);
+        $invoice->setLeftover($leftover);
+
+        $invoiceStoric = (new InvoiceStoric())
+          ->setCreatedAt($currentDate)
+          ->setUser($this->user->getUser())
+          ->setAmount($sum)
+          ->setInvoice($invoice);
+        $this->em->persist($invoiceStoric);
+
+        $box = $this->boxRepository->findBox($hospital->getId());
+        if (null !== $box) {
+          $boxHistoric = (new BoxHistoric())
+            ->setAmount($sum)
+            ->setBox($box)
+            ->setCreatedAt($currentDate)
+            ->setTag('input');
+          $this->em->persist($boxHistoric);
+        }
+
+        $activity = (new Activities())
+          ->setDescription("Paiement d'une facture par : ".$patient->getFullName())
+          ->setAuthor($this->user->getUser())
+          ->setCreatedAt(new DateTime())
+          ->setTitle("Paiement");
+        $this->em->persist($activity);
       }
 
       if ($isBedroomLeaved === true || $isIsComplete === true) {
-        $hosp->setLeaveAt($currentDate);
-        $hosp->setIsCompleted(true);
-        $hosp->getBed()->setItHasTaken(false);
+        $hosp?->setLeaveAt($currentDate);
+        $hosp?->setIsCompleted(true);
+        $hosp?->getBed()->setItHasTaken(false);
       }
 
       if ($isIsComplete === true) {
         $consult?->setIsComplete(true);
         $consult?->setIsPublished(false);
-        if (null!== $hosp)
+        if (null !== $hosp)
         {
           $hosp->setLeaveAt(new DateTime());
           $hosp->setIsCompleted(true);

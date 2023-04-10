@@ -104,6 +104,7 @@ class Agent
     private Collection $consultations;
 
     #[ORM\OneToMany(mappedBy: 'doctor', targetEntity: Appointment::class)]
+    #[ORM\JoinColumn(referencedColumnName: 'id', unique: false)]
     private Collection $appointments;
 
     #[ORM\Column(length: 255, nullable: true)]

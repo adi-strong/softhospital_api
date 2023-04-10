@@ -46,6 +46,10 @@ class MedicinesSold
     #[Groups(['medicineInvoice:read'])]
     private ?string $cost = '0';
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['medicineInvoice:read'])]
+    private ?string $gain = '0';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -119,6 +123,18 @@ class MedicinesSold
     public function setCost(?string $cost): self
     {
         $this->cost = $cost;
+
+        return $this;
+    }
+
+    public function getGain(): ?string
+    {
+        return $this->gain;
+    }
+
+    public function setGain(?string $gain): self
+    {
+        $this->gain = $gain;
 
         return $this;
     }

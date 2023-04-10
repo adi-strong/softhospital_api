@@ -3,8 +3,10 @@
 namespace App\Events\BoxEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
+use App\Entity\Activities;
 use App\Entity\BoxHistoric;
 use App\Entity\BoxOutput;
+use App\Repository\ParametersRepository;
 use App\Services\HandleCurrentUserService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,6 +20,7 @@ class OnAddBoxOutputEvent implements EventSubscriberInterface
 {
   public function __construct(
     private readonly HandleCurrentUserService $user,
+    private readonly ParametersRepository $parametersRepository,
     private readonly EntityManagerInterface $em)
   {
   }
@@ -28,6 +31,16 @@ class OnAddBoxOutputEvent implements EventSubscriberInterface
     $method = $event->getRequest()->getMethod();
     if ($output instanceof BoxOutput && $method === Request::METHOD_POST) {
       $createdAt = new DateTime();
+      $hosp = $this->user->getHospital() ?? $this->user->getHospitalCenter();
+      $parameter = $this->parametersRepository->findLastParameter($hosp);
+
+      $activity = (new Activities())
+        ->setAuthor($this->user->getUser())
+        ->setCreatedAt($createdAt)
+        ->setHospital($hosp)
+        ->setDescription("Dépense d'une somme de : ".$output->getAmount().' '.$parameter[0] ?? '')
+        ->setTitle('Sortie en caisse');
+      $this->em->persist($activity);
 
       $output->setHospital($this->user->getHospital() ?? $this->user->getHospitalCenter());
       $output->setCreatedAt($createdAt);

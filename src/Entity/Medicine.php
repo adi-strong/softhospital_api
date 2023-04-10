@@ -11,6 +11,7 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
+use App\Controller\DestockingMedicinePublication;
 use App\Repository\MedicineRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -115,10 +116,15 @@ class Medicine
     #[Groups(['medicine:read'])]
     private ?float $vTA = null;
 
+    #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: DestockingOfMedicines::class)]
+    #[Groups(['medicine:read'])]
+    private Collection $destockingOfMedicines;
+
     public function __construct()
     {
         $this->drugstoreSupplyMedicines = new ArrayCollection();
         $this->medicinesSolds = new ArrayCollection();
+        $this->destockingOfMedicines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -362,6 +368,36 @@ class Medicine
     public function setVTA(?float $vTA): self
     {
         $this->vTA = $vTA;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DestockingOfMedicines>
+     */
+    public function getDestockingOfMedicines(): Collection
+    {
+        return $this->destockingOfMedicines;
+    }
+
+    public function addDestockingOfMedicine(DestockingOfMedicines $destockingOfMedicine): self
+    {
+        if (!$this->destockingOfMedicines->contains($destockingOfMedicine)) {
+            $this->destockingOfMedicines->add($destockingOfMedicine);
+            $destockingOfMedicine->setMedicine($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDestockingOfMedicine(DestockingOfMedicines $destockingOfMedicine): self
+    {
+        if ($this->destockingOfMedicines->removeElement($destockingOfMedicine)) {
+            // set the owning side to null (unless already changed)
+            if ($destockingOfMedicine->getMedicine() === $this) {
+                $destockingOfMedicine->setMedicine(null);
+            }
+        }
 
         return $this;
     }

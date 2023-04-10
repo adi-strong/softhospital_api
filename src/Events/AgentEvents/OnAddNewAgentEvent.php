@@ -24,10 +24,13 @@ class OnAddNewAgentEvent implements EventSubscriberInterface
     $method = $event->getRequest()->getMethod();
 
     if ($agent instanceof Agent && $method === Request::METHOD_POST) {
+      $hosp = $this->user->getHospital() ?? $this->user->getHospitalCenter();
+
       if ($this->user->getUser() !== null) {
         $lastName = $agent?->getLastName();
         $firstName = $agent?->getFirstName();
         $agent->setUser($this->user->getUser());
+        $agent->setHospital($hosp);
         $agent->setHospital($this->user->getHospital() ?? $this->user->getHospitalCenter());
 
         $fullName = $agent->getName().' '.$lastName.' '.$firstName;

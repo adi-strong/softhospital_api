@@ -3,6 +3,10 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\Repository\BoxHistoricRepository;
 use Doctrine\DBAL\Types\Types;
@@ -12,7 +16,14 @@ use Symfony\Component\Validator\Constraints\Choice;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 #[ORM\Entity(repositoryClass: BoxHistoricRepository::class)]
-#[ApiResource]
+#[ApiResource(
+  types: ['https://schema.org/User'],
+  operations: [
+    new Get(),
+    new Post(),
+    new GetCollection(),
+  ],
+)]
 class BoxHistoric
 {
   use CreatedAtTrait;

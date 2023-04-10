@@ -46,6 +46,7 @@ class DrugstoreSupplyMedicine
     private ?int $otherQty = 0;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['supply:read'])]
     private ?float $vTA = null;
 
     public function getId(): ?int

@@ -3,8 +3,10 @@
 namespace App\Events\BoxEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
+use App\Entity\Activities;
 use App\Entity\BoxHistoric;
 use App\Entity\BoxInput;
+use App\Repository\ParametersRepository;
 use App\Services\HandleCurrentUserService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,6 +20,7 @@ class OnAddBoxInputEvent implements EventSubscriberInterface
 {
   public function __construct(
     private readonly HandleCurrentUserService $user,
+    private readonly ParametersRepository $parametersRepository,
     private readonly EntityManagerInterface $em)
   {
   }
@@ -28,6 +31,16 @@ class OnAddBoxInputEvent implements EventSubscriberInterface
     $method = $event->getRequest()->getMethod();
     if ($input instanceof BoxInput && $method === Request::METHOD_POST) {
       $createdAt = new DateTime();
+      $hosp = $this->user->getHospital() ?? $this->user->getHospitalCenter();
+      $parameter = $this->parametersRepository->findLastParameter($hosp);
+
+      $activity = (new Activities())
+        ->setTitle('Entrée en caisse d\'un montant de : ')
+        ->setDescription("Entrée en caisse d'une somme de : ".$parameter[0] ?? '')
+        ->setHospital($hosp)
+        ->setCreatedAt($createdAt)
+        ->setAuthor($this->user->getUser());
+      $this->em->persist($activity);
 
       $input->setHospital($this->user->getHospital() ?? $this->user->getHospitalCenter());
       $input->setUser($this->user->getUser());

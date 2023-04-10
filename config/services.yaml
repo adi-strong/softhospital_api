@@ -34,3 +34,6 @@ services:
     App\Services\QueryBuilderConnectionService:
         arguments:
             - '@doctrine.orm.entity_manager'
+
+    App\Exception\CustomExceptionFilter:
+        tags: [ 'api_platform.exception_filter' ]

@@ -4,6 +4,7 @@ namespace App\Events\ParametersEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
 use App\Entity\Parameters;
+use App\Repository\BoxRepository;
 use App\Repository\ParametersRepository;
 use App\Services\HandleCurrentUserService;
 use DateTime;
@@ -20,6 +21,7 @@ class OnAddNewParameterEvent implements EventSubscriberInterface
   public function __construct(
     private readonly HandleCurrentUserService $user,
     private readonly EntityManagerInterface   $em,
+    private readonly BoxRepository   $boxRepository,
     private readonly ParametersRepository     $repository) { }
 
   public function handler(ViewEvent $event)

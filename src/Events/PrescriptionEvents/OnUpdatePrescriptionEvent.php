@@ -34,7 +34,9 @@ class OnUpdatePrescriptionEvent implements EventSubscriberInterface
     $prescription = $event->getControllerResult();
     $method = $event->getRequest()->getMethod();
     if ($prescription instanceof Prescription && $method === Request::METHOD_PATCH) {
+      $hosp = $this->user->getHospital() ?? $this->user->getHospitalCenter();
       $patient = $prescription->getPatient();
+      $prescription->setHospital($hosp);
       $prescription->setUser($this->user->getUser());
       $prescription->setUpdatedAt(new DateTime());
       $prescription->setIsPublished(true);

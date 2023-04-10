@@ -17,7 +17,7 @@ class InvoiceStoric
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['invoice:read', 'nursing:read'])]
+    #[Groups(['invoice:read', 'nursing:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoiceStorics')]
@@ -25,15 +25,18 @@ class InvoiceStoric
     private ?Invoice $invoice = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    #[Groups(['invoice:read', 'nursing:read'])]
+    #[Groups(['invoice:read', 'nursing:read', 'invoice:read'])]
     private ?string $amount = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoiceStorics')]
-    #[Groups(['invoice:read', 'nursing:read'])]
+    #[Groups(['invoice:read', 'nursing:read', 'invoice:read'])]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoiceStorics')]
     private ?Nursing $nursing = null;
+
+    #[ORM\ManyToOne(inversedBy: 'invoiceStorics')]
+    private ?CovenantInvoice $covenantInvoice = null;
 
     public function getId(): ?int
     {
@@ -84,6 +87,18 @@ class InvoiceStoric
     public function setNursing(?Nursing $nursing): self
     {
         $this->nursing = $nursing;
+
+        return $this;
+    }
+
+    public function getCovenantInvoice(): ?CovenantInvoice
+    {
+        return $this->covenantInvoice;
+    }
+
+    public function setCovenantInvoice(?CovenantInvoice $covenantInvoice): self
+    {
+        $this->covenantInvoice = $covenantInvoice;
 
         return $this;
     }

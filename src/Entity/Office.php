@@ -29,7 +29,6 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['office:read']],
   order: ['id' => 'DESC'],
-  paginationEnabled: false,
 )]
 #[ApiFilter(SearchFilter::class, properties: ['title' => 'ipartial'])]
 class Office

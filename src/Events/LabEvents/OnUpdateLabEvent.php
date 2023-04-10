@@ -3,6 +3,7 @@
 namespace App\Events\LabEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
+use App\Entity\Activities;
 use App\Entity\Lab;
 use App\Entity\Prescription;
 use App\Repository\ExamRepository;
@@ -15,6 +16,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Validator\Constraints\Date;
 
 class OnUpdateLabEvent implements EventSubscriberInterface
 {
@@ -82,6 +84,14 @@ class OnUpdateLabEvent implements EventSubscriberInterface
         // End Init prescription
       }
       else $lab->setDescriptions(null);
+
+      $activity = (new Activities())
+        ->setTitle('Publication des résultats d\'examens')
+        ->setCreatedAt(new DateTime())
+        ->setHospital($hospital)
+        ->setAuthor($this->user->getUser())
+        ->setDescription("Publication des résultats des examens du patient : ".$patient->getFullName());
+      $this->em->persist($activity);
 
       $this->em->flush();
     }

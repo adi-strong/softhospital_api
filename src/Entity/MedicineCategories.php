@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -30,6 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   order: ['id' => 'DESC'],
   paginationEnabled: false,
 )]
+#[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]
 class MedicineCategories
 {
   use CreatedAtTrait;

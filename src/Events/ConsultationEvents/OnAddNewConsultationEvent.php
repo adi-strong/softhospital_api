@@ -3,6 +3,7 @@
 namespace App\Events\ConsultationEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
+use App\Entity\Activities;
 use App\Entity\ActsInvoiceBasket;
 use App\Entity\Appointment;
 use App\Entity\Consultation;
@@ -15,6 +16,7 @@ use App\Entity\Nursing;
 use App\Entity\NursingTreatment;
 use App\Repository\ParametersRepository;
 use App\Services\HandleCurrentUserService;
+use Cocur\Slugify\Slugify;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -216,6 +218,16 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
           'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
           'oxygenSaturation' => $consult->getOxygenSaturation()];
       }
+
+      $slug = (new Slugify())->slugify($fullName);
+      $activity = (new Activities())
+        ->setDescription("Enregistrement d'une nouvelle fiche \n Patient(e) : ".$fullName)
+        ->setAuthor($this->user->getUser())
+        ->setCreatedAt(new DateTime())
+        ->setHospital($hospital)
+        ->setTitle('Nouvelle consultation')
+        ->setSlug('/'.$slug);
+      $this->em->persist($activity);
 
       $consult->setFollowed($followed);
       $consult->setDiagnostic(null);

@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\IsDeletedTrait;
+use App\Controller\CovenantInvoicesController;
 use App\Repository\InvoiceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -27,6 +28,14 @@ use Symfony\Component\Validator\Constraints as Assert;
     new Post(),
     new Get(),
     new Patch(),
+
+    new Get(
+      uriTemplate: '/api/get_covenant_invoices/{year}/{month}/{covenantId}',
+      types: ['https://schema.org/Invoice'],
+      requirements: [ 'year' => '\d+', 'month' => '\d+', 'covenantId' => '\d+' ],
+      controller: CovenantInvoicesController::class,
+      name: 'get_covenant_invoices',
+    )
   ],
   normalizationContext: ['groups' => ['invoice:read']],
   order: ['id' => 'DESC'],

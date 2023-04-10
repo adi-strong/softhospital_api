@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -29,7 +31,6 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['medSubCategory:read']],
   order: ['id' => 'DESC'],
-  paginationEnabled: false,
 )]
 #[ApiResource(
   uriTemplate: '/medicine_categories/{id}/sub_categories',
@@ -37,7 +38,9 @@ use Symfony\Component\Validator\Constraints as Assert;
   operations: [ new GetCollection() ],
   uriVariables: ['id' => new Link(fromProperty: 'medicineSubCategories', fromClass: MedicineCategories::class)],
   normalizationContext: ['groups' => ['medSubCategory:read']],
+  paginationEnabled: false,
 )]
+#[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]
 class MedicineSubCategories
 {
   use CreatedAtTrait;

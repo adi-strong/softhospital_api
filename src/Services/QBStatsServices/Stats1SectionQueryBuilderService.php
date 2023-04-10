@@ -55,7 +55,6 @@ class Stats1SectionQueryBuilderService
   }
 
   /**
-   * @param $hospId
    * @param $year
    * @return array
    * @throws Exception
@@ -153,7 +152,7 @@ class Stats1SectionQueryBuilderService
    * @return array
    * @throws Exception
    */
-  #[ArrayShape(['sum' => "int|mixed", 'lasSum' => "int|mixed", 'revenueStat' => "float"])]
+  #[ArrayShape(['sum' => "int|mixed", 'lastSum' => "int|mixed", 'revenueStat' => "float"])]
   public function getRevenueStats($year, $month): array
   {
     $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
@@ -179,7 +178,7 @@ class Stats1SectionQueryBuilderService
 
     return [
       'sum' => $sum,
-      'lasSum' => $lastSum,
+      'lastSum' => $lastSum,
       'revenueStat' => $this->roundAmountService->roundAmount($revenueStat, 2),
     ];
   }
@@ -189,7 +188,7 @@ class Stats1SectionQueryBuilderService
    * @return array
    * @throws Exception
    */
-  #[ArrayShape(['sum' => "int|mixed", 'lasSum' => "int|mixed", 'revenueStat' => "float"])]
+  #[ArrayShape(['sum' => "int|mixed", 'lastSum' => "int|mixed", 'revenueStat' => "float"])]
   public function getRevenueByYearStats($year): array
   {
     $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
@@ -211,7 +210,7 @@ class Stats1SectionQueryBuilderService
 
     return [
       'sum' => $sum,
-      'lasSum' => $lastSum,
+      'lastSum' => $lastSum,
       'revenueStat' => $this->roundAmountService->roundAmount($revenueStat, 2),
     ];
   }

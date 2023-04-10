@@ -176,7 +176,7 @@ class Patient
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'patients')]
-    #[Groups(['patient:read', 'consult:read'])]
+    #[Groups(['patient:read', 'consult:read', 'nursing:read', 'invoice:read'])]
     private ?Covenant $covenant = null;
 
     #[ORM\ManyToOne]

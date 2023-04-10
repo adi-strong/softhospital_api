@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
@@ -27,6 +28,14 @@ use Symfony\Component\Validator\Constraints as Assert;
     new Get(),
     new Patch(),
   ],
+  normalizationContext: ['groups' => ['appointment:read']],
+  order: ['id' => 'DESC'],
+)]
+#[ApiResource(
+  uriTemplate: '/agents/{id}/appointments',
+  types: ['https://schema.org/Appointment'],
+  operations: [ new GetCollection() ],
+  uriVariables: [ 'id' => new Link(fromProperty: 'appointments', fromClass: Agent::class) ],
   normalizationContext: ['groups' => ['appointment:read']],
   order: ['id' => 'DESC'],
 )]

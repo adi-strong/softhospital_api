@@ -24,8 +24,9 @@ class OnAfterPostUserEvent implements EventSubscriberInterface
     $method = $event->getRequest()->getMethod();
     if ($user instanceof User && $method === Request::METHOD_POST) {
       if (null === $user->getUser()) {
+        $hospital = $user->getHospital() ?? $user->getHospitalCenter();
+        $user->setHospitalCenter($hospital);
         $user->setUId(uniqid().$user->getId());
-        $hospital = $user->getHospital();
 
         $box = (new Box())
           ->setHospital($hospital)

@@ -6,7 +6,9 @@ use ApiPlatform\Symfony\EventListener\EventPriorities;
 use App\Entity\DrugstoreSupply;
 use App\Entity\DrugstoreSupplyMedicine;
 use App\Repository\MedicineRepository;
+use App\Repository\ParametersRepository;
 use App\Services\HandleCurrentUserService;
+use App\Services\RoundAmountService;
 use DateTime;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +34,8 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
   public function __construct(
     private readonly HandleCurrentUserService $user,
     private readonly MedicineRepository $repository,
+    private readonly RoundAmountService $amountService,
+    private readonly ParametersRepository $parametersRepository,
     private readonly EntityManagerInterface $em)
   {
   }
@@ -58,8 +62,8 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
           $findMedicine = $this->repository->findMedicine($medicine['id']);
           if (null !== $findMedicine) {
             $quantity = (int) $medicine['quantity'] ?? null;
-            $cost = $medicine['cost'] ?? null;
-            $price = $medicine['price'] ?? null;
+            $cost = $medicine['cost'] ?? $findMedicine->getCost();
+            $price = $medicine['price'] ?? $findMedicine->getPrice();
             $vTA = $medicine['vTA'] ?? null;
             $quantityLabel = $medicine['quantityLabel'] ?? null;
             $otherQty = $medicine['otherQty'] ?? 0;
@@ -68,12 +72,32 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
               ? $expiryDate = new DateTime($medicine['expiryDate'])
               : null;
 
-            if (null !== $cost) $findMedicine->setCost($cost);
-            if (null !== $price) $findMedicine->setPrice($price);
+            // converter
+            $converterCost = $cost;
+            $parameter = $this->parametersRepository->findParameters($hospital);
+            if (null !== $parameter) {
+              $rate = $parameter->getRate() ?? null;
+              $fOperation = $parameter->getFOperation();
+              $currency = $parameter->getCurrency() ?? null;
+              if ($currency !== null) {
+                if (null !== $rate && $fOperation !== null && $currency !== $drugstore->getCurrency()) {
+                  if ($fOperation === '*') $converterCost = max(($cost * $rate), 1);
+                  elseif ($fOperation === '/') $converterCost = max(($cost / $rate), 1);
+                }
+              }
+            }
+            // end converter
+
+            $unitCost = $otherQty > 0 ? $converterCost / $otherQty : $converterCost;
+            $unitPrice = $vTA !== null ? (($unitCost * $vTA) / 100) + $unitCost : $price;
+
+            $findMedicine->setCost($this->amountService->roundAmount($unitCost, 2));
+            $findMedicine->setPrice($this->amountService->roundAmount($unitPrice, 2));
 
             if (null !== $quantity) {
-              $findMedicine->setQuantity($findMedicine->getQuantity() + $quantity);
-              $findMedicine->setTotalQuantity($findMedicine->getQuantity());
+              $newQty = $findMedicine->getQuantity() + $quantity;
+              $findMedicine->setQuantity($newQty);
+              $findMedicine->setTotalQuantity($newQty);
               $findMedicine->setVTA($vTA);
               $findMedicine->setReleased($released);
 
@@ -92,7 +116,7 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
                 ->setMedicine($findMedicine)
                 ->setDrugstoreSupply($drugstore)
                 ->setVTA($vTA)
-                ->setCost($findMedicine->getCost());
+                ->setCost($cost);
 
               $drugstore->addDrugstoreSupplyMedicine($supply);
             }

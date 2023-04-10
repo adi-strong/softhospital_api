@@ -7,7 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class CreatePdfObjectAction extends AbstractController
+final class CreatePdfObjectAction extends AbstractController
 {
   public function __invoke(Request $request): PdfObject
   {
