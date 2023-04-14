@@ -57,9 +57,9 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
-        - { path: ^/api/users, roles: ROLE_ADMIN, methods: PATCH }
-        - { path: ^/api/users, roles: [ ROLE_RECEIVER, ROLE_PHAR, ROLE_RECEIVER ], methods: GET }
-        - { path: ^/api/parameters, roles: ROLE_ADMIN, methods: [ PATCH, POST ] }
+        - { path: ^/api/users, roles: [ ROLE_RECEIVER, ROLE_PHAR, ROLE_RECEIVER ], methods: [ GET, PATCH ] }
+        # - { path: ^/api/users, roles: ROLE_ADMIN, methods: POST }
+        - { path: ^/api/parameters, roles: ROLE_ADMIN, methods: POST }
         - { path: ^/api/parameters, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
         - { path: ^/api/image_objects, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: [ POST, GET ] }
         - { path: ^/api/image_objects, roles: ROLE_ADMIN, methods: DELETE }

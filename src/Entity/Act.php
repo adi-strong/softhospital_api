@@ -36,10 +36,12 @@ class Act
 {
   use CreatedAtTrait, IsDeletedTrait;
 
+  public ?array $items = null;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['act:read', 'consult:read', 'invoice:read'])]
+    #[Groups(['act:read', 'consult:read', 'treatment:read', 'nursing:read', 'invoice:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -50,7 +52,7 @@ class Act
       minMessage: 'Ce champs doit contenir au moins 2 caractères.',
       maxMessage: 'Ce champs ne peut dépasser 255 caractères.'
     )]
-    #[Groups(['act:read', 'consult:read', 'invoice:read'])]
+    #[Groups(['act:read', 'consult:read', 'treatment:read', 'nursing:read', 'invoice:read'])]
     private ?string $wording = null;
 
     #[ORM\ManyToOne(inversedBy: 'acts')]
@@ -61,7 +63,6 @@ class Act
     private ?ActCategory $category = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    #[Assert\NotBlank(message: 'Le prix doit être renseigné.')]
     #[Groups(['act:read'])]
     private ?string $price = '0';
 
@@ -70,6 +71,14 @@ class Act
 
     #[ORM\OneToMany(mappedBy: 'act', targetEntity: ActsInvoiceBasket::class)]
     private Collection $actsInvoiceBaskets;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[Groups(['act:read'])]
+    private ?string $cost = '0';
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['act:read', 'invoice:read', 'consult:read'])]
+    private ?array $procedures = [];
 
     public function __construct()
     {
@@ -183,6 +192,30 @@ class Act
                 $actsInvoiceBasket->setAct(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCost(): ?string
+    {
+        return $this->cost;
+    }
+
+    public function setCost(?string $cost): self
+    {
+        $this->cost = $cost;
+
+        return $this;
+    }
+
+    public function getProcedures(): ?array
+    {
+        return $this->procedures;
+    }
+
+    public function setProcedures(?array $procedures): self
+    {
+        $this->procedures = $procedures;
 
         return $this;
     }
