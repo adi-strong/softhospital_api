@@ -77,6 +77,8 @@ class CovenantInvoicesQueryBuilderService
     }
     $invoiceSubTotal += $totalExamsPrice;
 
+    // dd($query1DataValues);
+
     return [
       'subTotal' => $invoiceSubTotal,
       'filesPrice' => $filesPrice,
@@ -88,7 +90,7 @@ class CovenantInvoicesQueryBuilderService
       'totalNursingPrice' => $totalNursingPrice,
       'hospPrice' => $hospPrice,
       'currency' => $currency,
-      'isInvoiceExists' => $invoice !== [],
+      'isInvoiceExists' => $invoice,
     ];
   }
 
@@ -254,7 +256,7 @@ class CovenantInvoicesQueryBuilderService
        LEFT JOIN consultations_type f ON f.id = co.file_id
        LEFT JOIN hospitalization ho ON ho.consultation_id = i.id
        LEFT JOIN nursing n ON n.consultation_id = i.id
-       JOIN bed b ON b.id = ho.bed_id
+       LEFT JOIN bed b ON b.id = ho.bed_id
       WHERE h.id = :hospId
        AND c.id = :covenantId
        AND date_format(i.released_at, '%Y-%m') = :format

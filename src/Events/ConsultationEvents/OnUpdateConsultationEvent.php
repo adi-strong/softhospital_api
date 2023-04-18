@@ -96,6 +96,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
         $actItems = $consult->actsItems;
         $nurseActs = $nursing->getActs();
         $dateTime = (new DateTime())->format('Y-m-d');
+        $nursingAmount = 0;
 
         if (null !== $nursing) {
           $nursing->setPatient($patient);
@@ -154,6 +155,13 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
             }
             $nursing->setActs($nurseActs);
           }
+
+          foreach ($treatments as $treatment) $nursingAmount += $treatment->getPrice();
+
+          $nursing->setSubTotal($nursingAmount);
+          $nursing->setTotalAmount($nursingAmount);
+          $nursing->setAmount($nursingAmount);
+          $nursing->setCurrency($parameter[0] ?? null);
         } // si le nursing existe
 
         if (null === $nursing) {
@@ -162,9 +170,11 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
             ->setPatient($patient)
             ->setHospital($hospital)
             ->setConsultation($consult)
+            ->setCurrency($parameter[0] ?? null)
             ->setCreatedAt($createdAt);
 
           foreach ($treatments as $treatment) {
+            $nursingAmount += $treatment->getPrice();
             $nurse = (new NursingTreatment())
               ->setNursing($newNursing)
               ->setTreatment($treatment);
@@ -196,6 +206,9 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
             $newNursing->setActs($nurseActs);
           }
 
+          $newNursing->setSubTotal($nursingAmount);
+          $newNursing->setTotalAmount($nursingAmount);
+          $newNursing->setAmount($nursingAmount);
           $this->em->persist($newNursing);
         }
         // end treatments

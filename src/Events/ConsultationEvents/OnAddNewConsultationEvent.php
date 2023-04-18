@@ -213,6 +213,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
 
       // treatments
       $treatments = $consult->getTreatments();
+      $nursingAmount = 0;
       if ($treatments->count() > 0) {
         $nursing = (new Nursing())
           ->setConsultation($consult)
@@ -223,6 +224,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
           ->setHospital($hospital);
 
         foreach ($treatments as $treatment) {
+          $nursingAmount += $treatment->getPrice();
           $nurse = (new NursingTreatment())
             ->setNursing($nursing)
             ->setTreatment($treatment);
@@ -247,6 +249,9 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
           $nursing->setActs($actItems);
         }
 
+        $nursing->setSubTotal($nursingAmount);
+        $nursing->setTotalAmount($nursingAmount);
+        $nursing->setAmount($nursingAmount);
         $this->em->persist($nursing);
       }
       elseif (null !== $acts) {

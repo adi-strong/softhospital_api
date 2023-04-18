@@ -4,6 +4,7 @@ namespace App\Events\PatientEvents;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
 use App\Entity\Patient;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -43,6 +44,13 @@ class OnUpdatePatientEvent implements EventSubscriberInterface
       $nursingItems = $patient->getNursings();
       $prescriptions = $patient->getPrescriptions();
       $labs = $patient->getLabs();
+
+      $currentYear = (int) (new DateTime())->format('Y');
+      $birthYear = $patient->getBirthDate() !== null ? (int) $patient->getBirthDate()->format('Y') : null;
+      if ($birthYear !== null) {
+        $age = $currentYear - $birthYear;
+        $patient->setAge($age);
+      }
 
       if ($consultations->count() > 0) {
         foreach ($consultations as $consultation) $consultation->setFullName($fullName);
