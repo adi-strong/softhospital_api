@@ -36,11 +36,13 @@ class Nursing
 
   public ?array $treatments = [];
 
-  public ?bool $isNursingCompleted = null;
+  public ?array $actsItems = null;
 
   public ?DateTime $arrivedAt = null;
 
   public ?DateTime $leaveAt = null;
+
+  public ?array $treatmentValues = null;
 
   public ?string $sum = null;
 
@@ -125,6 +127,10 @@ class Nursing
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['nursing:read'])]
     private ?string $currency = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?array $acts = [];
 
     public function __construct()
     {
@@ -415,6 +421,18 @@ class Nursing
   public function setCurrency(?string $currency): self
   {
       $this->currency = $currency;
+
+      return $this;
+  }
+
+  public function getActs(): ?array
+  {
+      return $this->acts;
+  }
+
+  public function setActs(?array $acts): self
+  {
+      $this->acts = $acts;
 
       return $this;
   }

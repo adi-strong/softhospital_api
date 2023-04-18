@@ -14,6 +14,7 @@ use App\Entity\Lab;
 use App\Entity\LabResult;
 use App\Entity\Nursing;
 use App\Entity\NursingTreatment;
+use App\Repository\ActRepository;
 use App\Repository\ParametersRepository;
 use App\Services\HandleCurrentUserService;
 use Cocur\Slugify\Slugify;
@@ -42,6 +43,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
   public function __construct(
     private readonly HandleCurrentUserService $user,
     private readonly ParametersRepository $parametersRepository,
+    private readonly ActRepository $repository,
     private readonly EntityManagerInterface $em)
   {
   }
@@ -97,15 +99,20 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       // end appointment
 
       // acts
-      $acts = $consult->getActs();
-      if ($acts->count() > 0) {
+      $acts = $consult->actsItems;
+      if (null !== $acts) {
         foreach ($acts as $act) {
-          $invoiceAmount += $act->getPrice();
-          $actBasket = (new ActsInvoiceBasket())
-            ->setPrice($act->getPrice())
-            ->setInvoice($invoice)
-            ->setAct($act);
-          $this->em->persist($actBasket);
+          $id = $act['id'] ?? 0;
+          $item = $this->repository->find($id);
+          if (null !== $item) {
+            $invoiceAmount += $item->getPrice();
+            $consult->addAct($item);
+            $actBasket = (new ActsInvoiceBasket())
+              ->setPrice($item->getPrice())
+              ->setInvoice($invoice)
+              ->setAct($item);
+            $this->em->persist($actBasket);
+          }
         }
       }
       // end acts
@@ -140,34 +147,6 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
         }
       }
       // end exams
-
-      // treatments
-      $treatments = $consult->getTreatments();
-      if ($treatments->count() > 0) {
-        $nursing = (new Nursing())
-          ->setConsultation($consult)
-          ->setCurrency($parameter[0] ?? null)
-          ->setPatient($patient)
-          ->setFullName($fullName)
-          ->setCreatedAt($createdAt)
-          ->setHospital($hospital);
-
-        $nurseAmount = 0;
-        foreach ($treatments as $treatment) {
-          $nurseAmount += $treatment->getPrice();
-          $nurse = (new NursingTreatment())
-            ->setPrice($treatment->getPrice())
-            ->setNursing($nursing)
-            ->setTreatment($treatment);
-          $this->em->persist($nurse);
-        }
-
-        $nursing->setSubTotal($nurseAmount);
-        $nursing->setAmount($nurseAmount);
-        $nursing->setTotalAmount($nurseAmount);
-        $this->em->persist($nursing);
-      }
-      // end treatments
 
       // hospitalization
       $hospReleasedAt = $consult->hospReleasedAt ?? $createdAt;
@@ -231,8 +210,74 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
 
       $consult->setFollowed($followed);
       $consult->setDiagnostic(null);
-      $consult->setArterialTension(null);
-      $consult->setTemperature(null);
+
+      // treatments
+      $treatments = $consult->getTreatments();
+      if ($treatments->count() > 0) {
+        $nursing = (new Nursing())
+          ->setConsultation($consult)
+          ->setCurrency($parameter[0] ?? null)
+          ->setPatient($patient)
+          ->setFullName($fullName)
+          ->setCreatedAt($createdAt)
+          ->setHospital($hospital);
+
+        foreach ($treatments as $treatment) {
+          $nurse = (new NursingTreatment())
+            ->setNursing($nursing)
+            ->setTreatment($treatment);
+          $this->em->persist($nurse);
+        }
+
+        $actItems = $nursing->getActs();
+        $dateTime = (new DateTime())->format('Y-m-d');
+        if (null !== $acts) {
+          foreach ($acts as $act) {
+            $id = $act['id'] ?? 0;
+            $item = $this->repository->find($id);
+            if (null !== $item) {
+              $actItems[] = [
+                'releasedAt' => $dateTime,
+                'wording' => $item->getWording(),
+                'procedures' => $item->getProcedures(),
+                'isDone' => false,
+              ];
+            }
+          }
+          $nursing->setActs($actItems);
+        }
+
+        $this->em->persist($nursing);
+      }
+      elseif (null !== $acts) {
+        $nursing = (new Nursing())
+          ->setConsultation($consult)
+          ->setCurrency($parameter[0] ?? null)
+          ->setPatient($patient)
+          ->setFullName($fullName)
+          ->setCreatedAt($createdAt)
+          ->setHospital($hospital);
+
+        $actItems = $nursing->getActs();
+        $dateTime = (new DateTime())->format('Y-m-d');
+
+        foreach ($acts as $act) {
+          $id = $act['id'] ?? 0;
+          $item = $this->repository->find($id);
+          if (null !== $item) {
+            $actItems[] = [
+              'releasedAt' => $dateTime,
+              'wording' => $item->getWording(),
+              'procedures' => $item->getProcedures(),
+              'isDone' => false,
+            ];
+          }
+        }
+
+        $nursing->setActs($actItems);
+        $this->em->persist($nursing);
+      }
+      // end treatments
 
 
       // we finish here

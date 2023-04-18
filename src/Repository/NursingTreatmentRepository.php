@@ -83,7 +83,7 @@ class NursingTreatmentRepository extends ServiceEntityRepository
     return $result;
   }
 
-  public function findNursingTreatment2($treatmentId, Nursing $nursing)
+  public function findNursingTreatment2($treatmentId, Nursing $nursing): ?NursingTreatment
   {
     $qb = $this->createQueryBuilder('nt')
       ->join('nt.nursing', 'n', 'WITH', 'n.id = :nursing')

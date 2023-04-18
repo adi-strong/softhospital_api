@@ -52,6 +52,8 @@ class Consultation
   public ?Bed $bed = null;
 
   public ?DateTime $hospReleasedAt = null;
+
+  public ?array $actsItems = [];
   
     #[ORM\Id]
     #[ORM\GeneratedValue]

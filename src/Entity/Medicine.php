@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Post;
 use App\AppTraits\CreatedAtTrait;
 use App\AppTraits\IsDeletedTrait;
 use App\Controller\DestockingMedicinePublication;
+use App\Controller\MedicinePartialDestockingPublication;
 use App\Repository\MedicineRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,6 +30,13 @@ use Symfony\Component\Validator\Constraints as Assert;
     new Post(),
     new Get(),
     new Patch(),
+
+    new Post(
+      uriTemplate: '/medicines/{id}/partial_destocking',
+      requirements: [ 'id' => '\d+' ],
+      controller: MedicinePartialDestockingPublication::class,
+      name: 'medicine_partial_destocking'
+    ),
   ],
   normalizationContext: ['groups' => ['medicine:read']],
   order: ['id' => 'DESC'],
@@ -120,11 +128,15 @@ class Medicine
     #[Groups(['medicine:read'])]
     private Collection $destockingOfMedicines;
 
+    #[ORM\OneToMany(mappedBy: 'medicine', targetEntity: DestockMedicineForHospital::class)]
+    private Collection $destockMedicineForHospitals;
+
     public function __construct()
     {
         $this->drugstoreSupplyMedicines = new ArrayCollection();
         $this->medicinesSolds = new ArrayCollection();
         $this->destockingOfMedicines = new ArrayCollection();
+        $this->destockMedicineForHospitals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -396,6 +408,36 @@ class Medicine
             // set the owning side to null (unless already changed)
             if ($destockingOfMedicine->getMedicine() === $this) {
                 $destockingOfMedicine->setMedicine(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DestockMedicineForHospital>
+     */
+    public function getDestockMedicineForHospitals(): Collection
+    {
+        return $this->destockMedicineForHospitals;
+    }
+
+    public function addDestockMedicineForHospital(DestockMedicineForHospital $destockMedicineForHospital): self
+    {
+        if (!$this->destockMedicineForHospitals->contains($destockMedicineForHospital)) {
+            $this->destockMedicineForHospitals->add($destockMedicineForHospital);
+            $destockMedicineForHospital->setMedicine($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDestockMedicineForHospital(DestockMedicineForHospital $destockMedicineForHospital): self
+    {
+        if ($this->destockMedicineForHospitals->removeElement($destockMedicineForHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($destockMedicineForHospital->getMedicine() === $this) {
+                $destockMedicineForHospital->setMedicine(null);
             }
         }
 

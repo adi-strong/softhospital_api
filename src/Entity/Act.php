@@ -80,6 +80,10 @@ class Act
     #[Groups(['act:read', 'invoice:read', 'consult:read'])]
     private ?array $procedures = [];
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['act:read', 'invoice:read', 'consult:read'])]
+    private ?float $profitMarge = 0;
+
     public function __construct()
     {
         $this->consultations = new ArrayCollection();
@@ -216,6 +220,18 @@ class Act
     public function setProcedures(?array $procedures): self
     {
         $this->procedures = $procedures;
+
+        return $this;
+    }
+
+    public function getProfitMarge(): ?float
+    {
+        return $this->profitMarge;
+    }
+
+    public function setProfitMarge(?float $profitMarge): self
+    {
+        $this->profitMarge = $profitMarge;
 
         return $this;
     }

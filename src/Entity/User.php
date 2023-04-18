@@ -226,6 +226,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: DestockingOfMedicines::class)]
     private Collection $destockingOfMedicines;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: DestockMedicineForHospital::class)]
+    private Collection $destockMedicineForHospitals;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -248,6 +251,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->activities = new ArrayCollection();
         $this->covenantInvoices = new ArrayCollection();
         $this->destockingOfMedicines = new ArrayCollection();
+        $this->destockMedicineForHospitals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1042,6 +1046,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($destockingOfMedicine->getUser() === $this) {
                 $destockingOfMedicine->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DestockMedicineForHospital>
+     */
+    public function getDestockMedicineForHospitals(): Collection
+    {
+        return $this->destockMedicineForHospitals;
+    }
+
+    public function addDestockMedicineForHospital(DestockMedicineForHospital $destockMedicineForHospital): self
+    {
+        if (!$this->destockMedicineForHospitals->contains($destockMedicineForHospital)) {
+            $this->destockMedicineForHospitals->add($destockMedicineForHospital);
+            $destockMedicineForHospital->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDestockMedicineForHospital(DestockMedicineForHospital $destockMedicineForHospital): self
+    {
+        if ($this->destockMedicineForHospitals->removeElement($destockMedicineForHospital)) {
+            // set the owning side to null (unless already changed)
+            if ($destockMedicineForHospital->getUser() === $this) {
+                $destockMedicineForHospital->setUser(null);
             }
         }
 
