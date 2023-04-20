@@ -68,8 +68,6 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
       $actBaskets = $invoice->getActsInvoiceBaskets();
 
       if ($consult->isIsPublished() === true) {
-        $currentUser = $this->user->getUser();
-
         $agent = $consult->getDoctor();
 
         $consult->setFullName($fullName);
@@ -385,6 +383,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
           $lab->setFullName($fullName);
           $lab->setPatient($patient);
           $lab->setNote($consult->getNote());
+          $lab->setUserPrescriber($this->user->getUser());
 
           $labResults = $lab->getLabResults();
           if ($labResults->count() > 0 && $exams->count() > 0) {
@@ -418,8 +417,9 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
         if (null === $lab && $exams->count() > 0) {
           $newLab = (new Lab())
             ->setCreatedAt($createdAt)
-            ->setUser($currentUser)
+            ->setUser($this->user->getUser())
             ->setHospital($hospital)
+            ->setUserPrescriber($this->user->getUser())
             ->setFullName($fullName)
             ->setPatient($patient)
             ->setConsultation($consult)

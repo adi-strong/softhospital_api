@@ -208,9 +208,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Lab::class)]
     private Collection $labs;
 
-    #[ORM\OneToMany(mappedBy: 'assistant', targetEntity: Lab::class)]
-    private Collection $labAssistants;
-
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Prescription::class)]
     private Collection $prescriptions;
 
@@ -228,6 +225,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: DestockMedicineForHospital::class)]
     private Collection $destockMedicineForHospitals;
+
+    #[ORM\OneToMany(mappedBy: 'userPresciber', targetEntity: Lab::class)]
+    private Collection $labPrescribers;
+
+    #[ORM\OneToMany(mappedBy: 'userPublisher', targetEntity: Lab::class)]
+    private Collection $labPublishers;
 
     public function __construct()
     {
@@ -252,6 +255,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->covenantInvoices = new ArrayCollection();
         $this->destockingOfMedicines = new ArrayCollection();
         $this->destockMedicineForHospitals = new ArrayCollection();
+        $this->labPrescribers = new ArrayCollection();
+        $this->labPublishers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -873,36 +878,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Lab>
-     */
-    public function getLabAssistants(): Collection
-    {
-        return $this->labAssistants;
-    }
-
-    public function addLabAssistant(Lab $labAssistant): self
-    {
-        if (!$this->labAssistants->contains($labAssistant)) {
-            $this->labAssistants->add($labAssistant);
-            $labAssistant->setAssistant($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLabAssistant(Lab $labAssistant): self
-    {
-        if ($this->labAssistants->removeElement($labAssistant)) {
-            // set the owning side to null (unless already changed)
-            if ($labAssistant->getAssistant() === $this) {
-                $labAssistant->setAssistant(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Prescription>
      */
     public function getPrescriptions(): Collection
@@ -1076,6 +1051,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($destockMedicineForHospital->getUser() === $this) {
                 $destockMedicineForHospital->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Lab>
+     */
+    public function getLabPrescribers(): Collection
+    {
+        return $this->labPrescribers;
+    }
+
+    public function addLabPrescriber(Lab $labPrescriber): self
+    {
+        if (!$this->labPrescribers->contains($labPrescriber)) {
+            $this->labPrescribers->add($labPrescriber);
+            $labPrescriber->setUserPrescriber($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabPrescriber(Lab $labPrescriber): self
+    {
+        if ($this->labPrescribers->removeElement($labPrescriber)) {
+            // set the owning side to null (unless already changed)
+            if ($labPrescriber->getUserPrescriber() === $this) {
+                $labPrescriber->setUserPrescriber(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Lab>
+     */
+    public function getLabPublishers(): Collection
+    {
+        return $this->labPublishers;
+    }
+
+    public function addLabPublisher(Lab $labPublisher): self
+    {
+        if (!$this->labPublishers->contains($labPublisher)) {
+            $this->labPublishers->add($labPublisher);
+            $labPublisher->setUserPublisher($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLabPublisher(Lab $labPublisher): self
+    {
+        if ($this->labPublishers->removeElement($labPublisher)) {
+            // set the owning side to null (unless already changed)
+            if ($labPublisher->getUserPublisher() === $this) {
+                $labPublisher->setUserPublisher(null);
             }
         }
 

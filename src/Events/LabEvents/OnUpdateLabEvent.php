@@ -62,7 +62,7 @@ class OnUpdateLabEvent implements EventSubscriberInterface
             $findLabExam = $this->labResultRepository->findLabExam($findExam, $lab);
             if (null !== $findLabExam) {
               $lab->setIsPublished(true);
-              $lab->setAssistant($this->user->getUser());
+              $lab->setUserPublisher($this->user->getUser());
               $lab->setUpdatedAt(new DateTime());
               $consultation?->setIsPublished(false);
             }

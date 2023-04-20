@@ -92,7 +92,7 @@ class Stats1SectionQueryBuilderService
     $sql = "
       SELECT COUNT(c.id) count
         FROM consultation c 
-          LEFT JOIN hospital h ON h.id = c.hospital_id
+          JOIN hospital h ON h.id = c.hospital_id
         WHERE c.hospital_id IS NOT NULL 
           AND h.id = :hospitalId
           AND date_format(c.created_at, '%Y') = :format
@@ -121,7 +121,7 @@ class Stats1SectionQueryBuilderService
     $sql = "
       SELECT COUNT(c.id) count
         FROM consultation c 
-          LEFT JOIN hospital h ON h.id = c.hospital_id
+          JOIN hospital h ON h.id = c.hospital_id
         WHERE c.hospital_id IS NOT NULL 
           AND h.id = :hospitalId
           AND date_format(c.created_at, '%Y-%m') = :format

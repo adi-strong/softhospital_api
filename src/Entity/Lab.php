@@ -49,10 +49,6 @@ class Lab
     #[Groups(['lab:read'])]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'labAssistants')]
-    #[Groups(['lab:read'])]
-    private ?User $assistant = null;
-
     #[ORM\OneToMany(mappedBy: 'lab', targetEntity: LabResult::class, cascade: ['persist', 'remove'])]
     #[Groups(['lab:read', 'prescript:read'])]
     private Collection $labResults;
@@ -89,6 +85,14 @@ class Lab
     #[Groups(['lab:read', 'prescript:read'])]
     private ?string $descriptions = null;
 
+    #[ORM\ManyToOne(inversedBy: 'labPrescribers')]
+    #[Groups(['lab:read', 'prescript:read'])]
+    private ?User $userPrescriber = null;
+
+    #[ORM\ManyToOne(inversedBy: 'labPublishers')]
+    #[Groups(['lab:read', 'prescript:read'])]
+    private ?User $userPublisher = null;
+
     public function __construct()
     {
         $this->labResults = new ArrayCollection();
@@ -119,18 +123,6 @@ class Lab
     public function setUser(?UserInterface $user): self
     {
         $this->user = $user;
-
-        return $this;
-    }
-
-    public function getAssistant(): ?User
-    {
-        return $this->assistant;
-    }
-
-    public function setAssistant(?UserInterface $assistant): self
-    {
-        $this->assistant = $assistant;
 
         return $this;
     }
@@ -273,6 +265,30 @@ class Lab
   public function setDescriptions(?string $descriptions): self
   {
       $this->descriptions = $descriptions;
+
+      return $this;
+  }
+
+  public function getUserPrescriber(): ?User
+  {
+      return $this->userPrescriber;
+  }
+
+  public function setUserPrescriber(?UserInterface $userPrescriber): self
+  {
+      $this->userPrescriber = $userPrescriber;
+
+      return $this;
+  }
+
+  public function getUserPublisher(): ?User
+  {
+      return $this->userPublisher;
+  }
+
+  public function setUserPublisher(?UserInterface $userPublisher): self
+  {
+      $this->userPublisher = $userPublisher;
 
       return $this;
   }

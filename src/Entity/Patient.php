@@ -232,6 +232,7 @@ class Patient
     private Collection $prescriptions;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['patient:read'])]
     private ?string $fullName = null;
 
     public function __construct()
