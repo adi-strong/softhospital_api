@@ -66,6 +66,9 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
       $createdAt = $consult->getCreatedAt() ?? new DateTime();
       $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
       $actBaskets = $invoice->getActsInvoiceBaskets();
+      $lab = $consult->getLab();
+      $exams = $consult->getExams();
+      $examBaskets = $invoice->getExamsInvoiceBaskets();
 
       if ($consult->isIsPublished() === true) {
         $agent = $consult->getDoctor();
@@ -138,6 +141,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
                 $consult->addAct($item);
                 $actBasketInvoice = (new ActsInvoiceBasket())
                   ->setPrice($item->getPrice())
+                  ->setDate((new DateTime())->format('Y-m-d'))
                   ->setAct($item)
                   ->setInvoice($invoice);
 
@@ -187,6 +191,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
                 $invoiceAmount += $item->getPrice();
                 $consult->addAct($item);
                 $actBasketInvoice = (new ActsInvoiceBasket())
+                  ->setDate((new DateTime())->format('Y-m-d'))
                   ->setAct($item)
                   ->setInvoice($invoice)
                   ->setPrice($item->getPrice());
@@ -210,6 +215,108 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
           $this->em->persist($newNursing);
         }
         // end treatments
+
+        // exams
+        if ($exams->count() < 1) {
+          $consult->setLab(null);
+          if (null !== $lab) {
+            $this->em->remove($lab);
+          } // on traite les données relatifs au labo
+
+          foreach ($examBaskets as $basket) $this->em->remove($basket);
+        }
+        else {
+          if (null !== $lab) {
+            $lab->setFullName($fullName);
+            $lab->setPatient($patient);
+            $lab->setNote($consult->getNote());
+            $lab->setUserPrescriber($this->user->getUser());
+
+            $labResults = $lab->getLabResults();
+            if ($labResults->count() > 0 && $exams->count() > 0) {
+              foreach ($exams as $exam) {
+                $findExam = $this->labResultRepository->findLabExam($exam, $lab);
+                if ($findExam === null) {
+                  $labResult = (new LabResult())
+                    ->setExam($exam)
+                    ->setLab($lab);
+                  $this->em->persist($labResult);
+                }
+              }
+
+              foreach ($labResults as $labResult) {
+                $exam = $labResult->getExam();
+                if (null !== $exam && $exams->contains($exam) === false) $this->em->remove($labResult);
+              }
+            }
+
+            if ($labResults->count() < 1) {
+              foreach ($exams as $exam) {
+                $examBasket = (new ExamsInvoiceBasket())
+                  ->setInvoice($invoice)
+                  ->setPrice($exam->getPrice())
+                  ->setExam($exam);
+                $this->em->persist($examBasket);
+              }
+            }
+          } // si les examens existent dans le labo => on évite les doublons
+
+          if (null === $lab && $exams->count() > 0) {
+            $newLab = (new Lab())
+              ->setCreatedAt($createdAt)
+              ->setUser($this->user->getUser())
+              ->setHospital($hospital)
+              ->setUserPrescriber($this->user->getUser())
+              ->setFullName($fullName)
+              ->setPatient($patient)
+              ->setConsultation($consult)
+              ->setNote($consult->getNote());
+            $this->em->persist($newLab);
+
+            foreach ($exams as $exam) {
+              $labResult = (new LabResult())
+                ->setExam($exam)
+                ->setLab($newLab);
+              $this->em->persist($labResult);
+            }
+          }
+          // si le labo n'existe pas, on le crée.
+
+          if ($examBaskets->count() > 0 && $exams->count() > 0) {
+            foreach ($exams as $exam) {
+              $findExam = $this->examsInvoiceBasketRepository->findInvoiceExamBasket($exam, $invoice);
+              if (null === $findExam) {
+                $examBasket = (new ExamsInvoiceBasket())
+                  ->setExam($exam)
+                  ->setPrice($exam->getPrice())
+                  ->setInvoice($invoice);
+                $this->em->persist($examBasket);
+              }
+            }
+            // si les examens existent mais pas dans le panier, on les ajoute.
+
+            foreach ($examBaskets as $basket) {
+              $exam = $basket->getExam();
+              if (null !== $exam && $exams->contains($exam) === false) $this->em->remove($basket);
+            }
+            // si les examens du panier n'existent pas dans la fiche, on les supprime.
+          }
+
+          if ($examBaskets->count() < 1) {
+            foreach ($exams as $exam) {
+              $examBasket = (new ExamsInvoiceBasket())
+                ->setInvoice($invoice)
+                ->setPrice($exam->getPrice())
+                ->setExam($exam);
+              $this->em->persist($examBasket);
+            }
+          }
+
+          foreach ($exams as $exam) {
+            $invoiceAmount += $exam->getPrice();
+          }
+        }
+        // end exams
 
         // hospitalization
         $hospReleasedAt = $consult->hospReleasedAt ?? $createdAt;
@@ -287,6 +394,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
               $invoiceAmount += $item->getPrice();
               $consult->addAct($item);
               $actBasketInvoice = (new ActsInvoiceBasket())
+                ->setDate((new DateTime())->format('Y-m-d'))
                 ->setPrice($item->getPrice())
                 ->setAct($item)
                 ->setInvoice($invoice);
@@ -319,6 +427,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
               $consult->addAct($item);
               $actBasketInvoice = (new ActsInvoiceBasket())
                 ->setPrice($item->getPrice())
+                ->setDate((new DateTime())->format('Y-m-d'))
                 ->setAct($item)
                 ->setInvoice($invoice);
 
@@ -334,142 +443,30 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
           }
           $newNursing->setActs($acts);
         }
+
+        if ($examBaskets->count() > 0) {
+          foreach ($examBaskets as $basket) $invoiceAmount += $basket->getPrice();
+        }
       }
 
       foreach ($actBaskets as $act) $invoiceAmount += $act->getPrice();
 
-      $diagnostic = null !== $consult->getDiagnostic() ? trim($consult?->getDiagnostic(), ' ') : null;
       $followed = $consult?->getFollowed();
 
-      if (null !== $diagnostic) {
-        $followed[] = [
-          'date' => (new DateTime())->format('Y-m-d'),
-          'diagnostic' => $diagnostic,
-          'temperature' => $consult->getTemperature(),
-          'weight' => $consult->getWeight(),
-          'arterialTension' => $consult->getArterialTension(),
-          'cardiacFrequency' => $consult->getCardiacFrequency(),
-          'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
-          'oxygenSaturation' => $consult->getOxygenSaturation()];
-      }
-      else {
-        $followed[] = [
-          'date' => (new DateTime())->format('Y-m-d'),
-          'temperature' => $consult->getTemperature(),
-          'weight' => $consult->getWeight(),
-          'arterialTension' => $consult->getArterialTension(),
-          'cardiacFrequency' => $consult->getCardiacFrequency(),
-          'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
-          'oxygenSaturation' => $consult->getOxygenSaturation()];
-      }
+      $followed[] = [
+        'date' => (new DateTime())->format('Y-m-d'),
+        'temperature' => $consult->getTemperature(),
+        'weight' => $consult->getWeight(),
+        'arterialTension' => $consult->getArterialTension(),
+        'cardiacFrequency' => $consult->getCardiacFrequency(),
+        'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
+        'oxygenSaturation' => $consult->getOxygenSaturation()];
 
       $consult->setFollowed($followed);
-      $consult->setDiagnostic(null);
-
-      // exams
-      $exams = $consult->getExams();
-      $examBaskets = $invoice->getExamsInvoiceBaskets();
-      $lab = $consult->getLab();
-      if ($exams->count() < 1) {
-        $consult->setLab(null);
-        if (null !== $lab) {
-          $this->em->remove($lab);
-        } // on traite les données relatifs au labo
-
-        foreach ($examBaskets as $basket) $this->em->remove($basket);
-      }
-      else {
-        if (null !== $lab) {
-          $lab->setFullName($fullName);
-          $lab->setPatient($patient);
-          $lab->setNote($consult->getNote());
-          $lab->setUserPrescriber($this->user->getUser());
-
-          $labResults = $lab->getLabResults();
-          if ($labResults->count() > 0 && $exams->count() > 0) {
-            foreach ($exams as $exam) {
-              $findExam = $this->labResultRepository->findLabExam($exam, $lab);
-              if ($findExam === null) {
-                $labResult = (new LabResult())
-                  ->setExam($exam)
-                  ->setLab($lab);
-                $this->em->persist($labResult);
-              }
-            }
-
-            foreach ($labResults as $labResult) {
-              $exam = $labResult->getExam();
-              if (null !== $exam && $exams->contains($exam) === false) $this->em->remove($labResult);
-            }
-          }
-
-          if ($labResults->count() < 1) {
-            foreach ($exams as $exam) {
-              $examBasket = (new ExamsInvoiceBasket())
-                ->setInvoice($invoice)
-                ->setPrice($exam->getPrice())
-                ->setExam($exam);
-              $this->em->persist($examBasket);
-            }
-          }
-        } // si les examens existent dans le labo => on évite les doublons
-
-        if (null === $lab && $exams->count() > 0) {
-          $newLab = (new Lab())
-            ->setCreatedAt($createdAt)
-            ->setUser($this->user->getUser())
-            ->setHospital($hospital)
-            ->setUserPrescriber($this->user->getUser())
-            ->setFullName($fullName)
-            ->setPatient($patient)
-            ->setConsultation($consult)
-            ->setNote($consult->getNote());
-          $this->em->persist($newLab);
-
-          foreach ($exams as $exam) {
-            $labResult = (new LabResult())
-              ->setExam($exam)
-              ->setLab($newLab);
-            $this->em->persist($labResult);
-          }
-        }
-        // si le labo n'existe pas, on le crée.
-
-        if ($examBaskets->count() > 0 && $exams->count() > 0) {
-          foreach ($exams as $exam) {
-            $findExam = $this->examsInvoiceBasketRepository->findInvoiceExamBasket($exam, $invoice);
-            if (null === $findExam) {
-              $examBasket = (new ExamsInvoiceBasket())
-                ->setExam($exam)
-                ->setPrice($exam->getPrice())
-                ->setInvoice($invoice);
-              $this->em->persist($examBasket);
-            }
-          }
-          // si les examens existent mais pas dans le panier, on les ajoute.
-
-          foreach ($examBaskets as $basket) {
-            $exam = $basket->getExam();
-            if (null !== $exam && $exams->contains($exam) === false) $this->em->remove($basket);
-          }
-          // si les examens du panier n'existent pas dans la fiche, on les supprime.
-        }
-
-        if ($examBaskets->count() < 1) {
-          foreach ($exams as $exam) {
-            $examBasket = (new ExamsInvoiceBasket())
-              ->setInvoice($invoice)
-              ->setPrice($exam->getPrice())
-              ->setExam($exam);
-            $this->em->persist($examBasket);
-          }
-        }
-
-        foreach ($exams as $exam) {
-          $invoiceAmount += $exam->getPrice();
-        }
-      }
-      // end exams
+      $consult->setTemperature(null);
+      $consult->setArterialTension(null);
+      $consult->setCardiacFrequency(null);
+      $consult->setWeight(null);
 
       // we finish here
 

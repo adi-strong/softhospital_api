@@ -81,10 +81,6 @@ class Lab
     #[ORM\OneToOne(mappedBy: 'lab', cascade: ['persist', 'remove'])]
     private ?Prescription $prescription = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['lab:read', 'prescript:read'])]
-    private ?string $descriptions = null;
-
     #[ORM\ManyToOne(inversedBy: 'labPrescribers')]
     #[Groups(['lab:read', 'prescript:read'])]
     private ?User $userPrescriber = null;
@@ -92,6 +88,10 @@ class Lab
     #[ORM\ManyToOne(inversedBy: 'labPublishers')]
     #[Groups(['lab:read', 'prescript:read'])]
     private ?User $userPublisher = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['lab:read', 'prescript:read'])]
+    private ?array $results = [];
 
     public function __construct()
     {
@@ -257,18 +257,6 @@ class Lab
       return $this;
   }
 
-  public function getDescriptions(): ?string
-  {
-      return $this->descriptions;
-  }
-
-  public function setDescriptions(?string $descriptions): self
-  {
-      $this->descriptions = $descriptions;
-
-      return $this;
-  }
-
   public function getUserPrescriber(): ?User
   {
       return $this->userPrescriber;
@@ -289,6 +277,18 @@ class Lab
   public function setUserPublisher(?UserInterface $userPublisher): self
   {
       $this->userPublisher = $userPublisher;
+
+      return $this;
+  }
+
+  public function getResults(): ?array
+  {
+      return $this->results;
+  }
+
+  public function setResults(?array $results): self
+  {
+      $this->results = $results;
 
       return $this;
   }

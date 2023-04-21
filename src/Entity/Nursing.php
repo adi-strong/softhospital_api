@@ -49,7 +49,7 @@ class Nursing
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['nursing:read', 'invoice:read', 'invoice:read'])]
+    #[Groups(['nursing:read', 'invoice:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'nursing')]

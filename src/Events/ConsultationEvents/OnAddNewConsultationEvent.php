@@ -108,6 +108,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
             $invoiceAmount += $item->getPrice();
             $consult->addAct($item);
             $actBasket = (new ActsInvoiceBasket())
+              ->setDate((new DateTime())->format('Y-m-d'))
               ->setPrice($item->getPrice())
               ->setInvoice($invoice)
               ->setAct($item);
@@ -176,27 +177,14 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       $date = (new DateTime())->format('Y-m-d');
       $followed = $consult?->getFollowed();
 
-      if (null !== $diagnostic) {
-        $followed[] = [
-          'date' => $date,
-          'diagnostic' => $diagnostic,
-          'temperature' => $consult->getTemperature(),
-          'weight' => $consult->getWeight(),
-          'arterialTension' => $consult->getArterialTension(),
-          'cardiacFrequency' => $consult->getCardiacFrequency(),
-          'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
-          'oxygenSaturation' => $consult->getOxygenSaturation()];
-      }
-      else {
-        $followed[] = [
-          'date' => $date,
-          'temperature' => $consult->getTemperature(),
-          'weight' => $consult->getWeight(),
-          'arterialTension' => $consult->getArterialTension(),
-          'cardiacFrequency' => $consult->getCardiacFrequency(),
-          'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
-          'oxygenSaturation' => $consult->getOxygenSaturation()];
-      }
+      $followed[] = [
+        'date' => $date,
+        'temperature' => $consult->getTemperature(),
+        'weight' => $consult->getWeight(),
+        'arterialTension' => $consult->getArterialTension(),
+        'cardiacFrequency' => $consult->getCardiacFrequency(),
+        'respiratoryFrequency' => $consult->getRespiratoryFrequency(),
+        'oxygenSaturation' => $consult->getOxygenSaturation()];
 
       $slug = (new Slugify())->slugify($fullName);
       $activity = (new Activities())
@@ -209,7 +197,10 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       $this->em->persist($activity);
 
       $consult->setFollowed($followed);
-      $consult->setDiagnostic(null);
+      $consult->setTemperature(null);
+      $consult->setArterialTension(null);
+      $consult->setCardiacFrequency(null);
+      $consult->setWeight(null);
 
       // treatments
       $treatments = $consult->getTreatments();

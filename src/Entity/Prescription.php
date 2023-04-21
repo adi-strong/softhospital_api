@@ -33,10 +33,12 @@ class Prescription
 {
   use FullNameTrait;
 
+  public ?array $others = [];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['prescript:read'])]
+    #[Groups(['prescript:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'prescription')]
@@ -71,7 +73,7 @@ class Prescription
     private ?Hospital $hospital = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['prescript:read'])]
+    #[Groups(['prescript:read', 'consult:read'])]
     private ?array $orders = [];
 
     public function getId(): ?int

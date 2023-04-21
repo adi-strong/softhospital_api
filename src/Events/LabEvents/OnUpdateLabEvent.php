@@ -54,9 +54,13 @@ class OnUpdateLabEvent implements EventSubscriberInterface
       $consultation?->setFullName($patient?->getFullName());
       $consultation?->setIsPublished(false);
 
+      $results = $lab->getResults();
+
       if ($lab->isIsPublished() === false) {
         foreach ($values as $value) {
           $examId = $value['id'];
+          $result = $value['result'] ?? null;
+          $normalValue = $value['normalValue'] ?? null;
           $findExam = $this->examRepository->find($examId);
           if (null !== $findExam) {
             $findLabExam = $this->labResultRepository->findLabExam($findExam, $lab);
@@ -65,16 +69,24 @@ class OnUpdateLabEvent implements EventSubscriberInterface
               $lab->setUserPublisher($this->user->getUser());
               $lab->setUpdatedAt(new DateTime());
               $consultation?->setIsPublished(false);
+
+              $results[] = [
+                'exam' => $findExam->getWording(),
+                'result' => $result,
+                'normalValue' => $normalValue,
+              ];
             }
           }
         }
+
+        $lab->setResults($results);
 
         // Init prescription
         if (null === $prescription) {
           $initPrescription = (new Prescription())
             ->setLab($lab)
             ->setPatient($lab->getPatient())
-            ->setConsultation($lab?->getConsultation())
+            ->setConsultation($lab->getConsultation())
             ->setIsPublished(false)
             ->setFullName($patient?->getFullName())
             ->setHospital($hospital);

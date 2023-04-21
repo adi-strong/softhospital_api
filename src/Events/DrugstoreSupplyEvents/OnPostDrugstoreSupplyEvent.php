@@ -81,8 +81,9 @@ class OnPostDrugstoreSupplyEvent implements EventSubscriberInterface
               $currency = $parameter->getCurrency() ?? null;
               if ($currency !== null) {
                 if (null !== $rate && $fOperation !== null && $currency !== $drugstore->getCurrency()) {
-                  if ($fOperation === '*') $converterCost = max(($cost * $rate), 1);
-                  elseif ($fOperation === '/') $converterCost = max(($cost / $rate), 1);
+                  $converterCost = max(($cost / $rate), 1);
+                  // if ($fOperation === '*') $converterCost = max(($cost * $rate), 1);
+                  // elseif ($fOperation === '/') $converterCost = max(($cost / $rate), 1);
                 }
               }
             }

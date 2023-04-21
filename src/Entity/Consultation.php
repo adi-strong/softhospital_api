@@ -86,6 +86,7 @@ class Consultation
     private Collection $treatments;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[Groups(['consult:read'])]
     private ?Invoice $invoice = null;
 
     #[ORM\ManyToOne(inversedBy: 'consultations')]
@@ -142,7 +143,7 @@ class Consultation
     private ?Appointment $appointment = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
-    #[Groups(['invoice:read'])]
+    #[Groups(['invoice:read', 'consult:read'])]
     private ?Nursing $nursing = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['remove'])]
@@ -161,6 +162,7 @@ class Consultation
     private ?string $diagnostic = null;
 
     #[ORM\OneToOne(mappedBy: 'consultation', cascade: ['persist', 'remove'])]
+    #[Groups(['consult:read'])]
     private ?Prescription $prescription = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -178,6 +180,14 @@ class Consultation
     #[ORM\Column(nullable: true)]
     #[Groups(['consult:read'])]
     private ?array $followed = [];
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['consult:read'])]
+    private ?array $medicinesPrescriptions = [];
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['consult:read'])]
+    private ?string $treatmentsDescriptions = null;
 
     public function __construct()
     {
@@ -602,6 +612,30 @@ class Consultation
     public function setFollowed(?array $followed): self
     {
         $this->followed = $followed;
+
+        return $this;
+    }
+
+    public function getMedicinesPrescriptions(): ?array
+    {
+        return $this->medicinesPrescriptions;
+    }
+
+    public function setMedicinesPrescriptions(?array $medicinesPrescriptions): self
+    {
+        $this->medicinesPrescriptions = $medicinesPrescriptions;
+
+        return $this;
+    }
+
+    public function getTreatmentsDescriptions(): ?string
+    {
+        return $this->treatmentsDescriptions;
+    }
+
+    public function setTreatmentsDescriptions(?string $treatmentsDescriptions): self
+    {
+        $this->treatmentsDescriptions = $treatmentsDescriptions;
 
         return $this;
     }

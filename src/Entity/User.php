@@ -129,7 +129,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le numéro de téléphone doit être renseigné')]
     #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'lab:read'])]
     private ?string $tel = null;
 
     #[ORM\Column]
@@ -226,7 +226,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: DestockMedicineForHospital::class)]
     private Collection $destockMedicineForHospitals;
 
-    #[ORM\OneToMany(mappedBy: 'userPresciber', targetEntity: Lab::class)]
+    #[ORM\OneToMany(mappedBy: 'userPrescriber', targetEntity: Lab::class)]
     private Collection $labPrescribers;
 
     #[ORM\OneToMany(mappedBy: 'userPublisher', targetEntity: Lab::class)]

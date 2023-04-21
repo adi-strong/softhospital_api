@@ -54,7 +54,7 @@ class Invoice
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['invoice:read'])]
+    #[Groups(['invoice:read', 'consult:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
@@ -104,7 +104,7 @@ class Invoice
     private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ActsInvoiceBasket::class, cascade: ['persist', 'remove'])]
-    #[Groups(['invoice:read'])]
+    #[Groups(['invoice:read', 'consult:read'])]
     private Collection $actsInvoiceBaskets;
 
     #[ORM\OneToMany(mappedBy: 'invoice', targetEntity: ExamsInvoiceBasket::class, cascade: ['persist', 'remove'])]

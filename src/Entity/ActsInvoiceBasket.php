@@ -21,13 +21,17 @@ class ActsInvoiceBasket
     private ?Invoice $invoice = null;
 
     #[ORM\ManyToOne(inversedBy: 'actsInvoiceBaskets')]
-    #[Groups(['invoice:read'])]
+    #[Groups(['invoice:read', 'consult:read'])]
     #[ORM\JoinColumn(nullable: true)]
     private ?Act $act = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     #[Groups(['invoice:read'])]
     private ?string $price = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['invoice:read', 'consult:read'])]
+    private ?string $date = null;
 
     public function getId(): ?int
     {
@@ -66,6 +70,18 @@ class ActsInvoiceBasket
     public function setPrice(?string $price): self
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    public function getDate(): ?string
+    {
+        return $this->date;
+    }
+
+    public function setDate(?string $date): self
+    {
+        $this->date = $date;
 
         return $this;
     }

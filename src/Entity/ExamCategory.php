@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     new Delete(),
   ],
   normalizationContext: ['groups' => ['examCategory:read']],
-  order: ['id' => 'DESC'],
+  order: ['id' => 'ASC'],
   paginationEnabled: false,
 )]
 class ExamCategory
@@ -55,6 +55,7 @@ class ExamCategory
     private ?Hospital $hospital = null;
 
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: Exam::class)]
+    #[Groups(['examCategory:read'])]
     private Collection $exams;
 
     public function __construct()

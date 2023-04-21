@@ -47,6 +47,7 @@ class Exam
       'prescript:read',
       'prescript:read',
       'invoice:read',
+      'examCategory:read',
     ])]
     private ?int $id = null;
 
@@ -66,6 +67,7 @@ class Exam
       'prescript:read',
       'prescript:read',
       'invoice:read',
+      'examCategory:read',
     ])]
     private ?string $wording = null;
 

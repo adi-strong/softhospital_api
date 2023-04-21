@@ -45,6 +45,24 @@ class OnUpdatePrescriptionEvent implements EventSubscriberInterface
       $consult = $prescription->getConsultation();
       $consult?->setFullName($consult?->getFullName());
       $consult?->setIsPublished(false);
+
+      $orders = $prescription->getOrders();
+      $others = $prescription->others;
+      if (null !== $others) {
+        foreach ($others as $other) {
+          $medicine = $other['medicine'] ?? null;
+          $dosage = $other['dosage'] ?? null;
+          $orders[] = [
+            'medicine' => $medicine,
+            'dosage' => $dosage,
+          ];
+        }
+      }
+
+      if (null !== $orders) {
+        $prescription->setOrders($orders);
+        $consult?->setPrescription($prescription);
+      }
     }
   }
 }
