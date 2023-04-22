@@ -481,7 +481,7 @@ class Stats2SectionQueryBuilderService
     $sql = "
       SELECT
         COUNT(c.id) 'fiches'
-        FROM consultations_type c
+        FROM consultation c
          LEFT JOIN hospital h ON h.id = c.hospital_id
         WHERE h.id = :hospId
          AND date_format(c.created_at, '%Y-%m') = :format;

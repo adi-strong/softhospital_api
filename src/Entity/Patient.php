@@ -136,12 +136,9 @@ class Patient
     ])]
     private ?string $maritalStatus = null;
 
-    #[ORM\Column(length: 20, nullable: true)]
-    #[Assert\Length(
-      min: 9,
-      max: 20,
-      minMessage: 'Ce champs doit contenir au moins {{ limit }} caractères.',
-      maxMessage: 'Ce champs ne peut dépasser {{ limit }} caractères.')]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(min: 9, minMessage: 'Ce champs doit contenir au moins {{ limit }} caractères.')]
+    // #[Assert\Regex('#^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$#', message: 'Numéro de téléphone non valide.')]
     #[Groups([
       'patient:read',
       'covenant:read',

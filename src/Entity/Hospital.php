@@ -58,9 +58,8 @@ class Hospital
     #[ORM\OneToMany(mappedBy: 'hospitalCenter', targetEntity: User::class)]
     private Collection $users;
 
-    #[ORM\Column(length: 20, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Length(min: 9, minMessage: 'Ce champs doit faire au moins {{ limit }} caractères.')]
-    #[Assert\Regex('#^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$#', message: 'Numéro de téléphone non valide.')]
     #[Groups(['hospital:read', 'user:read', 'param:read'])]
     private ?string $tel = null;
 

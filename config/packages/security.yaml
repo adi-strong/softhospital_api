@@ -57,7 +57,7 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
-        - { path: ^/api/users, roles: [ ROLE_RECEIVER, ROLE_PHAR, ROLE_RECEIVER ], methods: [ GET, PATCH ] }
+        - { path: ^/api/users, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: [ GET, PATCH ] }
         # - { path: ^/api/users, roles: ROLE_ADMIN, methods: POST }
         - { path: ^/api/parameters, roles: ROLE_ADMIN, methods: POST }
         - { path: ^/api/parameters, roles: [ ROLE_RECEIVER, ROLE_PHAR ], methods: GET }
@@ -105,17 +105,17 @@ security:
         - { path: ^/api/exams, roles: ROLE_ADMIN, methods: [ POST, PATCH ] }
         - { path: ^/api/exams, roles: ROLE_RECEIVER, methods: GET }
         - { path: ^/api/expense_categories, roles: ROLE_LOCKER, methods: [ POST, GET, PATCH, DELETE ] }
-        - { path: ^/api/get_box_by_month, roles: ROLE_MD, methods: GET }
-        - { path: ^/api/get_box_by_year, roles: ROLE_MD, methods: GET }
-        - { path: ^/api/get_most_sales_drugs, roles: ROLE_MD, methods: GET }
-        - { path: ^/api/get_stats2_by_month, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_box_by_month, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/get_box_by_year, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/get_most_sales_drugs, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/get_stats2_by_month, roles: ROLE_LOCKER, methods: GET }
         - { path: ^/api/get_covenant_invoices, roles: ROLE_LOCKER, methods: GET }
         - { path: ^/api/invoices, roles: ROLE_LOCKER, methods: [ GET, PATCH, POST ] }
-        - { path: ^/api/get_file_stats, roles: ROLE_MD, methods: GET }
-        - { path: ^/api/get_file_stats_by_year, roles: ROLE_MD, methods: GET }
-        - { path: ^/api/get_patients_stats, roles: ROLE_MD, methods: GET }
-        - { path: ^/api/get_revenue_by_year_stats, roles: ROLE_MD, methods: GET }
-        - { path: ^/api/get_revenue_stats, roles: ROLE_MD, methods: GET }
+        - { path: ^/api/get_file_stats, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/get_file_stats_by_year, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/get_patients_stats, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/get_revenue_by_year_stats, roles: ROLE_LOCKER, methods: GET }
+        - { path: ^/api/get_revenue_stats, roles: ROLE_LOCKER, methods: GET }
         - { path: ^/api/get_lasts_activities_by_month, roles: ROLE_MD, methods: GET }
         - { path: ^/api/get_lasts_activities_by_year, roles: ROLE_MD, methods: GET }
         - { path: ^/api/get_lasts_activities_by_last_month, roles: ROLE_MD, methods: GET }

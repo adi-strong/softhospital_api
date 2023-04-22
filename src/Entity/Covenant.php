@@ -75,9 +75,10 @@ class Covenant
     #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $focal = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le n° de téléphone doit être renseigné.')]
     #[Assert\NotNull(message: 'Ce champs doit être renseigné.')]
+    #[Assert\Length(min: 9, minMessage: 'Le numéro de téléphone doit au minimum {{ limit }} caractères.')]
     #[Groups(['covenant:read', 'covenant:write'])]
     private ?string $tel = null;
 
