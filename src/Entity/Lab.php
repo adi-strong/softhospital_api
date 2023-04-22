@@ -93,6 +93,10 @@ class Lab
     #[Groups(['lab:read', 'prescript:read'])]
     private ?array $results = [];
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['lab:read', 'prescript:read'])]
+    private ?int $age = null;
+
     public function __construct()
     {
         $this->labResults = new ArrayCollection();
@@ -289,6 +293,18 @@ class Lab
   public function setResults(?array $results): self
   {
       $this->results = $results;
+
+      return $this;
+  }
+
+  public function getAge(): ?int
+  {
+      return $this->age;
+  }
+
+  public function setAge(?int $age): self
+  {
+      $this->age = $age;
 
       return $this;
   }

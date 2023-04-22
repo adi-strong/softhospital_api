@@ -72,6 +72,8 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       $consult->setHospital($hospital);
       $consult->setFullName($fullName);
 
+      $age = $patient->getAge() ?? null;
+
       $invoice = (new Invoice())
         ->setCurrency($parameter[0] ?? null)
         ->setUser($currentUser)
@@ -123,6 +125,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       if ($exams->count() > 0) {
         // on crée le Labo
         $lab = (new Lab())
+          ->setAge($age)
           ->setCreatedAt($createdAt)
           ->setUser($currentUser)
           ->setHospital($hospital)
@@ -172,8 +175,6 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
       }
       // end hospitalization
 
-
-      $diagnostic = null !== $consult->getDiagnostic() ? trim($consult?->getDiagnostic(), ' ') : null;
       $date = (new DateTime())->format('Y-m-d');
       $followed = $consult?->getFollowed();
 
@@ -212,6 +213,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
           ->setPatient($patient)
           ->setFullName($fullName)
           ->setCreatedAt($createdAt)
+          ->setAge($age)
           ->setHospital($hospital);
 
         foreach ($treatments as $treatment) {
@@ -252,6 +254,7 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
           ->setPatient($patient)
           ->setFullName($fullName)
           ->setCreatedAt($createdAt)
+          ->setAge($age)
           ->setHospital($hospital);
 
         $actItems = $nursing->getActs();
@@ -274,6 +277,8 @@ class OnAddNewConsultationEvent implements EventSubscriberInterface
         $this->em->persist($nursing);
       }
       // end treatments
+
+      $consult->setAge($age);
 
 
       // we finish here

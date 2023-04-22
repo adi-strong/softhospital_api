@@ -189,6 +189,10 @@ class Consultation
     #[Groups(['consult:read'])]
     private ?string $treatmentsDescriptions = null;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['consult:read'])]
+    private ?int $age = null;
+
     public function __construct()
     {
         $this->acts = new ArrayCollection();
@@ -636,6 +640,18 @@ class Consultation
     public function setTreatmentsDescriptions(?string $treatmentsDescriptions): self
     {
         $this->treatmentsDescriptions = $treatmentsDescriptions;
+
+        return $this;
+    }
+
+    public function getAge(): ?int
+    {
+        return $this->age;
+    }
+
+    public function setAge(?int $age): self
+    {
+        $this->age = $age;
 
         return $this;
     }

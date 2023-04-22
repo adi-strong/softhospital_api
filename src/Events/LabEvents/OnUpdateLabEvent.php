@@ -53,6 +53,8 @@ class OnUpdateLabEvent implements EventSubscriberInterface
       $lab->setFullName($patient?->getFullName());
       $consultation?->setFullName($patient?->getFullName());
       $consultation?->setIsPublished(false);
+      $lab->setAge($patient?->getAge());
+      $consultation?->setAge($patient?->getAge());
 
       $results = $lab->getResults();
 

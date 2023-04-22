@@ -60,15 +60,19 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
       $invoice = $consult->getInvoice();
       $file = $consult->getFile();
       $invoiceAmount = $file ? $file->getPrice() : 0;
-      $nursing = $consult->getNursing();
       $patient = $consult->getPatient();
       $fullName = $patient->getFullName();
       $createdAt = $consult->getCreatedAt() ?? new DateTime();
       $hospital = $this->user->getHospital() ?? $this->user->getHospitalCenter();
       $actBaskets = $invoice->getActsInvoiceBaskets();
-      $lab = $consult->getLab();
       $exams = $consult->getExams();
       $examBaskets = $invoice->getExamsInvoiceBaskets();
+      $age = $patient->getAge();
+      $lab = $consult->getLab();
+      $nursing = $consult->getNursing();
+      $nursing?->setAge($age);
+      $lab?->setAge($age);
+      $consult->setAge($age);
 
       if ($consult->isIsPublished() === true) {
         $agent = $consult->getDoctor();
@@ -102,6 +106,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
         if (null !== $nursing) {
           $nursing->setPatient($patient);
           $nursing->setFullName($fullName);
+          $nursing->setAge($age);
 
           $nurses = $nursing->getNursingTreatments();
           if ($nurses->count() > 0 && $treatments->count() > 0) {
@@ -168,9 +173,11 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
 
         if (null === $nursing) {
           $newNursing = (new Nursing())
+            ->setAge($age)
             ->setFullName($fullName)
             ->setPatient($patient)
             ->setHospital($hospital)
+            ->setAge($age)
             ->setConsultation($consult)
             ->setCurrency($parameter[0] ?? null)
             ->setCreatedAt($createdAt);
@@ -264,6 +271,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
           if (null === $lab && $exams->count() > 0) {
             $newLab = (new Lab())
               ->setCreatedAt($createdAt)
+              ->setAge($age)
               ->setUser($this->user->getUser())
               ->setHospital($hospital)
               ->setUserPrescriber($this->user->getUser())
@@ -414,6 +422,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
         else {
           $newNursing = (new Nursing())
             ->setConsultation($consult)
+            ->setAge($age)
             ->setCurrency($parameter[0] ?? null)
             ->setPatient($patient)
             ->setFullName($fullName)

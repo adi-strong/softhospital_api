@@ -132,6 +132,10 @@ class Nursing
     #[Groups(['nursing:read'])]
     private ?array $acts = [];
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['nursing:read'])]
+    private ?int $age = null;
+
     public function __construct()
     {
         $this->nursingTreatments = new ArrayCollection();
@@ -433,6 +437,18 @@ class Nursing
   public function setActs(?array $acts): self
   {
       $this->acts = $acts;
+
+      return $this;
+  }
+
+  public function getAge(): ?int
+  {
+      return $this->age;
+  }
+
+  public function setAge(?int $age): self
+  {
+      $this->age = $age;
 
       return $this;
   }

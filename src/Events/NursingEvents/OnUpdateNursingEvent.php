@@ -41,6 +41,8 @@ class OnUpdateNursingEvent implements EventSubscriberInterface
       $nursing->setFullName($patient?->getFullName());
       $consult?->setFullName($patient?->getFullName());
       $nursing->setConsultation($consult);
+      $nursing->setAge($patient?->getAge());
+      $consult?->setAge($patient?->getAge());
 
       if (null !== $treatments) {
         foreach ($treatments as $treatment) {
