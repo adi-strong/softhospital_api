@@ -46,15 +46,17 @@ class OnUpdateAppointmentEvent implements EventSubscriberInterface
       $isConsultation = $appointment->isConsultation;
       $doctor = $appointment->getDoctor();
       $patient = $appointment->getPatient();
+      $fullName = $patient?->getFullName();
 
       $appointment->setAppointmentDate($appointmentDate);
-      $appointment->setFullName($patient->getFullName());
+      $appointment->setFullName($fullName);
 
       if ($isConsultation === true) {
         $consultation = (new Consultation())
           ->setUser($currentUser)
           ->setHospital($hospital)
           ->setPatient($patient)
+          ->setFullName($fullName)
           ->setCreatedAt($createdAt)
           ->setDoctor($doctor);
 
@@ -62,6 +64,7 @@ class OnUpdateAppointmentEvent implements EventSubscriberInterface
           ->setPatient($patient)
           ->setConsultation($consultation)
           ->setAmount(0)
+          ->setFullName($fullName)
           ->setTotalAmount(0)
           ->setUser($currentUser)
           ->setHospital($hospital);
