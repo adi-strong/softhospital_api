@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-class CovenantInvoicesController extends AbstractController
+final class CovenantInvoicesController extends AbstractController
 {
   public function __construct(private readonly CovenantInvoicesQueryBuilderService $builder)
   {

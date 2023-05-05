@@ -232,6 +232,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'userPublisher', targetEntity: Lab::class)]
     private Collection $labPublishers;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ResetPassNotifier::class)]
+    private Collection $resetPassNotifiers;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -257,6 +260,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->destockMedicineForHospitals = new ArrayCollection();
         $this->labPrescribers = new ArrayCollection();
         $this->labPublishers = new ArrayCollection();
+        $this->resetPassNotifiers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1111,6 +1115,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($labPublisher->getUserPublisher() === $this) {
                 $labPublisher->setUserPublisher(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResetPassNotifier>
+     */
+    public function getResetPassNotifiers(): Collection
+    {
+        return $this->resetPassNotifiers;
+    }
+
+    public function addResetPassNotifier(ResetPassNotifier $resetPassNotifier): self
+    {
+        if (!$this->resetPassNotifiers->contains($resetPassNotifier)) {
+            $this->resetPassNotifiers->add($resetPassNotifier);
+            $resetPassNotifier->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResetPassNotifier(ResetPassNotifier $resetPassNotifier): self
+    {
+        if ($this->resetPassNotifiers->removeElement($resetPassNotifier)) {
+            // set the owning side to null (unless already changed)
+            if ($resetPassNotifier->getUser() === $this) {
+                $resetPassNotifier->setUser(null);
             }
         }
 
