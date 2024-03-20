@@ -39,6 +39,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['invoice:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Invoice

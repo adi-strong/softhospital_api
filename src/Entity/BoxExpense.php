@@ -21,6 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   operations: [ new GetCollection(), new Post() ],
   normalizationContext: ['groups' => ['expense:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['reason' => 'ipartial'])]
 class BoxExpense

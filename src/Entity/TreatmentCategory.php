@@ -28,6 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['treatmentCategory:read']],
   order: ['id' => 'DESC'],
+  forceEager: false,
   paginationEnabled: false,
 )]
 class TreatmentCategory

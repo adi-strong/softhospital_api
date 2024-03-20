@@ -29,7 +29,8 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['actCategory:read']],
   order: ['id' => 'DESC'],
-  paginationEnabled: false,
+  forceEager: false,
+  paginationEnabled: false
 )]
 class ActCategory
 {

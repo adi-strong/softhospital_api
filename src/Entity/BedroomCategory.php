@@ -28,6 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['bedroomCategory:read']],
   order: ['id' => 'DESC'],
+  forceEager: false,
   paginationEnabled: false,
 )]
 class BedroomCategory

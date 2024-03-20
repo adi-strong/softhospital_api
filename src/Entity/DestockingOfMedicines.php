@@ -16,6 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   operations: [ ],
   normalizationContext: ['groups' => ['destocking:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class DestockingOfMedicines
 {

@@ -41,6 +41,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   uriVariables: [ 'id' => new Link(fromProperty: 'consultations', fromClass: Agent::class) ],
   normalizationContext: ['groups' => ['consult:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Consultation

@@ -38,6 +38,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   operations: [ new GetCollection() ],
   uriVariables: ['id' => new Link(fromProperty: 'medicineSubCategories', fromClass: MedicineCategories::class)],
   normalizationContext: ['groups' => ['medSubCategory:read']],
+  forceEager: false,
   paginationEnabled: false,
 )]
 #[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]

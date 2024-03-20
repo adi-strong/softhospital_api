@@ -53,7 +53,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     ),
   ],
   normalizationContext: ['groups' => ['img_obj:read']],
-  order: ['id' => 'DESC']
+  order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class ImageObject
 {

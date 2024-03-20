@@ -28,6 +28,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
   ],
   normalizationContext: ['groups' => ['expense_category:read']],
   order: ['id' => 'DESC'],
+  forceEager: false,
   paginationEnabled: false,
 )]
 class ExpenseCategory

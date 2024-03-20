@@ -28,6 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['hospital:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class Hospital
 {

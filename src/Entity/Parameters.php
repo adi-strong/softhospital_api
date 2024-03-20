@@ -24,6 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['param:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class Parameters
 {

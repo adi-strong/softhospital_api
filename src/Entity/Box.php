@@ -20,6 +20,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
   ],
   normalizationContext: ['groups' => ['box:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class Box
 {

@@ -23,6 +23,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
     new Post(),
     new GetCollection(),
   ],
+  forceEager: false
 )]
 class BoxHistoric
 {

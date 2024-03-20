@@ -35,6 +35,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
   normalizationContext: ['groups' => ['covenant:read']],
   denormalizationContext: ['groups' => ['covenant:write']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['denomination' => 'ipartial'])]
 class Covenant

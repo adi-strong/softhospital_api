@@ -28,6 +28,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   ],
   normalizationContext: ['groups' => ['lab:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Lab

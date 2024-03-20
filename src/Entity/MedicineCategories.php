@@ -30,7 +30,8 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['medCategory:read']],
   order: ['id' => 'DESC'],
-  paginationEnabled: false,
+  forceEager: false,
+  paginationEnabled: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]
 class MedicineCategories

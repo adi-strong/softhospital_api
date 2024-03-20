@@ -26,6 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['supply:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[UniqueEntity('document', message: "Ce n° de document existe déjà.")]
 class DrugstoreSupply

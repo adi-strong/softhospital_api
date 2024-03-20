@@ -99,7 +99,7 @@ class OnUpdateConsultationEvent implements EventSubscriberInterface
         // treatments
         $treatments = $consult->getTreatments();
         $actItems = $consult->actsItems;
-        $nurseActs = $nursing->getActs();
+        $nurseActs = $nursing?->getActs();
         $dateTime = (new DateTime())->format('Y-m-d');
         $nursingAmount = 0;
 

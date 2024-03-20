@@ -53,7 +53,8 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
     ),
   ],
   normalizationContext: ['groups' => ['personal_img_obj:read']],
-  order: ['id' => 'DESC']
+  order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class PersonalImageObject
 {

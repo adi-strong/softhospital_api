@@ -39,7 +39,8 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   uriVariables: [
     'id' => new Link(fromProperty: 'services', fromClass: Department::class)
-  ]
+  ],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['name' => 'ipartial'])]
 class Service

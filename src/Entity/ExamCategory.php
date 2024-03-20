@@ -28,6 +28,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['examCategory:read']],
   order: ['id' => 'ASC'],
+  forceEager: false,
   paginationEnabled: false,
 )]
 class ExamCategory

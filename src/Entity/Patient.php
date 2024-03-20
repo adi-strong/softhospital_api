@@ -40,7 +40,8 @@ use Symfony\Component\Validator\Constraints as Assert;
   types: ['https://schema.org/Patient'],
   operations: [ new GetCollection() ],
   uriVariables: [ 'id' => new Link(fromProperty: 'patients', fromClass: Covenant::class) ],
-  normalizationContext: ['groups' => ['patient:read']]
+  normalizationContext: ['groups' => ['patient:read']],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]
 class Patient

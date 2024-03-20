@@ -49,7 +49,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     ),
   ],
   normalizationContext: ['groups' => ['pdf_obj:read']],
-  order: ['id' => 'DESC']
+  order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class PdfObject
 {

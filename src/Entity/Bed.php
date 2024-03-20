@@ -30,7 +30,8 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['bed:read']],
   order: ['id' => 'DESC'],
-  paginationEnabled: false,
+  forceEager: false,
+  paginationEnabled: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['number' => 'ipartial'])]
 class Bed

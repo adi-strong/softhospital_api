@@ -30,6 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
   ],
   normalizationContext: ['groups' => ['consumptionUnit:read']],
   order: ['id' => 'DESC'],
+  forceEager: false,
   paginationEnabled: false,
 )]
 #[ApiFilter(SearchFilter::class, properties: ['wording' => 'ipartial'])]

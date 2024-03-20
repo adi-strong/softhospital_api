@@ -38,6 +38,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   uriVariables: [ 'id' => new Link(fromProperty: 'covenantInvoices', fromClass: Covenant::class) ],
   normalizationContext: ['groups' => ['invoice:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: [ 'year' => 'exact', 'month' => 'exact' ])]
 class CovenantInvoice

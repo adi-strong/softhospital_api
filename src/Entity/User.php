@@ -32,7 +32,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     new Patch(),
   ],
   normalizationContext: ['groups' => ['user:read']],
-  order: ['id' => 'DESC']
+  order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['username' => 'ipartial'])]
 #[UniqueEntity('username', message: 'Ce username est déjà pris.')]

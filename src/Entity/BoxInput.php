@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   operations: [ new GetCollection(), new Post() ],
   normalizationContext: ['groups' => ['input:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['reason' => 'ipartial'])]
 class BoxInput

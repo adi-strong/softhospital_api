@@ -26,6 +26,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   ],
   normalizationContext: ['groups' => ['prescript:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(BooleanFilter::class, properties: ['isPublished'])]
 #[ApiFilter(SearchFilter::class, properties: ['fullName' => 'ipartial'])]

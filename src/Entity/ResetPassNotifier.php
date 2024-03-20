@@ -17,6 +17,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     new GetCollection()
   ],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 #[ApiFilter(SearchFilter::class, properties: ['code' => 'exact'])]
 class ResetPassNotifier

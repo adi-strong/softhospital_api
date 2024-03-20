@@ -39,6 +39,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
   ],
   normalizationContext: ['groups' => ['activity:read']],
   order: ['id' => 'DESC'],
+  forceEager: false
 )]
 class Activities
 {
